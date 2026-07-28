@@ -192,7 +192,7 @@ u8 get_sound_result(void)
 *****************************************************************************************/
 void led_gpio_init(void)
 {
-    // USER_TO_DO 测试时屏蔽：
+    // 测试时屏蔽：
 #if 0
 //过零检测
     gpio_set_die(IO_PORT_DP, 1);        //过零触发检测口  普通io输入
@@ -265,7 +265,7 @@ void led_pwm_init(void)
 
     // 上拉是rgb 下拉是rgw
     if (gpio_read(IO_PORTB_06))
-    { 
+    {
         is_rgbw = 0; // 混白灯
     }
     else
@@ -285,7 +285,7 @@ void led_pwm_init(void)
 volatile u32 syn_ms = 0;
 u8 syn_timer_f = 0;
 
- 
+
 AT_VOLATILE_RAM_CODE
 void get_syn_signal(void)
 {

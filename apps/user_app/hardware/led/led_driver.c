@@ -2,16 +2,11 @@
 #include "gpio.h"
 #include "mcpwm.h"
 
-volatile led_driver_t led_driver;
+// volatile led_driver_t led_driver;
 
-// void led_driver
 
 void led_driver_init(void)
 {
-	u8 white_light_det_cnt = 0; // 纯白色灯检测计数
-	u8 mixed_white_light_det_cnt = 0; // 混白色灯检测计数
-	u8 i = 0; // 循环计数
-
 	struct pwm_platform_data mcpwm_arg;
 	gpio_set_direction(LED_DRIVER_RED_PIN, 0); // 输出模式
 	gpio_direction_output(LED_DRIVER_RED_PIN, 0);
@@ -22,32 +17,9 @@ void led_driver_init(void)
 	gpio_set_direction(LED_DRIVER_BLUE_PIN, 0); // 输出模式
 	gpio_direction_output(LED_DRIVER_BLUE_PIN, 0);
 
-	// 上电时配置为输入上拉，判断当前灯具类型是混白灯还是纯白灯
-	gpio_set_die(LED_DRIVER_WHITE_PIN, 1);
-	gpio_set_direction(LED_DRIVER_WHITE_PIN, 1);  //输入模式
-	gpio_set_pull_up(LED_DRIVER_WHITE_PIN, 1);  //上拉
+	gpio_set_direction(LED_DRIVER_WHITE_PIN, 0); // 输出模式
+	gpio_direction_output(LED_DRIVER_WHITE_PIN, 0);
 
-
-	/*
-		检测脚读取到高电平，作为混白色灯，读取到低电平，作为纯白色灯
-	*/
-	for (i = 0; i < 20; i++)
-	{
-		if (gpio_read(LED_DRIVER_WHITE_PIN))
-		{
-			mixed_white_light_det_cnt++;
-		}
-		else
-		{
-			white_light_det_cnt++;
-		}
-
-		clr_wdt();
-		delay(1);
-	}
-
-	// white_light_det_cnt = (u8)-1; // TEST_ONLY  
-	// mixed_white_light_det_cnt = (u8)-1; // TEST_ONLY  
 
 	// R
 	mcpwm_arg.pwm_aligned_mode = pwm_edge_aligned;         // 边沿对齐
@@ -77,28 +49,18 @@ void led_driver_init(void)
 	mcpwm_arg.complementary_en = 0;                        // 两个引脚的波形, 0: 同步,  1: 互补，互补波形的占空比体现在H引脚上
 	mcpwm_init(&mcpwm_arg);
 
-	if (mixed_white_light_det_cnt >= white_light_det_cnt)
-	{
-		led_driver.is_mixed_white_light = 1;
-		// 关闭检测脚的上拉
-		gpio_set_pull_up(LED_DRIVER_WHITE_PIN, 0);  // 关闭上拉 
-	}
-	else
-	{
-		led_driver.is_mixed_white_light = 0;
-
-		// 关闭检测脚的上拉，检测脚改为输出模式，驱动白灯
-		gpio_set_pull_up(LED_DRIVER_WHITE_PIN, 0);  // 关闭上拉
-		gpio_set_die(LED_DRIVER_WHITE_PIN, 1); // 1：普通IO输入；0：模拟IO输入
-		gpio_set_direction(LED_DRIVER_WHITE_PIN, 0); // 输出模式
-		gpio_direction_output(LED_DRIVER_WHITE_PIN, 0);
-		// 用 timer0 的 PWM 来驱动白灯
-		timer_pwm_init(JL_TIMER0, LED_DRIVER_WHITE_PIN, 1000, 0);
-		set_timer_pwm_duty(JL_TIMER0, 0); // 输出 0% 占空比  
-	}
+	// W
+	mcpwm_arg.pwm_aligned_mode = pwm_edge_aligned;         // 边沿对齐
+	mcpwm_arg.pwm_ch_num = LED_DRIVER_PWM_WHITE_CHANNEL;                        //通道号
+	mcpwm_arg.frequency = 1000;                            // 1KHz
+	mcpwm_arg.duty = 0;                                    // 上电输出0%占空比
+	mcpwm_arg.h_pin = LED_DRIVER_WHITE_PIN;                         // 任意引脚
+	mcpwm_arg.l_pin = -1;                                  // 任意引脚,不需要就填-1
+	mcpwm_arg.complementary_en = 0;                        // 两个引脚的波形, 0: 同步,  1: 互补，互补波形的占空比体现在H引脚上
+	mcpwm_init(&mcpwm_arg);
 }
 
-
+#if 0 
 /**
  * @brief 根据RGB值，设置对应的pwm占空比值
  *
@@ -109,11 +71,6 @@ void led_driver_set_rgb_pwm_val(u8 r, u8 g, u8 b)
 	u32 green_pwm_duty;
 	u32 blue_pwm_duty;
 
-	// if (0 == led_driver.is_mixed_white_light)
-	// {
-	// 	return;
-	// }
-
 	red_pwm_duty = (u32)r * 10000 / 255;
 	green_pwm_duty = (u32)g * 10000 / 255;
 	blue_pwm_duty = (u32)b * 10000 / 255;
@@ -122,24 +79,28 @@ void led_driver_set_rgb_pwm_val(u8 r, u8 g, u8 b)
 	mcpwm_set_duty(LED_DRIVER_PWM_GREEN_CHANNEL, green_pwm_duty);  // G   
 	mcpwm_set_duty(LED_DRIVER_PWM_BLUE_CHANNEL, blue_pwm_duty);  // B
 }
+#endif
 
 /**
- * @brief 根据白色值，设置对应的pwm占空比值
+ * @brief 根据RGB值，设置对应的pwm占空比值
  *
  */
-void led_driver_set_white_pwm_val(u8 white_val)
+void led_driver_set_rgbw_pwm_val(u8 r, u8 g, u8 b, u8 w)
 {
-	// if (led_driver.is_mixed_white_light)
-	// {
-	// 	return;
-	// }
-
+	u32 red_pwm_duty;
+	u32 green_pwm_duty;
+	u32 blue_pwm_duty;
 	u32 white_pwm_duty;
-	white_pwm_duty = (u32)white_val * 10000 / 255;
-	// mcpwm_set_duty(LED_DRIVER_PWM_WHITE_CHANNEL, white_pwm_duty);
 
-	// printf("white_pwm_duty = %u\n", (u16)white_pwm_duty);
-	set_timer_pwm_duty(JL_TIMER0, white_pwm_duty);
+	red_pwm_duty = (u32)r * 10000 / 255;
+	green_pwm_duty = (u32)g * 10000 / 255;
+	blue_pwm_duty = (u32)b * 10000 / 255;
+	white_pwm_duty = (u32)w * 10000 / 255;
+
+	mcpwm_set_duty(LED_DRIVER_PWM_RED_CHANNEL, red_pwm_duty);  // R
+	mcpwm_set_duty(LED_DRIVER_PWM_GREEN_CHANNEL, green_pwm_duty);  // G   
+	mcpwm_set_duty(LED_DRIVER_PWM_BLUE_CHANNEL, blue_pwm_duty);  // B
+	mcpwm_set_duty(LED_DRIVER_PWM_WHITE_CHANNEL, white_pwm_duty);  // W
 }
-
+ 
 

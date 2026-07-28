@@ -24,11 +24,7 @@ void user_init(void)
 	motor_24byj48_init();
 	motor_init();
 	sound_control_init();
-
-#if !USER_SHIELD_220V_50HZ_DETECTION
-	det_50hz_init();
-#endif
-
+  
 	user_data_init();
 
 	full_color_init();
@@ -124,12 +120,8 @@ void user_main(void* p)
 
 void user_10ms_isr(void)
 {
-	user_data_save_delay_add();
-
-#if USER_SHIELD_220V_50HZ_DETECTION
-	// TEST_ONLY 实际不用这个时钟源，而是用220V的50Hz信号作为时钟源
 	run_tick_per_10ms();
-#endif
+	user_data_save_delay_add(); 
 }
 
 // 在定时器中断内调用

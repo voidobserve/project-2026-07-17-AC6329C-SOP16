@@ -105,16 +105,9 @@ extern u32 get_syn_time(void);
 void WS2812FX_service() 
 {
   if(_running || _triggered) {
-
-#if USER_SHIELD_220V_50HZ_DETECTION // 如果没有使能 220V 50HZ检测
-
+ 
     unsigned long now = millis(); // Be aware, millis() rolls over every 49 days
-    
-#else
-    // USER_TO_DO 在测试时屏蔽了，实际要恢复
-    // u32 now = get_syn_time(); // Be aware, millis() rolls over every 49 days    
-    unsigned long now = det_50hz_get_tick();
-#endif
+     
 
     uint8_t doShow = false;
     for(uint8_t i=0; i < _active_segments_len; i++) {

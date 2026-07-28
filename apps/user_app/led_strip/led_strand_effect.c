@@ -80,7 +80,7 @@ void fc_data_init(void)
     fc_effect.dream_scene.speed = LED_COLORFUL_ANIM_SPEED_VAL_MAP(fc_effect.report_speed);
     // fc_effect.dream_scene.speed = 100;
     fc_effect.dream_scene.mixed_white_breath_speed = (u16)4000; // 初始值为 4000，对应 4秒
-    fc_effect.sequence = NEO_RGB;
+    fc_effect.sequence = NEO_RGBW;
 
     //流星
     // fc_effect.metemor_on_off = 0x01;        //开关
@@ -1892,21 +1892,12 @@ void led_colorful_light_set_static_color(u32 color)
     fc_effect.rgb.r = color >> 16;
     fc_effect.rgb.g = color >> 8;
     fc_effect.rgb.b = color;
-
-    if (0 == led_driver.is_mixed_white_light)
-    {
-        // 不是混白色灯，灯由 RGBW 组成
-        fc_effect.rgb.w = color >> 24;
-    }
-    else
-    {
-        // 混白色灯，灯由 RGB 组成，将白色分量设置为0
-        fc_effect.rgb.w = 0;
-    }
+    fc_effect.rgb.w = color >> 24;
 
     set_fc_effect();
 }
 
+#if 0
 /**
  * @brief 设置七彩灯为静态模式，并且颜色为自定义的
  *
@@ -1917,14 +1908,11 @@ void led_colorful_light_set_static_color_by_structure(color_t color)
     fc_effect.rgb.r = color.r;
     fc_effect.rgb.g = color.g;
     fc_effect.rgb.b = color.b;
-    if (0 == led_driver.is_mixed_white_light)
-    {
-        // 不是混白色灯，灯由 RGBW组成
-        fc_effect.rgb.w = color.w;
-    }
+    fc_effect.rgb.w = color.w;
 
     set_fc_effect();
 }
+#endif
 
 
 // 设置fc_effect.dream_scene.rgb的颜色池
@@ -1937,11 +1925,7 @@ void ls_set_color(uint8_t n, uint32_t c)
         fc_effect.dream_scene.rgb[n].r = (c >> 16) & 0xff;
         fc_effect.dream_scene.rgb[n].g = (c >> 8) & 0xff;
         fc_effect.dream_scene.rgb[n].b = c & 0xff;
-        if (0 == led_driver.is_mixed_white_light)
-        {
-            // 不是混白色灯，灯由 RGBW组成
-            fc_effect.dream_scene.rgb[n].w = (c >> 24) & 0xFF;
-        }
+        fc_effect.dream_scene.rgb[n].w = (c >> 24) & 0xFF;
     }
 }
 

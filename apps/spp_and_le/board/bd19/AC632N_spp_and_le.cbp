@@ -2,7 +2,7 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="220V同步信号光纤灯" />
+		<Option title="迷你闪烁机" />
 		<Option compiler="q32s_lto_compiler" />
 		<Build>
 			<Target title="Release">

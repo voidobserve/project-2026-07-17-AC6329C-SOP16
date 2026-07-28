@@ -48,10 +48,23 @@
 
 // 24BYJ48电机引脚定义（需要根据实际硬件连接修改）
 // 默认使用PA0-PA3，实际使用时需要根据硬件连接调整
-#define MOTOR_PIN_1     IO_PORTB_05
-#define MOTOR_PIN_2     IO_PORT_DP
-#define MOTOR_PIN_3     IO_PORTA_00
-#define MOTOR_PIN_4     IO_PORTB_07
+// #define MOTOR_PIN_1     IO_PORTB_05
+// #define MOTOR_PIN_2     IO_PORT_DP
+// #define MOTOR_PIN_3     IO_PORTA_00
+// #define MOTOR_PIN_4     IO_PORTB_07
+
+/*
+	motor_pin_x 顺序：
+	以电机的正极引脚为起点，
+	依次为 正极引脚 -> 4 -> 3 -> 2 -> 1
+
+	以电机的正极引脚为终点，
+	依次为 1 -> 2 -> 3 -> 4 -> 正极引脚
+*/
+#define MOTOR_PIN_1     IO_PORT_DP
+#define MOTOR_PIN_2     IO_PORTA_00
+#define MOTOR_PIN_3     IO_PORTB_07
+#define MOTOR_PIN_4     IO_PORTB_05
 
 // // 电机参数定义
 // #define STEPS_PER_REVOLUTION    2048    // 24BYJ48: 32步 × 64减速比 = 2048步/转

@@ -12,17 +12,17 @@
 #define LED_DRIVER_PWM_RED_CHANNEL 	pwm_ch0
 #define LED_DRIVER_PWM_GREEN_CHANNEL pwm_ch1
 #define LED_DRIVER_PWM_BLUE_CHANNEL pwm_ch2
-// #define LED_DRIVER_PWM_WHITE_CHANNEL pwm_ch3
+#define LED_DRIVER_PWM_WHITE_CHANNEL pwm_ch3
 
-typedef struct {
-	u8 is_mixed_white_light; // 是否为混白色灯，0：否(RGBW) ，1: 是(只有RGB)
-} led_driver_t;
+// typedef struct {
+// 	u8 is_mixed_white_light; // 是否为混白色灯，0：否(RGBW) ，1: 是(只有RGB)
+// } led_driver_t;
 
-extern volatile led_driver_t led_driver;
+// extern volatile led_driver_t led_driver;
 
 void led_driver_init(void);
 
-void led_driver_set_rgb_pwm_val(u8 r, u8 g, u8 b);
-void led_driver_set_white_pwm_val(u8 white_val);
+// void led_driver_set_rgb_pwm_val(u8 r, u8 g, u8 b);
+void led_driver_set_rgbw_pwm_val(u8 r, u8 g, u8 b, u8 w);
 
 #endif

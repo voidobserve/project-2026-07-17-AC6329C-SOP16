@@ -1763,18 +1763,9 @@ obj/Release/apps/user_app/hardware/led/led_driver.o
 -r=obj/Release/apps/user_app/hardware/led/led_driver.o,led_driver_init,pl
 -r=obj/Release/apps/user_app/hardware/led/led_driver.o,gpio_set_direction,l
 -r=obj/Release/apps/user_app/hardware/led/led_driver.o,gpio_direction_output,l
--r=obj/Release/apps/user_app/hardware/led/led_driver.o,gpio_set_die,l
--r=obj/Release/apps/user_app/hardware/led/led_driver.o,gpio_set_pull_up,l
--r=obj/Release/apps/user_app/hardware/led/led_driver.o,gpio_read,l
--r=obj/Release/apps/user_app/hardware/led/led_driver.o,clr_wdt,l
--r=obj/Release/apps/user_app/hardware/led/led_driver.o,delay,l
 -r=obj/Release/apps/user_app/hardware/led/led_driver.o,mcpwm_init,l
--r=obj/Release/apps/user_app/hardware/led/led_driver.o,timer_pwm_init,l
--r=obj/Release/apps/user_app/hardware/led/led_driver.o,set_timer_pwm_duty,l
--r=obj/Release/apps/user_app/hardware/led/led_driver.o,led_driver_set_rgb_pwm_val,pl
+-r=obj/Release/apps/user_app/hardware/led/led_driver.o,led_driver_set_rgbw_pwm_val,pl
 -r=obj/Release/apps/user_app/hardware/led/led_driver.o,mcpwm_set_duty,l
--r=obj/Release/apps/user_app/hardware/led/led_driver.o,led_driver_set_white_pwm_val,pl
--r=obj/Release/apps/user_app/hardware/led/led_driver.o,led_driver,pl
 obj/Release/apps/user_app/hardware/motor/motor.o
 -r=obj/Release/apps/user_app/hardware/motor/motor.o,motor_init,pl
 -r=obj/Release/apps/user_app/hardware/motor/motor.o,motor_set_speed_sec_per_round,pl
@@ -1932,7 +1923,6 @@ obj/Release/apps/user_app/led_strip/led_strand_effect.o
 -r=obj/Release/apps/user_app/led_strip/led_strand_effect.o,set_IS_light_scene_state,pl
 -r=obj/Release/apps/user_app/led_strip/led_strand_effect.o,fc_static_effect,pl
 -r=obj/Release/apps/user_app/led_strip/led_strand_effect.o,led_colorful_light_set_static_color,pl
--r=obj/Release/apps/user_app/led_strip/led_strand_effect.o,led_colorful_light_set_static_color_by_structure,pl
 -r=obj/Release/apps/user_app/led_strip/led_strand_effect.o,ls_set_color,pl
 -r=obj/Release/apps/user_app/led_strip/led_strand_effect.o,set_w,pl
 -r=obj/Release/apps/user_app/led_strip/led_strand_effect.o,music_static_sound,pl
@@ -1961,7 +1951,6 @@ obj/Release/apps/user_app/led_strip/led_strand_effect.o
 -r=obj/Release/apps/user_app/led_strip/led_strand_effect.o,speed_index,pl
 -r=obj/Release/apps/user_app/led_strip/led_strand_effect.o,fc_static_map,pl
 -r=obj/Release/apps/user_app/led_strip/led_strand_effect.o,is_rgbw,l
--r=obj/Release/apps/user_app/led_strip/led_strand_effect.o,led_driver,l
 -r=obj/Release/apps/user_app/led_strip/led_strand_effect.o,alarm_clock,pl
 -r=obj/Release/apps/user_app/led_strip/led_strand_effect.o,set_week,pl
 -r=obj/Release/apps/user_app/led_strip/led_strand_effect.o,time_clock,pl
@@ -2133,7 +2122,6 @@ obj/Release/apps/user_app/rf24g/rf24g_app.o
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,rf24g_key,l
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,rf24g_key_type_28keys_handle_func_buff,pl
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,fc_effect,l
--r=obj/Release/apps/user_app/rf24g/rf24g_app.o,led_driver,l
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,zd_countdown,l
 obj/Release/apps/user_app/rf24g/rf24g_driver.o
 -r=obj/Release/apps/user_app/rf24g/rf24g_driver.o,rf24g_driver_package_handle,pl
@@ -2156,7 +2144,6 @@ obj/Release/apps/user_app/save_flash/save_flash.o
 -r=obj/Release/apps/user_app/save_flash/save_flash.o,save_user_data_area3,pl
 -r=obj/Release/apps/user_app/save_flash/save_flash.o,save_data,pl
 -r=obj/Release/apps/user_app/save_flash/save_flash.o,fc_effect,l
--r=obj/Release/apps/user_app/save_flash/save_flash.o,led_driver,l
 -r=obj/Release/apps/user_app/save_flash/save_flash.o,zd_countdown,l
 obj/Release/apps/user_app/user_main.o
 -r=obj/Release/apps/user_app/user_main.o,user_init,pl
@@ -2164,7 +2151,6 @@ obj/Release/apps/user_app/user_main.o
 -r=obj/Release/apps/user_app/user_main.o,motor_24byj48_init,l
 -r=obj/Release/apps/user_app/user_main.o,motor_init,l
 -r=obj/Release/apps/user_app/user_main.o,sound_control_init,l
--r=obj/Release/apps/user_app/user_main.o,det_50hz_init,l
 -r=obj/Release/apps/user_app/user_main.o,user_data_init,l
 -r=obj/Release/apps/user_app/user_main.o,full_color_init,l
 -r=obj/Release/apps/user_app/user_main.o,usr_timer_add,l
@@ -2183,6 +2169,7 @@ obj/Release/apps/user_app/user_main.o
 -r=obj/Release/apps/user_app/user_main.o,music_static_sound,l
 -r=obj/Release/apps/user_app/user_main.o,WS2812FX_service,l
 -r=obj/Release/apps/user_app/user_main.o,rf24g_key_handle,l
+-r=obj/Release/apps/user_app/user_main.o,run_tick_per_10ms,l
 -r=obj/Release/apps/user_app/user_main.o,user_data_save_delay_add,l
 -r=obj/Release/apps/user_app/user_main.o,user_125us_isr,pl
 -r=obj/Release/apps/user_app/user_main.o,motor_handle_125us,l
@@ -2244,12 +2231,9 @@ obj/Release/apps/user_app/ws2812-fx-lib/Adafruit_NeoPixel_C/neo_pixel.o
 obj/Release/apps/user_app/ws2812-fx-lib/WS2812FX_C/ws2812_drive.o
 -r=obj/Release/apps/user_app/ws2812-fx-lib/WS2812FX_C/ws2812_drive.o,ws281x_init,pl
 -r=obj/Release/apps/user_app/ws2812-fx-lib/WS2812FX_C/ws2812_drive.o,ws281x_show,pl
--r=obj/Release/apps/user_app/ws2812-fx-lib/WS2812FX_C/ws2812_drive.o,led_driver_set_rgb_pwm_val,l
--r=obj/Release/apps/user_app/ws2812-fx-lib/WS2812FX_C/ws2812_drive.o,led_driver_set_white_pwm_val,l
+-r=obj/Release/apps/user_app/ws2812-fx-lib/WS2812FX_C/ws2812_drive.o,led_driver_set_rgbw_pwm_val,l
 -r=obj/Release/apps/user_app/ws2812-fx-lib/WS2812FX_C/ws2812_drive.o,HAL_GetTick,pl
 -r=obj/Release/apps/user_app/ws2812-fx-lib/WS2812FX_C/ws2812_drive.o,run_tick_per_10ms,pl
--r=obj/Release/apps/user_app/ws2812-fx-lib/WS2812FX_C/ws2812_drive.o,led_driver,l
--r=obj/Release/apps/user_app/ws2812-fx-lib/WS2812FX_C/ws2812_drive.o,fc_effect,l
 -r=obj/Release/apps/user_app/ws2812-fx-lib/WS2812FX_C/ws2812_drive.o,zd_countdown,l
 -r=obj/Release/apps/user_app/ws2812-fx-lib/WS2812FX_C/ws2812_drive.o,buf,pl
 obj/Release/apps/user_app/ws2812-fx-lib/WS2812FX_C/ws2812fx2.o
@@ -2259,7 +2243,7 @@ obj/Release/apps/user_app/ws2812-fx-lib/WS2812FX_C/ws2812fx2.o
 -r=obj/Release/apps/user_app/ws2812-fx-lib/WS2812FX_C/ws2812fx2.o,WS2812FX_resetSegmentRuntimes,pl
 -r=obj/Release/apps/user_app/ws2812-fx-lib/WS2812FX_C/ws2812fx2.o,Adafruit_NeoPixel_setBrightness,l
 -r=obj/Release/apps/user_app/ws2812-fx-lib/WS2812FX_C/ws2812fx2.o,WS2812FX_service,pl
--r=obj/Release/apps/user_app/ws2812-fx-lib/WS2812FX_C/ws2812fx2.o,det_50hz_get_tick,l
+-r=obj/Release/apps/user_app/ws2812-fx-lib/WS2812FX_C/ws2812fx2.o,HAL_GetTick,l
 -r=obj/Release/apps/user_app/ws2812-fx-lib/WS2812FX_C/ws2812fx2.o,WS2812FX_show,pl
 -r=obj/Release/apps/user_app/ws2812-fx-lib/WS2812FX_C/ws2812fx2.o,WS2812FX_set_coloQty,pl
 -r=obj/Release/apps/user_app/ws2812-fx-lib/WS2812FX_C/ws2812fx2.o,WS2812FX_setPixelColor,pl
@@ -3302,7 +3286,6 @@ obj/Release/apps/spp_and_le/examples/multi_conn/ble_multi_peripheral.o
 -r=obj/Release/apps/spp_and_le/examples/multi_conn/ble_multi_peripheral.o,puts,l
 -r=obj/Release/apps/spp_and_le/examples/multi_conn/ble_multi_peripheral.o,mul_server_init_cfg,pl
 -r=obj/Release/apps/spp_and_le/examples/multi_conn/ble_multi_peripheral.o,zd_countdown,l
--r=obj/Release/apps/spp_and_le/examples/multi_conn/ble_multi_peripheral.o,led_driver,l
 -r=obj/Release/apps/spp_and_le/examples/multi_conn/ble_multi_peripheral.o,fc_effect,l
 -r=obj/Release/apps/spp_and_le/examples/multi_conn/ble_multi_peripheral.o,alarm_clock,l
 obj/Release/apps/spp_and_le/examples/nonconn_24g/app_nonconn_24g.o
@@ -3423,7 +3406,6 @@ obj/Release/apps/spp_and_le/board/bd19/board_ac6329e_demo.o
 obj/Release/apps/spp_and_le/board/bd19/board_ac6329f_demo.o
 obj/Release/apps/spp_and_le/board/bd19/board_ac632n_demo.o
 -r=obj/Release/apps/spp_and_le/board/bd19/board_ac632n_demo.o,debug_uart_init,pl
--r=obj/Release/apps/spp_and_le/board/bd19/board_ac632n_demo.o,uart_init,l
 -r=obj/Release/apps/spp_and_le/board/bd19/board_ac632n_demo.o,get_power_on_status,pl
 -r=obj/Release/apps/spp_and_le/board/bd19/board_ac632n_demo.o,board_init,pl
 -r=obj/Release/apps/spp_and_le/board/bd19/board_ac632n_demo.o,board_power_init,pl
@@ -3433,7 +3415,6 @@ obj/Release/apps/spp_and_le/board/bd19/board_ac632n_demo.o
 -r=obj/Release/apps/spp_and_le/board/bd19/board_ac632n_demo.o,devices_init,l
 -r=obj/Release/apps/spp_and_le/board/bd19/board_ac632n_demo.o,get_charge_online_flag,l
 -r=obj/Release/apps/spp_and_le/board/bd19/board_ac632n_demo.o,power_set_mode,l
--r=obj/Release/apps/spp_and_le/board/bd19/board_ac632n_demo.o,gpio_set_die,l
 -r=obj/Release/apps/spp_and_le/board/bd19/board_ac632n_demo.o,board_set_soft_poweroff,pl
 -r=obj/Release/apps/spp_and_le/board/bd19/board_ac632n_demo.o,log_print,l
 -r=obj/Release/apps/spp_and_le/board/bd19/board_ac632n_demo.o,sleep_exit_callback,pl
@@ -3458,6 +3439,7 @@ obj/Release/apps/spp_and_le/board/bd19/board_ac632n_demo.o
 -r=obj/Release/apps/spp_and_le/board/bd19/board_ac632n_demo.o,gpio_set_pull_up,l
 -r=obj/Release/apps/spp_and_le/board/bd19/board_ac632n_demo.o,gpio_set_pull_down,l
 -r=obj/Release/apps/spp_and_le/board/bd19/board_ac632n_demo.o,gpio_set_direction,l
+-r=obj/Release/apps/spp_and_le/board/bd19/board_ac632n_demo.o,gpio_set_die,l
 -r=obj/Release/apps/spp_and_le/board/bd19/board_ac632n_demo.o,gpio_set_dieh,l
 -r=obj/Release/apps/spp_and_le/board/bd19/board_ac632n_demo.o,usb1_iomode,l
 -r=obj/Release/apps/spp_and_le/board/bd19/board_ac632n_demo.o,power_param,pl

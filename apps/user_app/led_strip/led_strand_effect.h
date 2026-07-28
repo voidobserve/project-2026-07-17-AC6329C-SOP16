@@ -242,7 +242,9 @@ void set_static_mode(u8 r, u8 g, u8 b);
 void fc_dynamic_effect(u8 n);
 
 void led_colorful_light_set_static_color(u32 color);
+#if 0
 void led_colorful_light_set_static_color_by_structure(color_t color);
+#endif
 
 
 
