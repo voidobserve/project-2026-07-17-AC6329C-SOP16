@@ -2080,9 +2080,11 @@ obj/Release/apps/user_app/rf24g/rf24g_app.o
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,user_report_brightness,l
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,ls_sensitive_plus,l
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,user_report_sound_control_sensitive,l
+-r=obj/Release/apps/user_app/rf24g/rf24g_app.o,rf24g_key_r1c1_hold_handle,pl
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,rf24g_key_r1c2_press_handle,pl
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,bright_sub,l
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,ls_sensitive_sub,l
+-r=obj/Release/apps/user_app/rf24g/rf24g_app.o,rf24g_key_r1c2_hold_handle,pl
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,rf24g_key_r1c3_press_handle,pl
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,soft_rurn_off_lights,l
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,rf24g_key_r1c4_press_handle,pl
@@ -2104,11 +2106,13 @@ obj/Release/apps/user_app/rf24g/rf24g_app.o
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,rf24g_key_r4c4_press_handle,pl
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,ls_speed_plus,l
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,user_report_speed,l
+-r=obj/Release/apps/user_app/rf24g/rf24g_app.o,rf24g_key_r4c4_hold_handle,pl
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,rf24g_key_r5c1_press_handle,pl
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,rf24g_key_r5c2_press_handle,pl
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,rf24g_key_r5c3_press_handle,pl
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,rf24g_key_r5c4_press_handle,pl
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,ls_speed_sub,l
+-r=obj/Release/apps/user_app/rf24g/rf24g_app.o,rf24g_key_r5c4_hold_handle,pl
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,rf24g_key_r6c1_press_handle,pl
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,user_report_sound_control_mode,l
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,rf24g_key_r6c2_press_handle,pl
@@ -2116,9 +2120,11 @@ obj/Release/apps/user_app/rf24g/rf24g_app.o
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,rf24g_key_r6c4_press_handle,pl
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,rf24g_key_r7c1_press_handle,pl
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,motor_set_speed_sec_per_round,l
+-r=obj/Release/apps/user_app/rf24g/rf24g_app.o,rf24g_key_r7c1_hold_handle,pl
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,rf24g_key_r7c2_press_handle,pl
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,rf24g_key_r7c3_press_handle,pl
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,rf24g_key_r7c4_press_handle,pl
+-r=obj/Release/apps/user_app/rf24g/rf24g_app.o,rf24g_key_r7c4_hold_handle,pl
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,rf24g_key,l
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,rf24g_key_type_28keys_handle_func_buff,pl
 -r=obj/Release/apps/user_app/rf24g/rf24g_app.o,fc_effect,l
