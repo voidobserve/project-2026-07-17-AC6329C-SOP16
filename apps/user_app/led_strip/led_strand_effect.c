@@ -96,7 +96,8 @@ void fc_data_init(void)
     // fc_effect.base_ins.music_mode = 0;
 
     fc_effect.motor_mode = MOTOR_MODE_FORWARD_ROTATION; // 正转
-    fc_effect.motor_sec_per_round = 8; // 默认8秒
+    // fc_effect.motor_sec_per_round = 20; // 默认 电机转速
+    fc_effect.motor_sec_per_round = MOTOR_THE_FASTEST_SPEED_SEC_PER_ROUND; // 默认 电机转速
 
     //声控部分
     fc_effect.sound.c_v = 0;

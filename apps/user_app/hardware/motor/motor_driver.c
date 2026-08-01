@@ -2,6 +2,8 @@
 #include "system/includes.h"
 #include "gpio.h"
 
+#include "user_config.h"
+
 volatile motor_24byj48_t motor_24byj48;
 
 
@@ -71,6 +73,17 @@ void motor_24byj48_time_add(void)
 // 判断时间是否到来（到达目标值）
 u8 motor_24byj48_time_expire(void)
 {
+#if USER_DEBUG_ENABLE
+	// static u16 cnt = 0;
+	// cnt ++;
+	// if (cnt >= (u32)1000 * 1000 / 125)
+	// {
+	// 	cnt = 0;
+	// 	printf("this->dest_step_delay_us = %lu\n", this->dest_step_delay_us);
+	// }
+#endif
+
+	
 	if (this->cur_step_delay_us >= this->dest_step_delay_us) {
 		return 1;
 	}

@@ -4,6 +4,8 @@
 
 #include "motor_driver.h"
 
+#include "user_config.h"
+
 // ===============================================================
 // 
 // ===============================================================
@@ -74,6 +76,10 @@ void motor_set_speed_sec_per_round(u8 sec_per_round)
             speed_delay_us = (u32)125 * call_times;
         }
     }
+
+#if USER_DEBUG_ENABLE
+    // printf("speed_delay_us == %lu\n", (u32)speed_delay_us);
+#endif
 
     motor.speed_sec_per_round = sec_per_round;
     motor_24byj48_set_dest_step_delay_us(speed_delay_us);

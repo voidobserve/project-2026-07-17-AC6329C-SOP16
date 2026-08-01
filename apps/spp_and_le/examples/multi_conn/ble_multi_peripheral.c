@@ -459,9 +459,9 @@ static uint16_t multi_att_read_callback(hci_con_handle_t connection_handle, uint
 
         }
 #endif
- 
-            // RGBW 对应 0x02
-            user_report_dev_type(0x02); 
+
+        // RGBW 对应 0x02
+        user_report_dev_type(0x02);
 
         user_report_dev_on_off_sta(fc_effect.on_off_flag);
         user_report_brightness((u32)fc_effect.b * 100 / 255);

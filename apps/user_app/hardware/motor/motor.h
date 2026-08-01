@@ -29,6 +29,24 @@ typedef struct
 
 extern volatile motor_t motor;
 
+/*
+	调节电机转速时，每次调节的单位，单位：秒/圈
+*/
+#define MOTOR_ADJUST_UNIT 10
+
+/*
+	调节电机转速时，限制的最快转速
+
+	由于客户选的电机质量比较差，不能达到理论的4秒转一圈，
+	这里要实际测试客户的电机可以转多块，再给个保守值
+*/
+#define MOTOR_THE_FASTEST_SPEED_SEC_PER_ROUND 10
+
+/*
+	调节电机转速时，限制的最慢转速
+*/
+#define MOTOR_THE_SLOWEST_SPEED_SEC_PER_ROUND 70
+
 void motor_handle_125us(void);
 
 // 设置电机模式

@@ -689,8 +689,6 @@ void rf24g_key_r6c4_press_handle(void)
 
 void rf24g_key_r7c1_press_handle(void)
 {
-    const u8 step = 1;
-
 #if USER_DEBUG_ENABLE
     printf("r7c1 press\n");
 #endif
@@ -703,14 +701,15 @@ void rf24g_key_r7c1_press_handle(void)
     // fc_effect.motor_sec_per_round = 70;
     // motor_set_speed_sec_per_round(fc_effect.motor_sec_per_round);
 
-    // 电机速度 减
-    if (fc_effect.motor_sec_per_round < 70 - step)
+    // 电机速度 减（数值越大，转得越慢）
+    if (fc_effect.motor_sec_per_round <
+        (MOTOR_THE_SLOWEST_SPEED_SEC_PER_ROUND - MOTOR_ADJUST_UNIT))
     {
-        fc_effect.motor_sec_per_round += step;
+        fc_effect.motor_sec_per_round += MOTOR_ADJUST_UNIT;
     }
     else
     {
-        fc_effect.motor_sec_per_round = 70;
+        fc_effect.motor_sec_per_round = MOTOR_THE_SLOWEST_SPEED_SEC_PER_ROUND;
     }
 
     motor_set_speed_sec_per_round(fc_effect.motor_sec_per_round);
@@ -723,20 +722,24 @@ void rf24g_key_r7c1_press_handle(void)
 
 void rf24g_key_r7c1_hold_handle(void)
 {
-    const u8 step = 1;
-
 #if USER_DEBUG_ENABLE
     printf("r7c1 hold\n");
 #endif
 
-    // 电机速度 减
-    if (fc_effect.motor_sec_per_round < 70 - step)
+    if (fc_effect.on_off_flag == DEVICE_OFF)
     {
-        fc_effect.motor_sec_per_round += step;
+        return;
+    }
+
+    // 电机速度 减 （ 数值越大，转得越慢 ）
+    if (fc_effect.motor_sec_per_round <
+        MOTOR_THE_SLOWEST_SPEED_SEC_PER_ROUND - MOTOR_ADJUST_UNIT)
+    {
+        fc_effect.motor_sec_per_round += MOTOR_ADJUST_UNIT;
     }
     else
     {
-        fc_effect.motor_sec_per_round = 70;
+        fc_effect.motor_sec_per_round = MOTOR_THE_SLOWEST_SPEED_SEC_PER_ROUND;
     }
 
     motor_set_speed_sec_per_round(fc_effect.motor_sec_per_round);
@@ -758,7 +761,7 @@ void rf24g_key_r7c2_press_handle(void)
         return;
     }
 
-    fc_effect.motor_sec_per_round = 70;
+    fc_effect.motor_sec_per_round = 42;
     motor_set_speed_sec_per_round(fc_effect.motor_sec_per_round);
 #if USER_DEBUG_ENABLE
     printf("fc_effect.motor_sec_per_round == %u\n",
@@ -777,7 +780,7 @@ void rf24g_key_r7c3_press_handle(void)
         return;
     }
 
-    fc_effect.motor_sec_per_round = 20;
+    fc_effect.motor_sec_per_round = 30;
     motor_set_speed_sec_per_round(fc_effect.motor_sec_per_round);
 #if USER_DEBUG_ENABLE
     printf("fc_effect.motor_sec_per_round == %u\n",
@@ -787,8 +790,6 @@ void rf24g_key_r7c3_press_handle(void)
 
 void rf24g_key_r7c4_press_handle(void)
 {
-    const u8 step = 1;
-
 #if USER_DEBUG_ENABLE
     printf("r7c4 press\n");
 #endif
@@ -798,17 +799,15 @@ void rf24g_key_r7c4_press_handle(void)
         return;
     }
 
-    // fc_effect.motor_sec_per_round = 20;
-    // motor_set_speed_sec_per_round(fc_effect.motor_sec_per_round);
-
-    // 电机速度 加(值越小，速度越快，但不能小于一定值) 
-    if (fc_effect.motor_sec_per_round > 20 + step)
+    // 电机速度 加（数值越小，转得越快，但不能小于一定值）
+    if (fc_effect.motor_sec_per_round >
+        MOTOR_THE_FASTEST_SPEED_SEC_PER_ROUND + MOTOR_ADJUST_UNIT)
     {
-        fc_effect.motor_sec_per_round -= step;
+        fc_effect.motor_sec_per_round -= MOTOR_ADJUST_UNIT;
     }
     else
     {
-        fc_effect.motor_sec_per_round = 20;
+        fc_effect.motor_sec_per_round = MOTOR_THE_FASTEST_SPEED_SEC_PER_ROUND;
     }
 
     motor_set_speed_sec_per_round(fc_effect.motor_sec_per_round);
@@ -821,20 +820,24 @@ void rf24g_key_r7c4_press_handle(void)
 
 void rf24g_key_r7c4_hold_handle(void)
 {
-    const u8 step = 1;
-
 #if USER_DEBUG_ENABLE
     printf("r7c4 hold\n");
 #endif
 
-    // 电机速度 加(值越小，速度越快，但不能小于一定值) 
-    if (fc_effect.motor_sec_per_round > 20 + step)
+    if (fc_effect.on_off_flag == DEVICE_OFF)
     {
-        fc_effect.motor_sec_per_round -= step;
+        return;
+    }
+
+    // 电机速度 加（数值越小，转得越快，但不能小于一定值）
+    if (fc_effect.motor_sec_per_round >
+        MOTOR_THE_FASTEST_SPEED_SEC_PER_ROUND + MOTOR_ADJUST_UNIT)
+    {
+        fc_effect.motor_sec_per_round -= MOTOR_ADJUST_UNIT;
     }
     else
     {
-        fc_effect.motor_sec_per_round = 20;
+        fc_effect.motor_sec_per_round = MOTOR_THE_FASTEST_SPEED_SEC_PER_ROUND;
     }
 
     motor_set_speed_sec_per_round(fc_effect.motor_sec_per_round);
