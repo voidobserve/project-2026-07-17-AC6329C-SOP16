@@ -2,7 +2,7 @@
 #include "WS2812FX.h"
 #include "led_strand_effect.h" // 包含 fc_effect 定义
 #include "ws2812fx_tool.h"
-#include "Adafruit_NeoPixel.h" // 
+#include "Adafruit_NeoPixel.h" //
 #include <math.h>
 
 #include "user_config.h"
@@ -12,8 +12,7 @@ u16 led_colorful_anim_jump(void)
     volatile u16 anim_speed = 0;
     // 根据传递过来的速度对应的百分比值，进行映射
     anim_speed = LED_COLORFUL_ANIM_SPEED_VAL_MAP(fc_effect.report_speed);
-    if (_seg_rt->aux_param == 0)
-    {
+    if (_seg_rt->aux_param == 0) {
         // 刚进入该函数
         _seg_rt->aux_param = 1;
 #if USER_DEBUG_ENABLE
@@ -21,8 +20,8 @@ u16 led_colorful_anim_jump(void)
 #endif
     }
 
-
-    Adafruit_NeoPixel_fill(_seg->colors[_seg_rt->counter_mode_step], _seg->start, _seg_len);
+    Adafruit_NeoPixel_fill(_seg->colors[_seg_rt->counter_mode_step],
+                           _seg->start, _seg_len);
     _seg_rt->counter_mode_step++;
     _seg_rt->counter_mode_step %= _seg->c_n;
     // if (_seg_rt->counter_mode_step == 0)
@@ -32,7 +31,6 @@ u16 led_colorful_anim_jump(void)
 
     return anim_speed;
 }
-
 
 // 七彩灯的渐变动画，支持多种颜色切换
 u16 led_colorful_anim_gradual(void)
@@ -44,12 +42,11 @@ u16 led_colorful_anim_gradual(void)
     int lum = _seg_rt->counter_mode_step;
     u16 anim_speed;
 
-    anim_speed =
-        LED_COLORFUL_ANIM_SPEED_VAL_MAP(fc_effect.report_speed) / 10;
+    anim_speed = LED_COLORFUL_ANIM_SPEED_VAL_MAP(fc_effect.report_speed) / 10;
 
-    if (lum > 255) lum = 511 - lum; // lum = 0 -> 255 -> 0
-    if (_seg_rt->aux_param == 0)
-    {
+    if (lum > 255)
+        lum = 511 - lum; // lum = 0 -> 255 -> 0
+    if (_seg_rt->aux_param == 0) {
         _seg_rt->aux_param = 1;
         index = 0;
         c1 = _seg->colors[index];
@@ -66,12 +63,10 @@ u16 led_colorful_anim_gradual(void)
 
     Adafruit_NeoPixel_fill(color, _seg->start, _seg_len);
 
-    if (_seg_rt->counter_mode_step == 256)
-    {
+    if (_seg_rt->counter_mode_step == 256) {
         index++;
         index %= _seg->c_n;
-        if (index == 0)
-        {
+        if (index == 0) {
             // ws2811fx_set_cycle = 1;
         }
         c1 = _seg->colors[index];
@@ -83,8 +78,7 @@ u16 led_colorful_anim_gradual(void)
         index++;
         index %= _seg->c_n;
         c0 = _seg->colors[index];
-        if (index == 0)
-        {
+        if (index == 0) {
             // ws2811fx_set_cycle = 1;
         }
         SET_CYCLE;
@@ -93,7 +87,6 @@ u16 led_colorful_anim_gradual(void)
     // return (_seg->speed / 5);
     return anim_speed;
 }
-
 
 /**
  * @brief 七彩灯的呼吸动画
@@ -136,7 +129,8 @@ u16 led_colorful_anim_breath(void)
     // u16 step = 0; // 步长
     // step = 512 * 10 / _seg->speed;
 
-    static volatile u32 temp_step = 0;  // 累计放大了1000倍的步长，超过1000后，才执行动画的下一步骤
+    static volatile u32 temp_step =
+        0; // 累计放大了1000倍的步长，超过1000后，才执行动画的下一步骤
     static volatile u16 brightness = 0; // 亮度值
     u32 step = 0;                       // 步长（放大了1000倍）
     // step = ((u32)brightness_max + 1) * 10 * 1000 / anim_speed;
@@ -146,10 +140,8 @@ u16 led_colorful_anim_breath(void)
     step = ((u32)brightness_max + 1) * 10 * 1000 / anim_speed;
     // step = ((u32)brightness_max - 1) * 10 * 10000 / anim_speed; // （放大了10000倍）
 
-    if (0 == _seg_rt->counter_mode_step &&
-        0 == _seg_rt->aux_param &&
-        0 == _seg_rt->counter_mode_call)
-    {
+    if (0 == _seg_rt->counter_mode_step && 0 == _seg_rt->aux_param &&
+        0 == _seg_rt->counter_mode_call) {
         /*
             如果是第一次进入，设置默认颜色
             当前颜色为黑色，向目标颜色渐变（看起来像呼吸渐亮）
@@ -162,13 +154,10 @@ u16 led_colorful_anim_breath(void)
     }
 
     temp_step += step;
-    if (temp_step >= 1000)
-    {
+    if (temp_step >= 1000) {
         // 有可能单次的步长会超过1000，这里用循环来逐个递减
-        while (1)
-        {
-            if (temp_step < 1000)
-            {
+        while (1) {
+            if (temp_step < 1000) {
                 break;
             }
 
@@ -177,18 +166,14 @@ u16 led_colorful_anim_breath(void)
                 brightness 变化范围： 0 -> brightness -> 0
             */
             _seg_rt->counter_mode_step++;
-            if (temp_step >= 1000)
-            {
+            if (temp_step >= 1000) {
                 temp_step -= 1000;
-            }
-            else
-            {
+            } else {
                 temp_step = 0;
             }
 
             brightness = _seg_rt->counter_mode_step;
-            if (brightness > (u16)brightness_max)
-            {
+            if (brightness > (u16)brightness_max) {
                 brightness = ((u16)brightness_max * 2) - brightness;
             }
 
@@ -196,15 +181,14 @@ u16 led_colorful_anim_breath(void)
                 0 -> brightness_max，共 brightness_max 个步骤，灯光渐亮
                 brightness_max -> 0，共 brightness_max 个步骤，灯光渐暗
             */
-            if (_seg_rt->counter_mode_step >= ((u32)brightness_max * 2))
-            {
+            if (_seg_rt->counter_mode_step >= ((u32)brightness_max * 2)) {
                 _seg_rt->counter_mode_step = 0;
                 temp_step = 0;
                 brightness = 0;
 
-                _seg_rt->aux_param += 1; // 切换颜色数组 _seg->colors[] 中的下一个颜色
-                if (_seg_rt->aux_param >= _seg->c_n)
-                {
+                _seg_rt->aux_param +=
+                    1; // 切换颜色数组 _seg->colors[] 中的下一个颜色
+                if (_seg_rt->aux_param >= _seg->c_n) {
                     _seg_rt->aux_param = 0;
                 }
 
@@ -242,17 +226,14 @@ u16 led_colorful_anim_gradual_by_pause(void)
         现在根据传递过来的速度对应的百分比值，映射到 10 ~ 500 ，
     */
     // anim_speed = (500 - (u32)fc_effect.report_speed * (500 - 10) / 100);
-    anim_speed =
-        LED_COLORFUL_ANIM_SPEED_VAL_MAP(fc_effect.report_speed) / 10;
+    anim_speed = LED_COLORFUL_ANIM_SPEED_VAL_MAP(fc_effect.report_speed) / 10;
 
-    if (lum > 255)
-    {
+    if (lum > 255) {
         // lum = 0 -> 255 -> 0
         lum = 511 - lum;
     }
 
-    if (_seg_rt->aux_param == 0)
-    {
+    if (_seg_rt->aux_param == 0) {
         // 如果刚进入该函数，初始化参数
         _seg_rt->aux_param = 1;
         index = 0;
@@ -261,7 +242,8 @@ u16 led_colorful_anim_gradual_by_pause(void)
         c0 = _seg->colors[index];
 
 #if USER_DEBUG_ENABLE
-        printf("led_colorful_anim_gradual_by_pause: anim_speed == %u\n", anim_speed);
+        printf("led_colorful_anim_gradual_by_pause: anim_speed == %u\n",
+               anim_speed);
 #endif
     }
 
@@ -270,8 +252,7 @@ u16 led_colorful_anim_gradual_by_pause(void)
 
     Adafruit_NeoPixel_fill(color, _seg->start, _seg_len);
 
-    if (_seg_rt->counter_mode_step == 256)
-    {
+    if (_seg_rt->counter_mode_step == 256) {
         index++;
         index %= _seg->c_n;
 
@@ -282,22 +263,20 @@ u16 led_colorful_anim_gradual_by_pause(void)
 #if USER_DEBUG_ENABLE
         printf("next color\n");
 #endif
-        return (anim_speed) * 10; // 
+        return (anim_speed) * 10; //
     }
 
     _seg_rt->counter_mode_step++;
-    if (_seg_rt->counter_mode_step > 511)
-    {
+    if (_seg_rt->counter_mode_step > 511) {
         _seg_rt->counter_mode_step = 0;
         index++;
         index %= _seg->c_n;
         c0 = _seg->colors[index];
-        // SET_CYCLE; 
+        // SET_CYCLE;
     }
 
     return anim_speed;
 }
-
 
 // 七彩灯的七色滑翔动画
 u16 led_colorful_anim_slide(void)
@@ -308,8 +287,8 @@ u16 led_colorful_anim_slide(void)
         使用正弦插值在两种颜色之间平滑过渡，形成滑翔效果。
         每次过渡耗时 anim_speed 毫秒，ws2812fx_service() 大约每 10ms 调用一次。
     */
-    static volatile uint8_t next_idx = 1;  // 下一个颜色索引
-    static volatile float radian = 0.0f;   // 正弦角度（弧度值），范围 [0, 2PI)
+    static volatile uint8_t next_idx = 1; // 下一个颜色索引
+    static volatile float radian = 0.0f;  // 正弦角度（弧度值），范围 [0, 2PI)
     static volatile float radian_cnt = 0.0f;
     static volatile u32 color_0;
     static volatile u32 color_1;
@@ -329,21 +308,17 @@ u16 led_colorful_anim_slide(void)
         现在根据传递过来的速度对应的百分比值，映射到 200 ~ 5000
     */
     // anim_speed = 5000 - (u32)fc_effect.report_speed * (5000 - 200) / 100;
-    anim_speed =
-        LED_COLORFUL_ANIM_SPEED_VAL_MAP(fc_effect.report_speed) * 10;
+    anim_speed = LED_COLORFUL_ANIM_SPEED_VAL_MAP(fc_effect.report_speed) * 10;
     steps = (float)anim_speed / 10.0f; // 每 10ms 一步
-    if (steps < 1.0f)
-    {
+    if (steps < 1.0f) {
         steps = 1.0f;
     }
 
     delta = TWO_PI / steps;
 
-    if (0 == _seg_rt->counter_mode_step &&
-        0 == _seg_rt->aux_param &&
-        0 == _seg_rt->counter_mode_call)
-    {
-        // 刚进入该动画 
+    if (0 == _seg_rt->counter_mode_step && 0 == _seg_rt->aux_param &&
+        0 == _seg_rt->counter_mode_call) {
+        // 刚进入该动画
         // idx = 0;
         next_idx = (_seg->c_n > 1) ? 1 : 0;
         radian = 0.0f;
@@ -365,15 +340,13 @@ u16 led_colorful_anim_slide(void)
     /* 取当前两色并按正弦插值计算混合比例（0..255） */
     t = sinf(radian);
     t = (t > 0) ? t : -t;
-    blend = (uint8_t)((float)t * 255.0f); // t 从 0 -> 1 -> 0时，blend 从 0 -> 255 -> 0
+    blend = (uint8_t)((float)t *
+                      255.0f); // t 从 0 -> 1 -> 0时，blend 从 0 -> 255 -> 0
 
-    if (dir == 0)
-    {
+    if (dir == 0) {
         // blend 从 0 -> 255
         color = WS2812FX_color_blend(color_0, color_1, blend);
-    }
-    else
-    {
+    } else {
         // blend 从 255 -> 0，颜色 传参顺序要反过来
         color = WS2812FX_color_blend(color_1, color_0, blend);
     }
@@ -388,10 +361,8 @@ u16 led_colorful_anim_slide(void)
     radian += delta;
     radian_cnt += delta;
 
-    if ((radian_cnt >= (TWO_PI / 4)) ||
-        (dir == 0 && blend == 255) ||
-        (dir == 1 && blend == 0))
-    {
+    if ((radian_cnt >= (TWO_PI / 4)) || (dir == 0 && blend == 255) ||
+        (dir == 1 && blend == 0)) {
         /*
             1/4 pi 时，blend 最接近 255，应该切换到下一个颜色
             radian 在 0 ~ 2pi 变化期间，每经过 1/4 pi，就切换一次颜色
@@ -407,13 +378,11 @@ u16 led_colorful_anim_slide(void)
         // printf("color change\n");
     }
 
-    if (radian >= TWO_PI)
-    {
+    if (radian >= TWO_PI) {
         radian = 0;
         radian_cnt = 0;
         // printf("circle\n");
     }
-
 
     // return 100; // 测试时使用，观察颜色和数值变化
     return 1;
@@ -421,10 +390,10 @@ u16 led_colorful_anim_slide(void)
 
 enum
 {
-    ANIM_INDEX_JUMP = 0, // 跳变
-    ANIM_INDEX_SLIDE, // 滑翔
-    ANIM_INDEX_BREATH, // 呼吸
-    ANIM_INDEX_GRADUAL, // 渐变
+    ANIM_INDEX_JUMP = 0,         // 跳变
+    ANIM_INDEX_SLIDE,            // 滑翔
+    ANIM_INDEX_BREATH,           // 呼吸
+    ANIM_INDEX_GRADUAL,          // 渐变
     ANIM_INDEX_GRADUAL_BY_PAUSE, // 带停顿的渐变
 };
 typedef u8 anim_index_e;
@@ -432,15 +401,13 @@ typedef u8 anim_index_e;
 u16 led_colorful_anim_auto(void)
 {
     static volatile anim_index_e anim_index = 0; // 控制动画索引
-    // static volatile u8 is_anim_jump_initialized = 0; // 
+    // static volatile u8 is_anim_jump_initialized = 0; //
     static volatile u8 is_anim_slide_initialized = 0;
     static volatile u8 is_anim_breath_initialized = 0;
     static volatile u8 is_anim_gradual_initialized = 0;
     static volatile u8 is_anim_gradual_by_pause_initialized = 0;
 
-
-    if (_seg_rt->aux_param == 0)
-    {
+    if (_seg_rt->aux_param == 0) {
         // 如果刚进入该函数，初始化参数
         _seg_rt->aux_param = 1;
 
@@ -449,48 +416,42 @@ u16 led_colorful_anim_auto(void)
         is_anim_gradual_initialized = 0;
         is_anim_gradual_by_pause_initialized = 0;
 
-
         anim_index = ANIM_INDEX_JUMP;
 #if USER_DEBUG_ENABLE
         printf("anim begin\n");
-#endif        
+#endif
     }
 
-    if (ANIM_INDEX_JUMP == anim_index)
-    {
-        Adafruit_NeoPixel_fill(
-            _seg->colors[_seg_rt->counter_mode_step],
-            _seg->start,
-            _seg_len);
+    if (ANIM_INDEX_JUMP == anim_index) {
+        Adafruit_NeoPixel_fill(_seg->colors[_seg_rt->counter_mode_step],
+                               _seg->start, _seg_len);
         _seg_rt->counter_mode_step++;
         _seg_rt->counter_mode_step %= _seg->c_n;
 
-        if (_seg_rt->counter_mode_step == 0)
-        {
+        if (_seg_rt->counter_mode_step == 0) {
             // 跳变完成，切换到下一种动画
             anim_index = ANIM_INDEX_SLIDE;
 #if USER_DEBUG_ENABLE
             printf("ANIM_INDEX_SLIDE \n");
 #endif
-            return 1; // 
+            return 1; //
         }
 
         return _seg->speed;
-    }
-    else if (ANIM_INDEX_SLIDE == anim_index)
-    {
+    } else if (ANIM_INDEX_SLIDE == anim_index) {
         // 七色滑翔使用的变量：
         u16 anim_speed = 0;
         /*
             使用正弦插值在两种颜色之间平滑过渡，形成滑翔效果。
             每次过渡耗时 anim_speed 毫秒，ws2812fx_service() 大约每 10ms 调用一次。
         */
-        static volatile uint8_t next_idx = 1;  // 下一个颜色索引
-        static volatile float radian = 0.0f;   // 正弦角度（弧度值），范围 [0, 2PI)
+        static volatile uint8_t next_idx = 1; // 下一个颜色索引
+        static volatile float radian =
+            0.0f; // 正弦角度（弧度值），范围 [0, 2PI)
         static volatile float radian_cnt = 0.0f;
         static volatile u32 color_0;
         static volatile u32 color_1;
-        static volatile u8 dir = 0; // 亮度变化方向，0：渐亮，1：渐暗 
+        static volatile u8 dir = 0; // 亮度变化方向，0：渐亮，1：渐暗
         const float TWO_PI = 6.28318530717958647692f;
         volatile u32 color;
         volatile float steps;
@@ -498,8 +459,7 @@ u16 led_colorful_anim_auto(void)
         volatile float t;
         volatile uint8_t blend;
 
-        if (0 == is_anim_slide_initialized)
-        {
+        if (0 == is_anim_slide_initialized) {
             // 七色滑翔，参数初始化
             next_idx = (_seg->c_n > 1) ? 1 : 0;
             radian = 0.0f;
@@ -519,8 +479,7 @@ u16 led_colorful_anim_auto(void)
         anim_speed =
             LED_COLORFUL_ANIM_SPEED_VAL_MAP(fc_effect.report_speed) * 10;
         steps = (float)anim_speed / 10.0f; // 每 10ms 一步
-        if (steps < 1.0f)
-        {
+        if (steps < 1.0f) {
             steps = 1.0f;
         }
 
@@ -529,15 +488,13 @@ u16 led_colorful_anim_auto(void)
         /* 取当前两色并按正弦插值计算混合比例（0..255） */
         t = sinf(radian);
         t = (t > 0) ? t : -t;
-        blend = (uint8_t)((float)t * 255.0f); // t 从 0 -> 1 -> 0时，blend 从 0 -> 255 -> 0
+        blend = (uint8_t)((float)t *
+                          255.0f); // t 从 0 -> 1 -> 0时，blend 从 0 -> 255 -> 0
 
-        if (dir == 0)
-        {
+        if (dir == 0) {
             // blend 从 0 -> 255
             color = WS2812FX_color_blend(color_0, color_1, blend);
-        }
-        else
-        {
+        } else {
             // blend 从 255 -> 0，颜色 传参顺序要反过来
             color = WS2812FX_color_blend(color_1, color_0, blend);
         }
@@ -548,10 +505,8 @@ u16 led_colorful_anim_auto(void)
         radian += delta;
         radian_cnt += delta;
 
-        if ((radian_cnt >= (TWO_PI / 4)) ||
-            (dir == 0 && blend == 255) ||
-            (dir == 1 && blend == 0))
-        {
+        if ((radian_cnt >= (TWO_PI / 4)) || (dir == 0 && blend == 255) ||
+            (dir == 1 && blend == 0)) {
             /*
                 1/4 pi 时，blend 最接近 255，应该切换到下一个颜色
                 radian 在 0 ~ 2pi 变化期间，每经过 1/4 pi，就切换一次颜色
@@ -564,24 +519,20 @@ u16 led_colorful_anim_auto(void)
             color_0 = color; // 从当前颜色开始往下一个颜色变化，防止颜色骤变
             color_1 = _seg->colors[next_idx];
 
-            if (next_idx == 0)
-            {
+            if (next_idx == 0) {
                 // 滑翔完成，切换到下种动画
                 anim_index = ANIM_INDEX_BREATH;
                 printf("ANIM_INDEX_BREATH\n");
             }
         }
 
-        if (radian >= TWO_PI)
-        {
+        if (radian >= TWO_PI) {
             radian = 0;
             radian_cnt = 0;
         }
 
         return 1;
-    }
-    else if (ANIM_INDEX_BREATH == anim_index)
-    {
+    } else if (ANIM_INDEX_BREATH == anim_index) {
         u8 brightness_max = fc_effect.b;
         u16 anim_speed = 0;
         /*
@@ -590,16 +541,17 @@ u16 led_colorful_anim_auto(void)
         */
         anim_speed = LED_COLORFUL_ANIM_SPEED_VAL_MAP(fc_effect.report_speed);
 
-        static u32 dest_color = BLACK; // 目标颜色  
-        static volatile u32 temp_step = 0;  // 累计放大了1000倍的步长，超过1000后，才执行动画的下一步骤
+        static u32 dest_color = BLACK; // 目标颜色
+        static volatile u32 temp_step =
+            0; // 累计放大了1000倍的步长，超过1000后，才执行动画的下一步骤
         static volatile u16 brightness = 0; // 亮度值
         static volatile u8 cur_color_idx = 0;
 
         u32 step = 0;
-        step = ((u32)brightness_max + 1) * 10 * 1000 / anim_speed; // 步长（放大了1000倍） 
+        step = ((u32)brightness_max + 1) * 10 * 1000 /
+               anim_speed; // 步长（放大了1000倍）
 
-        if (0 == is_anim_breath_initialized)
-        {
+        if (0 == is_anim_breath_initialized) {
             /*
                 如果是第一次进入，设置默认颜色
                 当前颜色为黑色，向目标颜色渐变（看起来像呼吸渐亮）
@@ -613,13 +565,10 @@ u16 led_colorful_anim_auto(void)
         }
 
         temp_step += step;
-        if (temp_step >= 1000)
-        {
+        if (temp_step >= 1000) {
             // 有可能单次的步长会超过1000，这里用循环来逐个递减
-            while (1)
-            {
-                if (temp_step < 1000)
-                {
+            while (1) {
+                if (temp_step < 1000) {
                     break;
                 }
 
@@ -628,18 +577,14 @@ u16 led_colorful_anim_auto(void)
                     brightness 变化范围： 0 -> brightness -> 0
                 */
                 _seg_rt->counter_mode_step++;
-                if (temp_step >= 1000)
-                {
+                if (temp_step >= 1000) {
                     temp_step -= 1000;
-                }
-                else
-                {
+                } else {
                     temp_step = 0;
                 }
 
                 brightness = _seg_rt->counter_mode_step;
-                if (brightness > (u16)brightness_max)
-                {
+                if (brightness > (u16)brightness_max) {
                     brightness = ((u16)brightness_max * 2) - brightness;
                 }
 
@@ -647,15 +592,14 @@ u16 led_colorful_anim_auto(void)
                     0 -> brightness_max，共 brightness_max 个步骤，灯光渐亮
                     brightness_max -> 0，共 brightness_max 个步骤，灯光渐暗
                 */
-                if (_seg_rt->counter_mode_step >= ((u32)brightness_max * 2))
-                {
+                if (_seg_rt->counter_mode_step >= ((u32)brightness_max * 2)) {
                     _seg_rt->counter_mode_step = 0;
                     temp_step = 0;
                     brightness = 0;
 
-                    cur_color_idx += 1; // 切换颜色数组 _seg->colors[] 中的下一个颜色
-                    if (cur_color_idx >= _seg->c_n)
-                    {
+                    cur_color_idx +=
+                        1; // 切换颜色数组 _seg->colors[] 中的下一个颜色
+                    if (cur_color_idx >= _seg->c_n) {
                         cur_color_idx = 0;
                         // 切换到下一个动画
                         anim_index = ANIM_INDEX_GRADUAL;
@@ -672,9 +616,7 @@ u16 led_colorful_anim_auto(void)
         Adafruit_NeoPixel_fill(color, _seg->start, _seg_len);
 
         return 1; // ws2812fx_service() 10ms调用一次，这个值只需要小于10
-    }
-    else if (ANIM_INDEX_GRADUAL == anim_index)
-    {
+    } else if (ANIM_INDEX_GRADUAL == anim_index) {
         static uint8_t index;
         uint32_t rgb;
         static uint32_t c0, c1;
@@ -685,9 +627,9 @@ u16 led_colorful_anim_auto(void)
         anim_speed =
             LED_COLORFUL_ANIM_SPEED_VAL_MAP(fc_effect.report_speed) / 10;
 
-        if (lum > 255) lum = 511 - lum; // lum = 0 -> 255 -> 0
-        if (is_anim_gradual_initialized == 0)
-        {
+        if (lum > 255)
+            lum = 511 - lum; // lum = 0 -> 255 -> 0
+        if (is_anim_gradual_initialized == 0) {
             _seg_rt->aux_param = 1;
             index = 0;
             c1 = _seg->colors[index];
@@ -701,12 +643,10 @@ u16 led_colorful_anim_auto(void)
 
         Adafruit_NeoPixel_fill(color, _seg->start, _seg_len);
 
-        if (_seg_rt->counter_mode_step == 256)
-        {
+        if (_seg_rt->counter_mode_step == 256) {
             index++;
             index %= _seg->c_n;
-            if (index == 0)
-            {
+            if (index == 0) {
                 // ws2811fx_set_cycle = 1;
             }
             c1 = _seg->colors[index];
@@ -718,17 +658,14 @@ u16 led_colorful_anim_auto(void)
             index++;
             index %= _seg->c_n;
             c0 = _seg->colors[index];
-            if (index == 0)
-            {
+            if (index == 0) {
                 // ws2811fx_set_cycle = 1;
             }
             SET_CYCLE;
         }
 
         return anim_speed;
-    }
-    else if (ANIM_INDEX_GRADUAL_BY_PAUSE == anim_index)
-    {
+    } else if (ANIM_INDEX_GRADUAL_BY_PAUSE == anim_index) {
         // static uint8_t index = 0;
         static volatile uint8_t cur_color_idx = 0;
         static uint32_t c0, c1;
@@ -742,15 +679,13 @@ u16 led_colorful_anim_auto(void)
         anim_speed =
             LED_COLORFUL_ANIM_SPEED_VAL_MAP(fc_effect.report_speed) / 10;
 
-        if (lum > 255)
-        {
+        if (lum > 255) {
             // lum = 0 -> 255 -> 0
             lum = 511 - lum;
         }
 
-        if (0 == is_anim_gradual_by_pause_initialized)
-        {
-            // 如果刚进入该函数，初始化参数 
+        if (0 == is_anim_gradual_by_pause_initialized) {
+            // 如果刚进入该函数，初始化参数
             cur_color_idx = 0;
             c1 = _seg->colors[cur_color_idx];
             cur_color_idx++;
@@ -763,11 +698,9 @@ u16 led_colorful_anim_auto(void)
         color = WS2812FX_color_blend(c1, c0, lum);
         Adafruit_NeoPixel_fill(color, _seg->start, _seg_len);
 
-        if (_seg_rt->counter_mode_step == 256)
-        {
+        if (_seg_rt->counter_mode_step == 256) {
             cur_color_idx++;
-            if (cur_color_idx >= _seg->c_n)
-            {
+            if (cur_color_idx >= _seg->c_n) {
                 anim_index = ANIM_INDEX_JUMP;
                 return 1;
             }
@@ -780,12 +713,10 @@ u16 led_colorful_anim_auto(void)
         }
 
         _seg_rt->counter_mode_step++;
-        if (_seg_rt->counter_mode_step > 511)
-        {
+        if (_seg_rt->counter_mode_step > 511) {
             _seg_rt->counter_mode_step = 0;
             cur_color_idx++;
-            if (cur_color_idx >= _seg->c_n)
-            {
+            if (cur_color_idx >= _seg->c_n) {
                 anim_index = ANIM_INDEX_JUMP;
                 return 1;
             }

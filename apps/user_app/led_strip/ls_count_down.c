@@ -3,14 +3,14 @@
 
 typedef enum
 {
-    IR_TIMER_NO = 0,        //无定时
-    IR_TIMER_1H = 1*60*60*1000,
-    IR_TIMER_2H = 2*60*60*1000,
+    IR_TIMER_NO = 0, //无定时
+    IR_TIMER_1H = 1 * 60 * 60 * 1000,
+    IR_TIMER_2H = 2 * 60 * 60 * 1000,
 
-    IR_TIMER_4H = 4*60*60*1000,
-    IR_TIMER_8H = 8*60*60*1000,
+    IR_TIMER_4H = 4 * 60 * 60 * 1000,
+    IR_TIMER_8H = 8 * 60 * 60 * 1000,
 
-}timer_e;
+} timer_e;
 
 /* 
 0：无定时
@@ -18,7 +18,7 @@ typedef enum
 2：4h
 3：8h
  */
-// u8 cd_state = 0; 
+// u8 cd_state = 0;
 // u32 setting_time;
 
 // void change_count_down(void)
@@ -47,7 +47,7 @@ typedef enum
 // {
 //     cd_state = 5;
 //     setting_time = 60 * 1000;
-    
+
 // }
 
 // 每10ms跑一次
@@ -64,7 +64,7 @@ typedef enum
 //         {
 //             cd_state = 0;
 //             soft_rurn_off_lights();  //关灯.
-            
+
 //         }
 //     }
 // }

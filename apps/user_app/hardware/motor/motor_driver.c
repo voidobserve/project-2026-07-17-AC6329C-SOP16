@@ -6,9 +6,8 @@
 
 volatile motor_24byj48_t motor_24byj48;
 
-
 // 步进序列定义
-static const u8 full_step_sequence[4] = { 0x01, 0x02, 0x04, 0x08 };
+static const u8 full_step_sequence[4] = {0x01, 0x02, 0x04, 0x08};
 /*
 	0x01： 0001
 	0x03： 0011
@@ -19,118 +18,114 @@ static const u8 full_step_sequence[4] = { 0x01, 0x02, 0x04, 0x08 };
 	0x08： 1000
 	0x09： 1001
 */
-static const u8 half_step_sequence[8] = { 0x01, 0x03, 0x02, 0x06, 0x04, 0x0C, 0x08, 0x09 };
+static const u8 half_step_sequence[8] = {0x01, 0x03, 0x02, 0x06,
+                                         0x04, 0x0C, 0x08, 0x09};
 
-
-static volatile motor_24byj48_t* const this = &motor_24byj48;
-
+static volatile motor_24byj48_t *const this = &motor_24byj48;
 
 // 设置电机引脚输出
 static void motor_set_pins(u8 pattern)
 {
-	gpio_direction_output(MOTOR_PIN_1, (pattern & 0x01) ? 1 : 0);
-	gpio_direction_output(MOTOR_PIN_2, (pattern & 0x02) ? 1 : 0);
-	gpio_direction_output(MOTOR_PIN_3, (pattern & 0x04) ? 1 : 0);
-	gpio_direction_output(MOTOR_PIN_4, (pattern & 0x08) ? 1 : 0);
+    gpio_direction_output(MOTOR_PIN_1, (pattern & 0x01) ? 1 : 0);
+    gpio_direction_output(MOTOR_PIN_2, (pattern & 0x02) ? 1 : 0);
+    gpio_direction_output(MOTOR_PIN_3, (pattern & 0x04) ? 1 : 0);
+    gpio_direction_output(MOTOR_PIN_4, (pattern & 0x08) ? 1 : 0);
 }
 
 // 获取当前步进序列长度
 static u8 motor_get_sequence_length(void)
 {
-	switch (this->step_mode) {
-	case MOTOR_MODE_HALF_STEP:
-		return 8;
-	case MOTOR_MODE_FULL_STEP:
-	default:
-		return 4;
-	}
+    switch (this->step_mode) {
+    case MOTOR_MODE_HALF_STEP:
+        return 8;
+    case MOTOR_MODE_FULL_STEP:
+    default:
+        return 4;
+    }
 }
 
 // 获取当前步进序列值
 static u8 motor_get_sequence_value(motor_control_mode_t mode, u16 step_index)
 {
-	u8 seq_len = motor_get_sequence_length();
-	step_index = step_index % seq_len;
+    u8 seq_len = motor_get_sequence_length();
+    step_index = step_index % seq_len;
 
-	switch (mode) {
-	case MOTOR_MODE_FULL_STEP:
-		return full_step_sequence[step_index];
-	case MOTOR_MODE_HALF_STEP:
-		return half_step_sequence[step_index];
-	default:
-		return 0;
-	}
+    switch (mode) {
+    case MOTOR_MODE_FULL_STEP:
+        return full_step_sequence[step_index];
+    case MOTOR_MODE_HALF_STEP:
+        return half_step_sequence[step_index];
+    default:
+        return 0;
+    }
 }
 
 void motor_24byj48_time_add(void)
 {
-	if (this->cur_step_delay_us < ((u32)-1) - 125)
-	{
-		this->cur_step_delay_us += 125;
-	}
+    if (this->cur_step_delay_us < ((u32)-1) - 125) {
+        this->cur_step_delay_us += 125;
+    }
 }
 
 // 判断时间是否到来（到达目标值）
 u8 motor_24byj48_time_expire(void)
 {
 #if USER_DEBUG_ENABLE
-	// static u16 cnt = 0;
-	// cnt ++;
-	// if (cnt >= (u32)1000 * 1000 / 125)
-	// {
-	// 	cnt = 0;
-	// 	printf("this->dest_step_delay_us = %lu\n", this->dest_step_delay_us);
-	// }
+    // static u16 cnt = 0;
+    // cnt ++;
+    // if (cnt >= (u32)1000 * 1000 / 125)
+    // {
+    // 	cnt = 0;
+    // 	printf("this->dest_step_delay_us = %lu\n", this->dest_step_delay_us);
+    // }
 #endif
 
-	
-	if (this->cur_step_delay_us >= this->dest_step_delay_us) {
-		return 1;
-	}
-	else {
-		return 0;
-	}
+    if (this->cur_step_delay_us >= this->dest_step_delay_us) {
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
 void motor_24byj48_time_clear(void)
 {
-	this->cur_step_delay_us = 0;
+    this->cur_step_delay_us = 0;
 }
 
 // 初始化电机驱动
 void motor_24byj48_init(void)
 {
-	// 设置引脚
-	motor_24byj48.in1_pin = MOTOR_PIN_1;
-	motor_24byj48.in2_pin = MOTOR_PIN_2;
-	motor_24byj48.in3_pin = MOTOR_PIN_3;
-	motor_24byj48.in4_pin = MOTOR_PIN_4;
-	motor_24byj48.step_mode = MOTOR_STEP_MODE_HALF;
-	motor_24byj48.current_step = 0;
-	motor_24byj48.dest_step_delay_us = 2000; // 默认 2000us 延迟
+    // 设置引脚
+    motor_24byj48.in1_pin = MOTOR_PIN_1;
+    motor_24byj48.in2_pin = MOTOR_PIN_2;
+    motor_24byj48.in3_pin = MOTOR_PIN_3;
+    motor_24byj48.in4_pin = MOTOR_PIN_4;
+    motor_24byj48.step_mode = MOTOR_STEP_MODE_HALF;
+    motor_24byj48.current_step = 0;
+    motor_24byj48.dest_step_delay_us = 2000; // 默认 2000us 延迟
 
-	// 初始化GPIO引脚为输出模式并设置初始值为0
-	gpio_set_direction(motor_24byj48.in1_pin, 0); // 
-	gpio_direction_output(motor_24byj48.in1_pin, 0);
+    // 初始化GPIO引脚为输出模式并设置初始值为0
+    gpio_set_direction(motor_24byj48.in1_pin, 0); //
+    gpio_direction_output(motor_24byj48.in1_pin, 0);
 
-	gpio_set_direction(motor_24byj48.in2_pin, 0); // 
-	gpio_direction_output(motor_24byj48.in2_pin, 0);
+    gpio_set_direction(motor_24byj48.in2_pin, 0); //
+    gpio_direction_output(motor_24byj48.in2_pin, 0);
 
-	gpio_set_direction(motor_24byj48.in3_pin, 0); // 
-	gpio_direction_output(motor_24byj48.in3_pin, 0);
+    gpio_set_direction(motor_24byj48.in3_pin, 0); //
+    gpio_direction_output(motor_24byj48.in3_pin, 0);
 
-	gpio_set_direction(motor_24byj48.in4_pin, 0); // 
-	gpio_direction_output(motor_24byj48.in4_pin, 0);
+    gpio_set_direction(motor_24byj48.in4_pin, 0); //
+    gpio_direction_output(motor_24byj48.in4_pin, 0);
 
-	// 设置引脚为输出模式并初始值为0
-	motor_set_pins(0x00);
+    // 设置引脚为输出模式并初始值为0
+    motor_set_pins(0x00);
 }
 
 // 设置电机步进模式
 void motor_24byj48_set_step_mode(motor_step_mode_t mode)
 {
-	this->step_mode = mode;
-	this->current_step = 0;
+    this->step_mode = mode;
+    this->current_step = 0;
 }
 
 // //设置电机速度（RPM）
@@ -159,9 +154,9 @@ void motor_24byj48_set_step_mode(motor_step_mode_t mode)
  */
 void motor_24byj48_set_dest_step_delay_us(u32 delay_us)
 {
-	this->current_step = 0; // 清空当前步数位置
-	this->cur_step_delay_us = 0; // 清空当前延时计数值
-	this->dest_step_delay_us = delay_us;
+    this->current_step = 0;      // 清空当前步数位置
+    this->cur_step_delay_us = 0; // 清空当前延时计数值
+    this->dest_step_delay_us = delay_us;
 }
 
 /**
@@ -172,54 +167,51 @@ void motor_24byj48_set_dest_step_delay_us(u32 delay_us)
  */
 void motor_24byj48_step(motor_direction_t direction)
 {
-	u8 seq_len;
-	u8 pattern;
+    u8 seq_len;
+    u8 pattern;
 
-	// 根据模式确定序列长度
-	switch (this->step_mode) {
-	case MOTOR_STEP_MODE_HALF:
-		seq_len = 8;
-		break;
-	case MOTOR_STEP_MODE_FULL:
-		// case MOTOR_STEP_MODE_MICROSTEP:
-	default:
-		seq_len = 4;
-		break;
-	}
+    // 根据模式确定序列长度
+    switch (this->step_mode) {
+    case MOTOR_STEP_MODE_HALF:
+        seq_len = 8;
+        break;
+    case MOTOR_STEP_MODE_FULL:
+        // case MOTOR_STEP_MODE_MICROSTEP:
+    default:
+        seq_len = 4;
+        break;
+    }
 
-	// 更新步数
-	if (direction == MOTOR_DIR_CW) {
-		this->current_step = (this->current_step + 1) % seq_len;
-	}
-	else {
-		if (this->current_step == 0) {
-			this->current_step = seq_len - 1;
-		}
-		else {
-			this->current_step--;
-		}
-	}
+    // 更新步数
+    if (direction == MOTOR_DIR_CW) {
+        this->current_step = (this->current_step + 1) % seq_len;
+    } else {
+        if (this->current_step == 0) {
+            this->current_step = seq_len - 1;
+        } else {
+            this->current_step--;
+        }
+    }
 
-	// 获取当前步进模式下的序列值
+    // 获取当前步进模式下的序列值
 
-	switch (this->step_mode) {
-	case MOTOR_STEP_MODE_HALF:
-		pattern = half_step_sequence[this->current_step];
-		break;
-	case MOTOR_STEP_MODE_FULL:
-	default:
-		pattern = full_step_sequence[this->current_step % 4];
-		break;
-	}
+    switch (this->step_mode) {
+    case MOTOR_STEP_MODE_HALF:
+        pattern = half_step_sequence[this->current_step];
+        break;
+    case MOTOR_STEP_MODE_FULL:
+    default:
+        pattern = full_step_sequence[this->current_step % 4];
+        break;
+    }
 
-	// 设置引脚输出
-	gpio_direction_output(this->in1_pin, (pattern & 0x01) ? 1 : 0);
-	gpio_direction_output(this->in2_pin, (pattern & 0x02) ? 1 : 0);
-	gpio_direction_output(this->in3_pin, (pattern & 0x04) ? 1 : 0);
-	gpio_direction_output(this->in4_pin, (pattern & 0x08) ? 1 : 0);
+    // 设置引脚输出
+    gpio_direction_output(this->in1_pin, (pattern & 0x01) ? 1 : 0);
+    gpio_direction_output(this->in2_pin, (pattern & 0x02) ? 1 : 0);
+    gpio_direction_output(this->in3_pin, (pattern & 0x04) ? 1 : 0);
+    gpio_direction_output(this->in4_pin, (pattern & 0x08) ? 1 : 0);
 
-
-	// 更新角度位置
+    // 更新角度位置
 #if 0
 	float angle_step = DEGREES_PER_STEP;
 	if (motor->step_mode == MOTOR_STEP_MODE_HALF) {
@@ -243,14 +235,14 @@ void motor_24byj48_step(motor_direction_t direction)
 #endif
 }
 
-//   
+//
 // 移动指定步数
 // void motor_24byj48_move_steps(motor_24byj48_t *motor, s32 steps, motor_direction_t direction)
 // {
 //     if (steps == 0) return;
 
 //     s32 abs_steps = (steps > 0) ? steps : -steps;
-//     motor_direction_t actual_dir = (steps > 0) ? direction : 
+//     motor_direction_t actual_dir = (steps > 0) ? direction :
 //                                    (direction == MOTOR_DIR_CW ? MOTOR_DIR_CCW : MOTOR_DIR_CW);
 
 //     for (s32 i = 0; i < abs_steps; i++) {
@@ -259,20 +251,22 @@ void motor_24byj48_step(motor_direction_t direction)
 // }
 
 // 移动指定步数
-void motor_24byj48_move_steps(motor_24byj48_t* motor, u32 steps, motor_direction_t direction)
+void motor_24byj48_move_steps(motor_24byj48_t *motor, u32 steps,
+                              motor_direction_t direction)
 {
-	if (steps == 0) return;
+    if (steps == 0)
+        return;
 
-	// u32 abs_steps = (steps > 0) ? steps : -steps;
+    // u32 abs_steps = (steps > 0) ? steps : -steps;
 
-	// motor_direction_t actual_dir =
-	// 	(steps > 0) ? direction :
-	// 	(direction == MOTOR_DIR_CW ? MOTOR_DIR_CCW : MOTOR_DIR_CW);
+    // motor_direction_t actual_dir =
+    // 	(steps > 0) ? direction :
+    // 	(direction == MOTOR_DIR_CW ? MOTOR_DIR_CCW : MOTOR_DIR_CW);
 
-	for (u32 i = 0; i < steps; i++) {
-		motor_24byj48_step(direction);
-		// 注意要有延时
-	}
+    for (u32 i = 0; i < steps; i++) {
+        motor_24byj48_step(direction);
+        // 注意要有延时
+    }
 }
 
 // 移动指定角度
@@ -316,11 +310,11 @@ void motor_24byj48_move_steps(motor_24byj48_t* motor, u32 steps, motor_direction
 // 停止电机
 void motor_24byj48_stop(void)
 {
-	// 关闭所有线圈
-	gpio_direction_output(this->in1_pin, 0);
-	gpio_direction_output(this->in2_pin, 0);
-	gpio_direction_output(this->in3_pin, 0);
-	gpio_direction_output(this->in4_pin, 0);
+    // 关闭所有线圈
+    gpio_direction_output(this->in1_pin, 0);
+    gpio_direction_output(this->in2_pin, 0);
+    gpio_direction_output(this->in3_pin, 0);
+    gpio_direction_output(this->in4_pin, 0);
 }
 
 // 角度转换为步数

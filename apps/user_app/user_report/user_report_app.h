@@ -1,5 +1,5 @@
 #ifndef __USER_REPORT_APP_H__
-#define __USER_REPORT_APP_H__ 
+#define __USER_REPORT_APP_H__
 
 #include "typedef.h"
 #include "led_strand_effect.h" // ALARM_CLOCK 类型定义

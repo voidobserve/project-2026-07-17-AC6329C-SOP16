@@ -61,48 +61,52 @@
 	以电机的正极引脚为终点，
 	依次为 1 -> 2 -> 3 -> 4 -> 正极引脚
 */
-#define MOTOR_PIN_1     IO_PORT_DP
-#define MOTOR_PIN_2     IO_PORTA_00
-#define MOTOR_PIN_3     IO_PORTB_07
-#define MOTOR_PIN_4     IO_PORTB_05
+#define MOTOR_PIN_1 IO_PORT_DP
+#define MOTOR_PIN_2 IO_PORTA_00
+#define MOTOR_PIN_3 IO_PORTB_07
+#define MOTOR_PIN_4 IO_PORTB_05
 
 // // 电机参数定义
 // #define STEPS_PER_REVOLUTION    2048    // 24BYJ48: 32步 × 64减速比 = 2048步/转
 // #define DEGREES_PER_STEP        (360.0f / STEPS_PER_REVOLUTION)  // 每步对应的角度
 
 // 控制模式枚举
-typedef enum {
-	MOTOR_MODE_FULL_STEP = 0,    // 全步模式 - 4步序列
-	MOTOR_MODE_HALF_STEP,        // 半步模式 - 8步序列  
+typedef enum
+{
+    MOTOR_MODE_FULL_STEP = 0, // 全步模式 - 4步序列
+    MOTOR_MODE_HALF_STEP,     // 半步模式 - 8步序列
 } motor_control_mode_t;
 
 // 步进模式定义
-typedef enum {
-	MOTOR_STEP_MODE_FULL = 0,       // 全步模式 (4步序列)
-	MOTOR_STEP_MODE_HALF,           // 半步模式 (8步序列)  
-	// MOTOR_STEP_MODE_MICROSTEP       // 微步模式 (这里实际使用半步模式实现)
+typedef enum
+{
+    MOTOR_STEP_MODE_FULL = 0, // 全步模式 (4步序列)
+    MOTOR_STEP_MODE_HALF,     // 半步模式 (8步序列)
+    // MOTOR_STEP_MODE_MICROSTEP       // 微步模式 (这里实际使用半步模式实现)
 } motor_step_mode_t;
 
 // 电机方向定义
-typedef enum {
-	MOTOR_DIR_CW = 0,               // 顺时针（clock wise）
-	MOTOR_DIR_CCW                   // 逆时针（count clock wise）
+typedef enum
+{
+    MOTOR_DIR_CW = 0, // 顺时针（clock wise）
+    MOTOR_DIR_CCW     // 逆时针（count clock wise）
 } motor_direction_t;
 
 // 电机控制结构体
-typedef struct {
-	// USER_TO_DO 可能可以改成 u8 类型
-	u32 in1_pin;                     // IN1引脚
-	u32 in2_pin;                     // IN2引脚  
-	u32 in3_pin;                     // IN3引脚
-	u32 in4_pin;                     // IN4引脚
-	motor_step_mode_t step_mode;    // 步进模式
-	u16 current_step; // 当前步数位置 (控制内部的步进，半步模式：0~7，全步模式：0~3)
-	motor_direction_t dir; // 旋转方向
+typedef struct
+{
+    // USER_TO_DO 可能可以改成 u8 类型
+    u32 in1_pin;                 // IN1引脚
+    u32 in2_pin;                 // IN2引脚
+    u32 in3_pin;                 // IN3引脚
+    u32 in4_pin;                 // IN4引脚
+    motor_step_mode_t step_mode; // 步进模式
+    u16 current_step; // 当前步数位置 (控制内部的步进，半步模式：0~7，全步模式：0~3)
+    motor_direction_t dir; // 旋转方向
 
-	u32 cur_step_delay_us; // 当前步进计时
-	u32 dest_step_delay_us; // 目标步进延时
-	// float current_angle;            // 当前角度位置 (0-360度)
+    u32 cur_step_delay_us;  // 当前步进计时
+    u32 dest_step_delay_us; // 目标步进延时
+    // float current_angle;            // 当前角度位置 (0-360度)
 } motor_24byj48_t;
 
 extern volatile motor_24byj48_t motor_24byj48;
@@ -111,11 +115,11 @@ void motor_24byj48_time_add(void);
 u8 motor_24byj48_time_expire(void);
 void motor_24byj48_time_clear(void);
 
-
 void motor_24byj48_init();
 void motor_24byj48_set_step_mode(motor_step_mode_t mode);
 void motor_24byj48_step(motor_direction_t direction);
-void motor_24byj48_move_steps(motor_24byj48_t* motor, u32 steps, motor_direction_t direction);
+void motor_24byj48_move_steps(motor_24byj48_t *motor, u32 steps,
+                              motor_direction_t direction);
 void motor_24byj48_set_dest_step_delay_us(u32 delay_us);
 
 // void motor_24byj48_move_angle(motor_24byj48_t* motor, float angle, motor_direction_t direction);

@@ -15,11 +15,8 @@
 // #pragma pack ()
 // extern rf24g_pair_t rf24g_pair[];        //需要写flash
 
-
 void rf24g_key_handle(void);
 
 #endif
-
-
 
 #endif

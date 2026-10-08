@@ -2,9 +2,7 @@
 #define __USER_REPORT_H__
 
 #include "typedef.h"
-#include "btstack_typedef.h" 
-
-  
+#include "btstack_typedef.h"
 
 // 发送缓冲区中，一条指令最大的长度：
 #define USER_REPORT_BUFF_MAX_LEN 30

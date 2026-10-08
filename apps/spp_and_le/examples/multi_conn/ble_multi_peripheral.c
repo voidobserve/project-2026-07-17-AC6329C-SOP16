@@ -407,7 +407,7 @@ static uint16_t multi_att_read_callback(hci_con_handle_t connection_handle, uint
             log_info("\n------read gap_name: %s\n", gap_name);
         }
     }
-                                                break;
+    break;
 
     case ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE:
         // char *gap_name = ble_comm_get_gap_name();

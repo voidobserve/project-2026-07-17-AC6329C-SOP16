@@ -1,13 +1,12 @@
 #ifndef dp_data_tran_h
 #define dp_data_tran_h
 
-
-#define         DP_TYPE_RAW                     0x00				//RAW
-#define         DP_TYPE_BOOL                    0x01	            //Bool
-#define         DP_TYPE_VALUE                   0x02	            //Value
-#define         DP_TYPE_STRING                  0x03				//String
-#define         DP_TYPE_ENUM                    0x04				//Enum
-#define         DP_TYPE_BITMAP                  0x05				//Bitmap
+#define DP_TYPE_RAW    0x00 //RAW
+#define DP_TYPE_BOOL   0x01 //Bool
+#define DP_TYPE_VALUE  0x02 //Value
+#define DP_TYPE_STRING 0x03 //String
+#define DP_TYPE_ENUM   0x04 //Enum
+#define DP_TYPE_BITMAP 0x05 //Bitmap
 
 /******************************************************************************
 						1:dp data point serial number redefinition
@@ -21,7 +20,7 @@
 //备注:
 #define DPID_WORK_MODE 21
 
-//白光亮度(可下发可上报)    
+//白光亮度(可下发可上报)
 //备注:
 #define DPID_BRIGHT_VALUE 22
 
@@ -55,35 +54,35 @@ typedef struct
     unsigned char id;
     uint8_t type;
     uint16_t len;
-    /* uint8_t *data; */    //不包含数据
-} dp_data_header_t;  //涂鸦DP数据头
+    /* uint8_t *data; */ //不包含数据
+} dp_data_header_t;      //涂鸦DP数据头
 
 /* -------------------------------------DPID_SWITCH_LED 开关-------------------------------------- */
 typedef struct
 {
     unsigned char on_off;
-} dp_switch_led_t;   //DPID_SWITCH_LED开关
+} dp_switch_led_t; //DPID_SWITCH_LED开关
 
 /* -------------------------------------DPID_WORK_MODE 工作模式-------------------------------------- */
 typedef struct
 {
     unsigned char mode;
-} dp_work_mode_t;  //DPID_WORK_MODE工作模式
+} dp_work_mode_t; //DPID_WORK_MODE工作模式
 
 /* -------------------------------------DPID_COUNTDOWN 倒计时-------------------------------------- */
 typedef struct
 {
     unsigned long time;
-} dp_countdown_t;  //DPID_COUNTDOWN倒计时
+} dp_countdown_t; //DPID_COUNTDOWN倒计时
 
 /* -------------------------------------DPID_MUSIC_DATA 音乐灯-------------------------------------- */
 typedef struct
 {
-    unsigned char change_type;  //变化方式
-    hsv_t colour;    //HSV颜色
-    unsigned short white_b;     //白光亮度
-    unsigned short ct;          //色温
-} dp_music_data_t;   //DPID_MUSIC_DATA音乐灯
+    unsigned char change_type; //变化方式
+    hsv_t colour;              //HSV颜色
+    unsigned short white_b;    //白光亮度
+    unsigned short ct;         //色温
+} dp_music_data_t;             //DPID_MUSIC_DATA音乐灯
 
 /* -------------------------------------DPID_RGBIC_LINERLIGHT_SCENE 炫彩情景----------------------------- */
 // typedef struct
@@ -102,34 +101,30 @@ typedef struct
 /* -------------------------------------DPID_LED_NUMBER_SET led点数设置----------------------------- */
 typedef struct
 {
-    unsigned long lednum;     //led点数
-} dp_lednum_set_t;  //DPID_LED_NUMBER_SET led点数设置
+    unsigned long lednum; //led点数
+} dp_lednum_set_t;        //DPID_LED_NUMBER_SET led点数设置
 
 /* -------------------------------------DPID_DRAW_TOOL 涂抹功能----------------------------- */
 typedef struct
 {
-    unsigned char tool;         //油桶、画笔、橡皮擦工具
-    hsv_t colour;                //HSV颜色
-    unsigned short white_b;     //白光亮度
-    unsigned short led_place;   //灯串位置
-} dp_draw_tool_t;  //DPID_DRAW_TOOL 涂抹功能
+    unsigned char tool;       //油桶、画笔、橡皮擦工具
+    hsv_t colour;             //HSV颜色
+    unsigned short white_b;   //白光亮度
+    unsigned short led_place; //灯串位置
+} dp_draw_tool_t;             //DPID_DRAW_TOOL 涂抹功能
 
-
-extern dp_data_header_t  dp_data_header;  //涂鸦DP数据头
-extern dp_switch_led_t   dp_switch_led;   //DPID_SWITCH_LED开关
-extern dp_work_mode_t    dp_work_mode;    //DPID_WORK_MODE工作模式
-extern dp_countdown_t    dp_countdown;    //DPID_COUNTDOWN倒计时
-extern dp_music_data_t   dp_music_data;   //DPID_MUSIC_DATA音乐灯
+extern dp_data_header_t dp_data_header; //涂鸦DP数据头
+extern dp_switch_led_t dp_switch_led;   //DPID_SWITCH_LED开关
+extern dp_work_mode_t dp_work_mode;     //DPID_WORK_MODE工作模式
+extern dp_countdown_t dp_countdown;     //DPID_COUNTDOWN倒计时
+extern dp_music_data_t dp_music_data;   //DPID_MUSIC_DATA音乐灯
 // extern dp_secene_data_t  dp_secene_data;  //DPID_RGBIC_LINERLIGHT_SCENE炫彩情景
-extern dp_lednum_set_t   dp_lednum_set;   //DPID_LED_NUMBER_SET led点数设置
-extern dp_draw_tool_t    dp_draw_tool;    //DPID_DRAW_TOOL 涂抹功能
-
+extern dp_lednum_set_t dp_lednum_set; //DPID_LED_NUMBER_SET led点数设置
+extern dp_draw_tool_t dp_draw_tool;   //DPID_DRAW_TOOL 涂抹功能
 
 // int string2hex(char* str,char* hex,uint8_t str_len);
-unsigned long string_hex_Byte(char* str, unsigned char Byte_num);
+unsigned long string_hex_Byte(char *str, unsigned char Byte_num);
 unsigned short dp_extract_data_handle(unsigned char *buff);
 extern void printf_buf(u8 *buf, u32 len);
 
 #endif
-
-

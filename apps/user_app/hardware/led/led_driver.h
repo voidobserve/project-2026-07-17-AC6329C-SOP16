@@ -1,17 +1,17 @@
 #ifndef __LED_DRIVER_H__
-#define __LED_DRIVER_H__ 
+#define __LED_DRIVER_H__
 
 #include "typedef.h"
 
 // 配置R、G、B、W对应的引脚
-#define LED_DRIVER_RED_PIN 			IO_PORTA_01
-#define LED_DRIVER_GREEN_PIN 		IO_PORTA_02
-#define LED_DRIVER_BLUE_PIN 		IO_PORTA_07
-#define LED_DRIVER_WHITE_PIN 		IO_PORTB_06
+#define LED_DRIVER_RED_PIN   IO_PORTA_01
+#define LED_DRIVER_GREEN_PIN IO_PORTA_02
+#define LED_DRIVER_BLUE_PIN  IO_PORTA_07
+#define LED_DRIVER_WHITE_PIN IO_PORTB_06
 
-#define LED_DRIVER_PWM_RED_CHANNEL 	pwm_ch0
+#define LED_DRIVER_PWM_RED_CHANNEL   pwm_ch0
 #define LED_DRIVER_PWM_GREEN_CHANNEL pwm_ch1
-#define LED_DRIVER_PWM_BLUE_CHANNEL pwm_ch2
+#define LED_DRIVER_PWM_BLUE_CHANNEL  pwm_ch2
 #define LED_DRIVER_PWM_WHITE_CHANNEL pwm_ch3
 
 // typedef struct {
