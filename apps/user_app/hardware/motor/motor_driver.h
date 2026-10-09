@@ -3,6 +3,8 @@
 
 #include "typedef.h"
 #include "gpio.h"
+#include "user_config.h" // USER_DEBUG_ENABLE：调试时屏蔽 MOTOR_PIN_1(IO_PORT_DP)，
+                         // 该脚由 UART0 用作打印 TX（TCFG_UART0_TX_PORT）
 
 /*
 	- 24BYJ48 电机参数

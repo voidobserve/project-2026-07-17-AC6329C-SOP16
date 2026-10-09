@@ -41,8 +41,6 @@
 #define LOG_CLI_ENABLE
 #include "debug.h"
 
-#include "user_report.h"
-
 #if TCFG_USER_BLE_ENABLE
 
 //默认配置
@@ -81,7 +79,6 @@ void btstack_ble_start_before_init(const ble_init_cfg_t *cfg, int param)
     }
 
     memcpy(Ble_Addr,tmp_ble_addr,6);
-    user_report_self_addr_set(tmp_ble_addr);
     le_controller_set_mac((void *)tmp_ble_addr);
 
     log_info("---ble's address");

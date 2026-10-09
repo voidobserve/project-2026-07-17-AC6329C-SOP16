@@ -197,7 +197,7 @@ void led_gpio_init(void)
 
     //LED_ON;     //上电默认开灯
 }
-u8 is_rgbw = 0;
+
 /***
  * @brief:LED的PWM初始化
  *
@@ -247,18 +247,13 @@ void led_pwm_init(void)
     // mcpwm_init(&pwm_p_data);
 
     // 上拉是rgb 下拉是rgw
-    if (gpio_read(IO_PORTB_06)) {
-        is_rgbw = 0; // 混白灯
-    } else {
-        gpio_set_die(IO_PORTB_06, 1);
-        gpio_direction_output(IO_PORTB_06, 0);
-        extern void timer_pwm_init(JL_TIMER_TypeDef * JL_TIMERx, u32 pwm_io,
-                                   u32 fre, u32 duty);
-        timer_pwm_init(JL_TIMER0, IO_PORTB_06, 1000,
-                       0); //调timer做pwm  通道号 R c
-
-        is_rgbw = 1; // 纯白灯
-    }
+    // 设备固定为 RGBW（纯白灯），不再读取 PB6 电平判断灯具类型
+    gpio_set_die(IO_PORTB_06, 1);
+    gpio_direction_output(IO_PORTB_06, 0);
+    extern void timer_pwm_init(JL_TIMER_TypeDef * JL_TIMERx, u32 pwm_io,
+                               u32 fre, u32 duty);
+    timer_pwm_init(JL_TIMER0, IO_PORTB_06, 1000,
+                   0); //调timer做pwm  PB6 = W 白光通道
 }
 
 // unsigned long syn_ms = 0;
@@ -313,8 +308,8 @@ void fc_driver(u8 r, u8 g, u8 b)
         mcpwm_set_duty(pwm_ch1, duty2);  //G   
         mcpwm_set_duty(pwm_ch2, duty3);  //B
         // mcpwm_set_duty(pwm_ch3, 0);       //W
-        if (is_rgbw)
-            gpio_set_direction(IO_PORTB_06, 1);
+        // 设备固定 RGBW：W 脚让出为普通 IO（RGB 输出状态）
+        gpio_set_direction(IO_PORTB_06, 1);
     }
     else
     {
@@ -323,9 +318,8 @@ void fc_driver(u8 r, u8 g, u8 b)
         mcpwm_set_duty(pwm_ch1, 0);
         mcpwm_set_duty(pwm_ch2, 0);
         // mcpwm_set_duty(pwm_ch3, fc_effect.w*10000/255*fc_effect.b/255);  
-        if (is_rgbw)
-            set_timer_pwm_duty(JL_TIMER0, fc_effect.w * 10000 / 255 * fc_effect.b / 255);
-
+        // 设备固定 RGBW：W 走 timer PWM 输出
+        set_timer_pwm_duty(JL_TIMER0, fc_effect.w * 10000 / 255 * fc_effect.b / 255);
     }
 
 }

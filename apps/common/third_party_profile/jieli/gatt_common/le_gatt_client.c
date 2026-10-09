@@ -807,56 +807,18 @@ static bool __resolve_adv_report(adv_report_t* report_pt, u16 len)
         }
 
         length = *adv_data_pt++;
-        // if (length >= report_pt->length || (length + i) >= report_pt->length) {
-        //     /*过滤非标准包格式*/
-        //     // printf("!!!error_adv_packet:");
-        //     // put_buf(report_pt->data, report_pt->length);
-
-        //     rf24g_scan(report_pt->data);    //天奕光纤灯2.4G遥控
-
-        //     break;
-        // }
+        if (length >= report_pt->length || (length + i) >= report_pt->length) {
+            /*过滤非标准包格式*/
+            // printf("!!!error_adv_packet:");
+            // put_buf(report_pt->data, report_pt->length);
+            break;
+        }
 
         ad_type = *adv_data_pt++;
         i += (length + 1);
 
-        /*  注意：  如果打印广播包内容，在这个行打印，长度是length  不要使用len*/
-    // if (report_pt->rssi >= -60 &&
-    //     report_pt->data[0] == 0x0D && 
-    //     report_pt->data[1] == 0xFF)
-        // if (report_pt->rssi >= -60)
-        // if (adv_data_pt[0] != 0x06 &&
-        //     (adv_data_pt[0] != 0x4C && adv_data_pt[1] != 0x00 & adv_data_pt[2] != 0x0C) &&
-        //     (adv_data_pt[0] != 0x2D && adv_data_pt[1] != 0xFD & adv_data_pt[2] != 0x01) &&
-        //     adv_data_pt[0] != 0x8F &&
-        //     adv_data_pt[0] != 0x52 &&
-        //     adv_data_pt[0] != 0x48 &&
-        //     adv_data_pt[0] != 0x43 &&
-        //     adv_data_pt[0] != 0xEE &&
-        //     adv_data_pt[0] != 0x5A &&
-        //     adv_data_pt[0] != 0x42 &&
-        //     adv_data_pt[0] != 0x6B &&
-        //     adv_data_pt[0] != 0x4E &&
-        //     adv_data_pt[0] != 0x37 &&
-        //     adv_data_pt[0] != 0x6E &&
-        //     (adv_data_pt[0] != 0x00 && adv_data_pt[1] != 0x01 & adv_data_pt[2] != 0xB5)
-        //      && length >= 4
-        //     )
-        // if (length >= 10 &&
-        //     adv_data_pt[0] == 0x55 &&
-        //     adv_data_pt[1] == 0xAA)
-        // {
-        //     printf("rssi == %d\n", (int)report_pt->rssi);
-        //     printf("address_type == %u\n", report_pt->address_type);
-        //     printf("event_type == %u\n", report_pt->event_type);
-        //     // printf("==\n");
-        //     printf_buf(adv_data_pt, length);
-        // }
-
-        // if (report_pt->rssi >= -60)
-        // {
-        rf24g_driver_package_handle(adv_data_pt, length);
-        // }
+        // rf24g_driver_package_handle(adv_data_pt, length);
+        rf24g_driver_package_process(report_pt);
 
 
         switch (ad_type) {    //ad_type  广播包类型

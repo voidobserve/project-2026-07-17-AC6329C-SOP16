@@ -1,5 +1,6 @@
 #include "rf24g_driver.h"
-#include "event.h" // key_driver 的按键事件定义
+#include "event.h"   // key_driver 的按键事件定义
+#include "ble_api.h" // adv_report_t
 
 volatile rf24g_key_t rf24g_key;
 
@@ -139,6 +140,36 @@ static u8 __rf24g_get_key_val__(void)
 
     // 如果没有检测到按键，并且已经超时，返回 NO_KEY
     return NO_KEY;
+}
+
+void rf24g_driver_package_process(adv_report_t *adv_report)
+{
+    if (adv_report->length < 13) {
+        // 长度不对，直接返回
+        return;
+    }
+
+    if (!(adv_report->data[2] == RF24G_TYPE_28KEY_FIXVAL_1 &&
+          adv_report->data[3] == RF24G_TYPE_28KEY_FIXVAL_2)) {
+        // 固定值不对，直接返回
+        return;
+    }
+
+    if (adv_report->rssi >= -60) {
+        put_buf(adv_report->data, adv_report->length);
+    }
+
+    /*
+        USER_TO_DO
+
+        两支遥控包格式几乎相同（都是 55 AA 头、键值在 payload[10]），
+        但键值范围重叠（参考 24 键用 0x01~0x18，
+        现有 28 键用 0x14~0x35，0x14~0x18 五个键值冲突），需要区分规则
+    */
+
+    // USER_TO_DO 获取键值
+    // rf24g_key.key_val = (u8)((rf24g_remote_package_t *)ptr)->key_val;
+    rf24g_key.is_update = 1;
 }
 
 /**

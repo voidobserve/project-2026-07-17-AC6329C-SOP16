@@ -34,7 +34,6 @@
 #include "ble_multi_profile.h"
 
 #include "led_driver.h"
-#include "user_report_app.h"
 #include "led_strand_effect.h"
 
 #include "user_include.h" 
@@ -221,7 +220,9 @@ static int multi_event_packet_handler(int event, u8* packet, u16 size, u8* ext_p
         log_info("peer_address_info:");
         hci_con_handle_t temp = little_endian_read_16(packet, 0);
         // get_handle(temp);
-        user_conn_handle_set(temp);
+        // 更新 notify 模块连接句柄（fff1 通知发送用）
+        extern void user_ble_notify_connection_handle_update(u16 handle);
+        user_ble_notify_connection_handle_update(temp);
         put_buf(&ext_param[7], 7);
         memcpy(cur_peer_addr_info, &ext_param[7], 7);
         multi_connection_update_enable = 1;
@@ -382,9 +383,6 @@ static uint16_t multi_att_read_callback(hci_con_handle_t connection_handle, uint
     return att_value_len;
 }
 #endif
-extern u8 fff3_buf_len;
-extern u8 _0103_f;
-extern uint8_t Send_buffer[50];
 static uint16_t multi_att_read_callback(hci_con_handle_t connection_handle, uint16_t att_handle, uint16_t offset, uint8_t* buffer, uint16_t buffer_size)
 {
     uint16_t  att_value_len = 0;
@@ -393,36 +391,6 @@ static uint16_t multi_att_read_callback(hci_con_handle_t connection_handle, uint
     log_info("read_callback,conn_handle =%04x, handle=%04x,buffer=%08x\n", connection_handle, handle, (u32)buffer);
 
     switch (handle) {
-    case ATT_CHARACTERISTIC_2a00_01_VALUE_HANDLE: {
-        char* gap_name = ble_comm_get_gap_name();
-        att_value_len = strlen(gap_name);
-
-        if ((offset >= att_value_len) || (offset + buffer_size) > att_value_len) {
-            break;
-        }
-
-        if (buffer) {
-            memcpy(buffer, &gap_name[offset], buffer_size);
-            att_value_len = buffer_size;
-            log_info("\n------read gap_name: %s\n", gap_name);
-        }
-    }
-    break;
-
-    case ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE:
-        // char *gap_name = ble_comm_get_gap_name();
-        // att_value_len = strlen(gap_name);
-
-        // if ((offset >= att_value_len) || (offset + buffer_size) > att_value_len) {
-        //     break;
-        // }
-
-        // if (buffer) {
-        //     memcpy(buffer, &gap_name[offset], buffer_size);
-        //     att_value_len = buffer_size;
-        //     log_info("\n------read gap_name: %s\n", gap_name);
-        // }
-        break;
     case ATT_CHARACTERISTIC_fff1_01_CLIENT_CONFIGURATION_HANDLE:
         if (buffer) {
             buffer[0] = att_get_ccc_config(handle);
@@ -432,54 +400,6 @@ static uint16_t multi_att_read_callback(hci_con_handle_t connection_handle, uint
         break;
 
 
-
-
-
-    case ATT_CHARACTERISTIC_fff3_01_VALUE_HANDLE:
-        extern void fff3_fb_state(void);
-        char* gap_name = ble_comm_get_gap_name();
-        att_value_len = strlen(gap_name);
-
-#if 0
-        if ((offset >= att_value_len) || (offset + buffer_size) > att_value_len) {
-            break;
-        }
-
-        if (buffer) {
-            if (_0103_f)
-            {
-                printf("_0103_f == 1\n");
-                fff3_fb_state();
-
-            }
-            memcpy(buffer, &Send_buffer, fff3_buf_len);
-            att_value_len = fff3_buf_len;
-            printf_buf(Send_buffer, fff3_buf_len);
-            // printf_buf(buffer,fff3_buf_len);
-
-        }
-#endif
-
-        // RGBW 对应 0x02
-        user_report_dev_type(0x02);
-
-        user_report_dev_on_off_sta(fc_effect.on_off_flag);
-        user_report_brightness((u32)fc_effect.b * 100 / 255);
-        user_report_speed(fc_effect.report_speed);
-        user_report_sound_control_type(fc_effect.music.m_type);
-        user_report_sound_control_mode(fc_effect.music.m);
-        user_report_sound_control_sensitive(fc_effect.sound.sensitive);
-
-        user_report_alarm_data(0, alarm_clock[0]);
-        user_report_alarm_data(1, alarm_clock[1]);
-        user_report_alarm_data(2, alarm_clock[2]);
-        user_report_motor_mode(fc_effect.motor_mode);
-        user_report_motor_speed_sec_per_round(fc_effect.motor_sec_per_round);
-        user_report_syn_end();
-
-        printf("ATT_CHARACTERISTIC_fff3_01_VALUE_HANDLE\n");
-
-        break;
 
 
 
@@ -531,17 +451,8 @@ static int multi_att_write_callback(hci_con_handle_t connection_handle, uint16_t
         log_info("\n-fff1_rx(%d):", buffer_size);
         printf_buf(buffer, buffer_size);
 
-        // extern void parse_led_strip_data(u8 *pBuf, u8);
-        // extern void parse_zd_data(unsigned char *LedCommand);
-        // parse_zd_data(buffer);  //中道指令处理
-        // parse_led_strip_data(buffer,buffer_size);//涂鸦
-        break;
-
-    case ATT_CHARACTERISTIC_fff2_01_VALUE_HANDLE:            //只写
-        log_info("\n-fff2_rx(%d):", buffer_size);
-        printf_buf(buffer, buffer_size);
-        parse_zd_data(buffer);
-        parse_led_strip_data(buffer, buffer_size);
+        parse_zd_data(buffer);                      //中道指令处理（app下发）
+        // parse_led_strip_data(buffer, buffer_size);  //涂鸦
         os_taskq_post("msg_task", 1, MSG_USER_SAVE_INFO); // 收到app传输过来的控制命令之后，使能保存数据的操作
         break;
 

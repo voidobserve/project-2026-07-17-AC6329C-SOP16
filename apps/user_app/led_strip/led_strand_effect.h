@@ -227,6 +227,11 @@ void music_static_sound(void);
 void set_static_mode(u8 r, u8 g, u8 b);
 void fc_dynamic_effect(u8 n);
 
+// 流星灯
+void meteor_period_sub(void);   // 流星周期计时（每10ms调用一次）
+void custom_meteor_effect(void); // 根据 metemor_effect_index 设置流星效果
+void set_mereor_mode(u8 m);      // 设置流星模式（app下发，上限18种）
+
 void led_colorful_light_set_static_color(u32 color);
 #if 0
 void led_colorful_light_set_static_color_by_structure(color_t color);

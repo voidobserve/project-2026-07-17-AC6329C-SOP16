@@ -3,6 +3,7 @@
 
 #include "typedef.h"
 #include "key_driver.h" // key_driver_para 结构体类型定义
+#include "ble_api.h"    // adv_report_t（rf24g_driver_package_process 形参类型）
 
 #define RF24G_KEY_EVENT_MAX                                                    \
     (5) // 按键事件种类个数，刚按下、短按、长按、持续hold、松开
@@ -269,6 +270,7 @@ typedef void (*rf24_key_handle_func_t)(void);
 extern volatile struct key_driver_para rf24g_driver_para;
 extern volatile rf24g_key_t rf24g_key;
 
+void rf24g_driver_package_process(adv_report_t *adv_report);
 void rf24g_driver_package_handle(void *ptr, u8 len);
 
 u8 rf24g_convert_to_key_event(u8 key_driver_value, u8 key_driver_event);

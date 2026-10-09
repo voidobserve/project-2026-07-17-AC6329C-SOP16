@@ -5,19 +5,20 @@
 #include "led_driver.h"
 #include "sound_control.h"
 #include "save_flash.h"
-#include "det_50hz.h"
 
 #include "led_strand_effect.h"
 #include "rf24g_app.h"
-#include "user_report.h"
 #include "user_config.h"
+#include "user_ble_notify.h"
 
-void user_report_handle_task(void *p);
 void user_msg_handle_task(void *p);
 void user_main(void *p);
+void user_notify_task(void *p);
 
 void user_init(void)
 {
+    extern void led_state_init(void);
+    led_state_init(); // 初始化 LEDC（流星灯驱动引脚），必须在 full_color_init 之前
     led_driver_init();
     motor_24byj48_init();
     motor_init();
@@ -29,21 +30,18 @@ void user_init(void)
 
     sys_s_hi_timer_add(NULL, user_10ms_isr, 10);
 
-    task_create(user_report_handle_task, NULL, "usr_report_task");
     task_create(user_msg_handle_task, NULL, "msg_task");
+    task_create(user_notify_task, NULL, "user_notify_task");
     task_create(user_main, NULL, "usr_main");
 
     printf("user_init\n");
 }
 
-void user_report_handle_task(void *p)
+// BLE notify 状态反馈线程：把 user_ble_notify 缓冲中的指令经 fff1 逐条发出
+void user_notify_task(void *p)
 {
     while (1) {
-        user_report.buf_handle();
-        /*
-			notify 需要一段时间才能发送，
-			如果直接一次性修改发送，会导致旧数据被覆盖
-		*/
+        user_ble_notify_param_handle();
         os_time_dly(1);
     }
 }
@@ -96,7 +94,14 @@ void user_main(void *p)
         check_mic_sound();    // 采集声音并计算平均值
         music_static_sound(); // 声控，七彩灯定色转换
 
-        // rf24g_long_timer();
+        meteor_period_sub(); // 流星周期控制（每10ms减一次）
+
+        // 灯带长度固定 16（app 下发的长度值统一按 16 执行）
+        // 正常时 led_num 恒为 16、条件不成立，零开销；被改动时立即纠正
+        if (fc_effect.led_num != 16) {
+            extern void set_ls_lenght(u16 l);
+            set_ls_lenght(16);
+        }
 
         WS2812FX_service(); // 注意，实际 这里约 20ms 才调用一次动画
 

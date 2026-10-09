@@ -17,14 +17,15 @@ DP协议转置，提取DP点有效数据
 #include "ble_user.h"
 #include "btstack/le/ble_api.h"
 #include "led_strip_drive.h"
+#include "user_ble_notify.h"      // BLE notify 反馈通道
+#include "user_ble_notify_app.h"  // 各状态 notify 接口
 // #include "one_wire.h"
 dp_data_header_t dp_data_header; //涂鸦DP数据头
 dp_switch_led_t dp_switch_led;   //DPID_SWITCH_LED开关
 dp_work_mode_t dp_work_mode;     //DPID_WORK_MODE工作模式
 dp_countdown_t dp_countdown;     //DPID_COUNTDOWN倒计时
 dp_music_data_t dp_music_data;   //DPID_MUSIC_DATA音乐灯
-// dp_secene_data_t  dp_secene_data;  //DPID_RGBIC_LINERLIGHT_SCENE炫彩情景
-dp_lednum_set_t dp_lednum_set; //DPID_LED_NUMBER_SET led点数设置
+
 dp_draw_tool_t dp_draw_tool;   //DPID_DRAW_TOOL 涂抹功能
 
 /************************************************************************************
@@ -174,27 +175,6 @@ unsigned short dp_extract_data_handle(unsigned char *buff)
         set_fc_effect();
         break;
 
-    case DPID_LED_NUMBER_SET: //led点数设置(可下发可上报)
-        //DP协议参数
-        dp_lednum_set.lednum = buff[4];
-        dp_lednum_set.lednum <<= 8;
-        dp_lednum_set.lednum |= buff[5];
-        dp_lednum_set.lednum <<= 8;
-        dp_lednum_set.lednum |= buff[6];
-        dp_lednum_set.lednum <<= 8;
-        dp_lednum_set.lednum |= buff[7];
-
-        printf("dp_lednum_set.lednum = %d\r\n", dp_lednum_set.lednum);
-        printf("\r\n");
-
-        //效果参数
-        fc_effect.led_num = dp_lednum_set.lednum;
-
-        if (fc_effect.led_num >= 48)
-            fc_effect.led_num = 48;
-
-        break;
-
     case DPID_DRAW_TOOL: //涂抹功能(可下发可上报)
         //DP协议参数
         dp_draw_tool.tool = buff[5];
@@ -229,406 +209,25 @@ unsigned short dp_extract_data_handle(unsigned char *buff)
 
 u8 Ble_Addr[6]; //蓝牙地址
 
-// extern int app_send_user_data(u16 handle, u8 *data, u16 len, u8 handle_type);
-
-// extern hci_con_handle_t fd_handle;
-
-u8 fff3_buf[50] = {0};
-u8 fff3_buf_len = 0;
-u8 _0103_f = 0;          // 控制同步指令的响应，每次通电期间，只响应一次
-uint8_t Send_buffer[50]; //发送缓存
-extern u8 is_rgbw;
-void fff3_fb_state(void)
-{
-
-    static u8 i_cnt = 0;
-    //   if(LedCommand[0] == 0x01 && LedCommand[1] == 0x03)  //与APP同步数据
-    {
-
-        memset(Send_buffer, 0, 50);
-        memcpy(Send_buffer, Ble_Addr, 6);
-        if (i_cnt == 0) {
-
-            // -----------------设备信息
-            Send_buffer[6] = 0x07;
-            Send_buffer[7] = 0x01;
-            Send_buffer[8] = 0x01;
-            if (is_rgbw) {
-                Send_buffer[9] = 0x02; //灯具类型：RGBW
-            } else {
-                Send_buffer[9] = 0x01; //灯具类型：RGB
-            }
-
-            fff3_buf_len = 10;
-            // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,10, ATT_OP_AUTO_READ_CCC);
-            i_cnt++;
-        } else if (i_cnt == 1) {
-            //-------------------发送开关机状态---------------------------
-            Send_buffer[6] = 0x01;
-            Send_buffer[7] = 0x01;
-            Send_buffer[8] = fc_effect.on_off_flag; //当前状态
-            fff3_buf_len = 9;
-            // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-            i_cnt++;
-        } else if (i_cnt == 2) {
-            //-------------------流星开关--------------------------
-            Send_buffer[6] = 0x2F;
-            Send_buffer[7] = 0x02;
-            Send_buffer[8] = get_meteor_on_off();
-            fff3_buf_len = 9;
-
-            // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-            i_cnt++;
-        } else if (i_cnt == 3) {
-            //-------------------流星速度-----------------
-            Send_buffer[6] = 0x2F;
-            Send_buffer[7] = 0x01;
-            Send_buffer[8] = 110 - (fc_effect.speed / 3);
-            fff3_buf_len = 9;
-            // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-            i_cnt++;
-        } else if (i_cnt == 4) {
-            //-------------------流星周期---------------
-            Send_buffer[6] = 0x2F;
-            Send_buffer[7] = 0x03;
-            Send_buffer[8] = fc_effect.meteor_period;
-            fff3_buf_len = 9;
-            // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,10, ATT_OP_AUTO_READ_CCC);
-            i_cnt++;
-        } else if (i_cnt == 5) {
-
-            //-------------------发送亮度---------
-            Send_buffer[6] = 0x04;
-            Send_buffer[7] = 0x03;
-            Send_buffer[8] = fc_effect.b * 100 / 255;
-            fff3_buf_len = 9;
-            // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-            i_cnt++;
-        } else if (i_cnt == 6) {
-            //-------------------发送速度---------------------------
-            Send_buffer[6] = 0x04;
-            Send_buffer[7] = 0x04;
-            Send_buffer[8] = (500 - fc_effect.dream_scene.speed) / 5;
-            fff3_buf_len = 9;
-            // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-            i_cnt++;
-        } else if (i_cnt == 7) {
-            //-------------------发送灯带长度---------
-            Send_buffer[6] = 0x04;
-            Send_buffer[7] = 0x08;
-            Send_buffer[8] = fc_effect.led_num >> 8;
-            fff3_buf_len = 9;
-            // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-            i_cnt++;
-        } else if (i_cnt == 8) {
-            //-------------------发送灵敏度-----------------------
-            Send_buffer[6] = 0x2F;
-            Send_buffer[7] = 0x05;
-            Send_buffer[8] = 100 - fc_effect.sound.sensitive;
-            fff3_buf_len = 9;
-            // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-            i_cnt++;
-        } else if (i_cnt == 9) {
-            //-------------------发送静态RGB模式--
-            Send_buffer[6] = 0x04;
-            Send_buffer[7] = 0x01;
-            Send_buffer[8] = 0x1e;
-            Send_buffer[9] = fc_effect.rgb.r;
-            Send_buffer[10] = fc_effect.rgb.g;
-            Send_buffer[11] = fc_effect.rgb.b;
-            fff3_buf_len = 12;
-            // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-            i_cnt++;
-        } else if (i_cnt == 10) {
-
-            //-------------------发送闹钟1定时数据---
-            Send_buffer[6] = 0x05;
-            Send_buffer[7] = 0x00;
-            Send_buffer[8] = alarm_clock[0].hour;
-            Send_buffer[9] = alarm_clock[0].minute;
-            Send_buffer[10] = alarm_clock[0].on_off;
-            Send_buffer[11] = alarm_clock[0].mode;
-            fff3_buf_len = 12;
-            // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-            i_cnt++;
-        }
-
-        else if (i_cnt == 11) {
-
-            //-------------------发送闹钟2定时数据--
-            Send_buffer[6] = 0x05;
-            Send_buffer[7] = 0x01;
-            Send_buffer[8] = alarm_clock[1].hour;
-            Send_buffer[9] = alarm_clock[1].minute;
-            Send_buffer[10] = alarm_clock[1].on_off;
-            Send_buffer[11] = alarm_clock[1].mode;
-            fff3_buf_len = 12;
-            i_cnt++;
-        }
-
-        else if (i_cnt == 12) {
-
-            //-------------------发送闹钟3定时数据----
-            Send_buffer[6] = 0x05;
-            Send_buffer[7] = 0x02;
-            Send_buffer[8] = alarm_clock[2].hour;
-            Send_buffer[9] = alarm_clock[2].minute;
-            Send_buffer[10] = alarm_clock[2].on_off;
-            Send_buffer[11] = alarm_clock[2].mode;
-            fff3_buf_len = 12;
-            i_cnt++;
-        }
-
-        else if (i_cnt == 13) {
-            //-------------------电机转速-----------------------
-            Send_buffer[6] = 0x2F;
-            Send_buffer[7] = 0x07;
-            // USER_TO_DO base_ins 相关定义已注释，需要添加新的
-            // Send_buffer[8] =  fc_effect.base_ins.period;
-            fff3_buf_len = 9;
-
-            i_cnt++;
-        }
-
-        else if (i_cnt == 14) {
-            //-------------------电机模式----------------
-            Send_buffer[6] = 0x2F;
-            Send_buffer[7] = 0x06;
-            // USER_TO_DO base_ins 相关定义已注释，需要添加新的
-            // Send_buffer[8] =  fc_effect.base_ins.mode;
-            fff3_buf_len = 9;
-
-            i_cnt++;
-        }
-
-        else if (i_cnt == 15) {
-            //-------------------发送RGB接口模式--
-            Send_buffer[6] = 0x04;
-            Send_buffer[7] = 0x05;
-            Send_buffer[8] = fc_effect.sequence;
-            fff3_buf_len = 9;
-
-            i_cnt++;
-        } else if (i_cnt == 16) {
-            //-------------------声控模式（手机麦或外麦--
-            Send_buffer[6] = 0x06;
-            Send_buffer[7] = 0x07;
-            Send_buffer[8] = fc_effect.music.m_type;
-            fff3_buf_len = 9;
-
-            i_cnt++;
-        } else if (i_cnt == 17) {
-            //-------------------本地麦克风模式---------
-            Send_buffer[6] = 0x06;
-            Send_buffer[7] = 0x06;
-            Send_buffer[8] = fc_effect.music.m;
-            fff3_buf_len = 9;
-
-            i_cnt++;
-        } else if (i_cnt == 18) {
-            //-------------------同步结束指令--------------------------
-            Send_buffer[6] = 0x01;
-            Send_buffer[7] = 0x03;
-            Send_buffer[8] = 0x00;
-            fff3_buf_len = 9;
-            // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-            i_cnt = 0;
-            _0103_f = 0;
-            printf("_0103_f == 0");
-        }
-    }
-}
-
 /* 解析中道数据，主要是静态模式，和动态效果的“基本”效果 */
 void parse_zd_data(unsigned char *LedCommand)
 {
 
-    memset(Send_buffer, 0, 50);
-    memcpy(Send_buffer, Ble_Addr, 6);
-
     if (LedCommand[0] == 0x01 && LedCommand[1] == 0x03) //与APP同步数据
     {
-
-        _0103_f = 1;
+        // 一次性下发设备全部状态
+        user_ble_notify_dev_all_info();
     }
 
-    // uint8_t Send_buffer[50];        //发送缓存
-    // if(LedCommand[0] == 0x01 && LedCommand[1] == 0x03)  //与APP同步数据
-    // {
-
-    //     memcpy(Send_buffer,Ble_Addr, 6);
-    //     // -----------------设备信息------------------------------
-    //     Send_buffer[6] = 0x07;
-    //     Send_buffer[7] = 0x01;
-    //     Send_buffer[8] = 0x01;
-    //     Send_buffer[9] = 0x02;  //灯具类型：RGBW
-    //     ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 10, ATT_OP_AUTO_READ_CCC);
-    //     os_time_dly(1);
-    //     //-------------------发送开关机状态---------------------------
-    //     Send_buffer[6] = 0x01;
-    //     Send_buffer[7] = 0x01;
-    //     Send_buffer[8] = get_on_off_state(); // 目前状态
-    //     // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-    //     ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 9, ATT_OP_AUTO_READ_CCC);
-    //     os_time_dly(1);
-    //     //-------------------流星开关--------------------------
-    //     Send_buffer[6] = 0x2F;
-    //     Send_buffer[7] = 0x02;
-    //     Send_buffer[8] = get_meteor_on_off();
-    //      // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,12, ATT_OP_AUTO_READ_CCC);
-    //     ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 9, ATT_OP_AUTO_READ_CCC);
-    //     os_time_dly(1);
-    //     //-------------------流星速度--------------------------
-    //     Send_buffer[6] = 0x2F;
-    //     Send_buffer[7] = 0x01;
-    //     Send_buffer[8] = 110 - (fc_effect.speed /3);
-    //     // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-    //     ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 9, ATT_OP_AUTO_READ_CCC);
-    //     //-------------------流星周期--------------------------
-
-    //     Send_buffer[6] = 0x2F;
-    //     Send_buffer[7] = 0x03;
-    //     Send_buffer[8] = fc_effect.meteor_period;
-    //     // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-    //     ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 9, ATT_OP_AUTO_READ_CCC);
-    //     //-------------------发送亮度---------------------------
-    //     Send_buffer[6] = 0x04;
-    //     Send_buffer[7] = 0x03;
-    //     Send_buffer[8] = fc_effect.b*100/255;
-    //     // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-    //     ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 9, ATT_OP_AUTO_READ_CCC);
-    //     os_time_dly(1);
-    //     //-------------------发送速度---------------------------
-    //     Send_buffer[6] = 0x04;
-    //     Send_buffer[7] = 0x04;
-    //     Send_buffer[8] =  (500 - fc_effect.dream_scene.speed) / 5;
-    //     // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-    //     ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 9, ATT_OP_AUTO_READ_CCC);
-    //     os_time_dly(1);
-    //     //-------------------发送灯带长度---------------------------
-    //     Send_buffer[6] = 0x04;
-    //     Send_buffer[7] = 0x08;
-    //     Send_buffer[8] = fc_effect.led_num>>8;
-    //     Send_buffer[9] = fc_effect.led_num&0xff;
-    //     ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 10, ATT_OP_AUTO_READ_CCC);
-    //     os_time_dly(1);
-
-    //    //-------------------发送灵敏度---------------------------
-    //     Send_buffer[6] = 0x2F;
-    //     Send_buffer[7] = 0x05;
-    //     Send_buffer[8] =  100 - fc_effect.sound.sensitive;
-    //     // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-    //     ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 9, ATT_OP_AUTO_READ_CCC);
-    //     os_time_dly(1);
-    //     //-------------------发送静态RGB模式--------------------------
-    //     Send_buffer[6] = 0x04;
-    //     Send_buffer[7] = 0x01;
-    //     Send_buffer[8] = 0x1e;
-    //     Send_buffer[9] = fc_effect.rgb.r;
-    //     Send_buffer[10] = fc_effect.rgb.g;
-    //     Send_buffer[11] = fc_effect.rgb.b;
-    //     // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,12, ATT_OP_AUTO_READ_CCC);
-    //     ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 12, ATT_OP_AUTO_READ_CCC);
-    //     os_time_dly(1);
-
-    //     //-------------------发送闹钟1定时数据--------------------------
-    //     Send_buffer[6] = 0x05;
-    //     Send_buffer[7] = 0x00;
-    //     Send_buffer[8] = alarm_clock[0].hour;
-    //     Send_buffer[9] = alarm_clock[0].minute;
-    //     Send_buffer[10] = alarm_clock[0].on_off;
-    //     Send_buffer[11] = alarm_clock[0].mode;
-    //     // int rett = app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,12, ATT_OP_AUTO_READ_CCC);
-    //     ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 12, ATT_OP_AUTO_READ_CCC);
-    //     os_time_dly(1);
-    //     //-------------------发送闹钟2定时数据--------------------------
-    //     Send_buffer[6] = 0x05;
-    //     Send_buffer[7] = 0x01;
-    //     Send_buffer[8] = alarm_clock[1].hour;
-    //     Send_buffer[9] = alarm_clock[1].minute;
-    //     Send_buffer[10] = alarm_clock[1].on_off;
-    //     Send_buffer[11] = alarm_clock[1].mode;
-    //     // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,12, ATT_OP_AUTO_READ_CCC);
-    //     ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 12, ATT_OP_AUTO_READ_CCC);
-    //     os_time_dly(1);
-    //     //-------------------发送闹钟3定时数据--------------------------
-    //     Send_buffer[6] = 0x05;
-    //     Send_buffer[7] = 0x02;
-    //     Send_buffer[8] = alarm_clock[2].hour;
-    //     Send_buffer[9] = alarm_clock[2].minute;
-    //     Send_buffer[10] = alarm_clock[2].on_off;
-    //     Send_buffer[11] = alarm_clock[2].mode;
-    //     // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,12, ATT_OP_AUTO_READ_CCC);
-    //     ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 12, ATT_OP_AUTO_READ_CCC);
-    //     os_time_dly(1);
-    //     //-------------------电机转速--------------------------
-    //     extern base_ins_t base_ins;
-    //     Send_buffer[6] = 0x2F;
-    //     Send_buffer[7] = 0x07;
-    //     Send_buffer[8] =  fc_effect.base_ins.period;
-    //     // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-    //     ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 9, ATT_OP_AUTO_READ_CCC);
-    //      //-------------------电机模式--------------------------
-    //     Send_buffer[6] = 0x2F;
-    //     Send_buffer[7] = 0x06;
-    //     Send_buffer[8] =  fc_effect.base_ins.mode;
-    //     // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-    //     ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 9, ATT_OP_AUTO_READ_CCC);
-    //     os_time_dly(1);
-    //     //-------------------发送RGB接口模式--------------------------
-    //     Send_buffer[6] = 0x04;
-    //     Send_buffer[7] = 0x05;
-    //     Send_buffer[8] = fc_effect.sequence;
-    //     ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 9, ATT_OP_AUTO_READ_CCC);
-    //     os_time_dly(1);
-    //     //-------------------声控模式（手机麦或外麦--------------------------
-    //     Send_buffer[6] = 0x06;
-    //     Send_buffer[7] = 0x07;
-    //     Send_buffer[8] = fc_effect.music.m_type;
-    //     // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-    //     ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 9, ATT_OP_AUTO_READ_CCC);
-    //     //-------------------本地麦克风模式--------------------------
-    //     Send_buffer[6] = 0x06;
-    //     Send_buffer[7] = 0x06;
-    //     Send_buffer[8] = fc_effect.music.m ;
-    //     // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-    //     ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 9, ATT_OP_AUTO_READ_CCC);
-
-    //     #if 0
-    //     -------------------发送工作模式---------------------------
-    //     Send_buffer[6] = 0x04;
-    //     Send_buffer[7] = 0x02;
-
-    //     if(led_state.running_task == DYNAMIC_TASK)
-    //     {
-    //         Send_buffer[8] = led_state.dynamic_state_flag;    //发送动态模式
-    //         app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-    //     }
-    //     else if(led_state.running_task == STATIC_TASK)
-    //     {
-    //         Send_buffer[8] = led_state.static_state_flag;     //发送静态模式
-    //         app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-    //     }
-    //     os_time_dly(1);
-
-    //     #endif
-
-    // }
     // else
     {
-        memcpy(Send_buffer, Ble_Addr, 6); //copy蓝牙地址
         //---------------------------------接收到开关灯命令-----------------------------------
         if (LedCommand[0] == 0x01 && LedCommand[1] == 0x01 &&
             gpio_read(IO_PORTB_05) == 0) {
 
             extern void set_on_off_led(u8 on_off);
             set_on_off_led(LedCommand[2]);
-            Send_buffer[6] = 0x01;
-            Send_buffer[7] = 0x01;
-            Send_buffer[8] = LedCommand[2];
-            fff3_buf_len = 9;
-            // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-            // ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 9, ATT_OP_AUTO_READ_CCC);
+            user_ble_notify_light_pwr_sta(); //回读开关状态
         }
         //---------------------------------接收到设备时间数据，无需返回应答-----------------------------------
         if (LedCommand[0] == 0x06 && LedCommand[1] == 0x02) {
@@ -641,15 +240,6 @@ void parse_zd_data(unsigned char *LedCommand)
         //-----------------------------------接收到闹钟数据-----------------------------------------
         if (LedCommand[0] == 0x05) {
             extern ALARM_CLOCK alarm_clock[3];
-            Send_buffer[6] = 0x05;
-            Send_buffer[7] = LedCommand[1]; //闹钟序号
-            Send_buffer[8] = LedCommand[2];
-            Send_buffer[9] = LedCommand[3];
-            Send_buffer[10] = LedCommand[4];
-            Send_buffer[11] = LedCommand[5];
-            //app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,12, ATT_OP_AUTO_READ_CCC);
-            // ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 12, ATT_OP_AUTO_READ_CCC);
-            fff3_buf_len = 12;
 
             if (LedCommand[1] == 0x00) {
                 alarm_clock[0].hour = LedCommand[2];
@@ -673,9 +263,7 @@ void parse_zd_data(unsigned char *LedCommand)
                 parse_alarm_data(2);
             }
 
-            // printf("on_off[0] = %02x,hour[0] = %02x,minute[0] = %02x,mode[0] = %02x\n",alarm_clock[0].on_off,alarm_clock[0].hour,alarm_clock[0].minute,alarm_clock[0].mode);
-            // printf("on_off[1] = %02x,hour[1] = %02x,minute[1] = %02x,mode[1] = %02x\n",alarm_clock[1].on_off,alarm_clock[1].hour,alarm_clock[1].minute,alarm_clock[1].mode);
-            // printf("on_off[2] = %02x,hour[2] = %02x,minute[2] = %02x,mode[2] = %02x\n",alarm_clock[2].on_off,alarm_clock[2].hour,alarm_clock[2].minute,alarm_clock[2].mode);
+            user_ble_notify_alarm_data(LedCommand[1]); //回读闹钟数据
         }
         //--------------------------下面所有的操作都需要在开灯状态下操作-----------------------------------
 
@@ -684,14 +272,6 @@ void parse_zd_data(unsigned char *LedCommand)
             if (LedCommand[0] == 0x04 && LedCommand[1] == 0x01 &&
                 LedCommand[2] == 0x1e) {
                 extern void set_static_mode(u8 r, u8 g, u8 b);
-                // //实现白光时，使用W控制，只有单色白光
-                // if(LedCommand[3] == 0xFF && LedCommand[4] == 0xFF && LedCommand[5] == 0xFF && is_rgbw == 1)
-                // {
-                //     fc_effect.w = 255;
-                //     fc_effect.b = 100;
-                // }
-                // else
-                //     fc_effect.w = 0; //必须要配置，不配置，无法调节RBG效果
 
                 set_static_mode(
                     LedCommand[3], LedCommand[4],
@@ -740,49 +320,24 @@ void parse_zd_data(unsigned char *LedCommand)
             if (LedCommand[0] == 0x04 && LedCommand[1] == 0x03) {
                 extern void set_bright(u8 b);
                 set_bright(LedCommand[2]);
-                Send_buffer[6] = 0x04;
-                Send_buffer[7] = 0x03;
-                Send_buffer[8] = LedCommand[2];
-                // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-                // ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 9, ATT_OP_AUTO_READ_CCC);
-                fff3_buf_len = 9;
+                user_ble_notify_light_brightness(); //回读亮度
             }
             //---------------------------------调节速度0-100-----------------------------------
             if (LedCommand[0] == 0x04 && LedCommand[1] == 0x04) {
                 // 范围0-100
                 ls_set_speed(LedCommand[2]);
-                Send_buffer[6] = 0x04;
-                Send_buffer[7] = 0x04;
-                Send_buffer[8] = LedCommand[2];
-                // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-                // ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 9, ATT_OP_AUTO_READ_CCC);
-                fff3_buf_len = 9;
+                user_ble_notify_light_speed(); //回读速度
             }
             //---------------------------------更改RGB接口-----------------------------------
             if (LedCommand[0] == 0x04 && LedCommand[1] == 0x05) {
                 extern void set_rgb_sequence(u8 s);
                 set_rgb_sequence(LedCommand[2]);
-                Send_buffer[6] = 0x04;
-                Send_buffer[7] = 0x05;
-                Send_buffer[8] = LedCommand[2];
-                // ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 9, ATT_OP_AUTO_READ_CCC);  //多主从
-                fff3_buf_len = 9;
+                user_ble_notify_rgb_sequence(); //回读RGB接口顺序
             }
             //---------------------------------W（灰度调节）控制----------------------------
             if (LedCommand[0] == 0x04 && LedCommand[1] == 0x06) {
                 extern void set_w(u8 w);
                 set_w(LedCommand[2] * 255 / 100);
-            }
-            //---------------------------------灯带长度-----------------------------------
-            if (LedCommand[0] == 0x04 && LedCommand[1] == 0x08) {
-                // extern void set_ls_lenght(u16 l);
-                // set_ls_lenght( LedCommand[2]<<8 | LedCommand[3]);
-                // save_user_data_area3();
-                // Send_buffer[6] = 0x04;
-                // Send_buffer[7] = 0x08;
-                // Send_buffer[8] = fc_effect.led_num >>8;
-                // Send_buffer[9] = fc_effect.led_num &0xff;
-                // ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 10, ATT_OP_AUTO_READ_CCC);
             }
             //---------------------------------手机音乐律动 手机麦克风-----------------------------------
             if (LedCommand[0] == 0x06 && LedCommand[1] == 0x04) {
@@ -801,24 +356,14 @@ void parse_zd_data(unsigned char *LedCommand)
                 if (fc_effect.music.m_type == 0x01) //外模模式
                 {
                     set_music_mode(LedCommand[2]);
-                    Send_buffer[6] = 0x06;
-                    Send_buffer[7] = 0x06;
-                    Send_buffer[8] = LedCommand[2];
-                    // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-                    // ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 9, ATT_OP_AUTO_READ_CCC);
-                    fff3_buf_len = 9;
+                    user_ble_notify_sound_mode(); //回读声控模式
                 }
             }
             //---------------------------------设备手机麦或者外麦-----------------------------------
             if (LedCommand[0] == 0x06 && LedCommand[1] == 0x07) {
                 extern void set_music_type(u8 ty);
                 set_music_type(LedCommand[2]);
-                Send_buffer[6] = 0x06;
-                Send_buffer[7] = 0x07;
-                Send_buffer[8] = LedCommand[2];
-                // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-                // ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 9, ATT_OP_AUTO_READ_CCC);
-                fff3_buf_len = 9;
+                user_ble_notify_sound_ctl_type(); //回读声控类型
             }
             // --------------------------------流星模式-----------------------------------
             if (LedCommand[0] == 0x2F && LedCommand[1] == 0x00 &&
@@ -831,23 +376,13 @@ void parse_zd_data(unsigned char *LedCommand)
                 fc_effect.metemor_on_off == 0x01) {
                 extern void set_mereor_speed(u8 s);
                 set_mereor_speed(LedCommand[2]);
-                Send_buffer[6] = 0x2F;
-                Send_buffer[7] = 0x01;
-                Send_buffer[8] = LedCommand[2];
-                // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-                // ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 9, ATT_OP_AUTO_READ_CCC);
-                fff3_buf_len = 9;
+                user_ble_notify_meteor_speed(); //回读流星速度
             }
             //-------------------------------- 流星开关-----------------------------------
             if (LedCommand[0] == 0x2F && LedCommand[1] == 0x02) {
                 extern void set_on_off_meteor(u8 on_off);
                 set_on_off_meteor(LedCommand[2]);
-                Send_buffer[6] = 0x2F;
-                Send_buffer[7] = 0x02;
-                Send_buffer[8] = LedCommand[2];
-                // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-                // ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 9, ATT_OP_AUTO_READ_CCC);
-                fff3_buf_len = 9;
+                user_ble_notify_meteor_pwr_sta(); //回读流星开关
             }
 
             // --------------------------------流星灯时间间隔-----------------------------------
@@ -855,48 +390,23 @@ void parse_zd_data(unsigned char *LedCommand)
                 fc_effect.metemor_on_off == 0x01) {
                 extern void set_meteor_p(u8 p);
                 set_meteor_p(LedCommand[2]);
-                Send_buffer[6] = 0x2F;
-                Send_buffer[7] = 0x03;
-                Send_buffer[8] = LedCommand[2];
-                // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-                // ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 9, ATT_OP_AUTO_READ_CCC);
-                fff3_buf_len = 9;
+                user_ble_notify_meteor_period(); //回读流星周期
             }
             //---------------------------------设置麦克风灵，电机，流星敏度-----------------------------------
             if (LedCommand[0] == 0x2F && LedCommand[1] == 0x05) {
                 // extern void set_music_sensitive(u8 s);
                 // set_music_sensitive(LedCommand[2]);
                 set_sensitive(100 - LedCommand[2]);
-                Send_buffer[6] = 0x2F;
-                Send_buffer[7] = 0x05;
-                Send_buffer[8] = LedCommand[2];
-                // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-                // ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 9, ATT_OP_AUTO_READ_CCC);
-                fff3_buf_len = 9;
+                user_ble_notify_sensitive(); //回读灵敏度
             }
             // ---------------------------------设置电机模式-----------------------------------
             if (LedCommand[0] == 0x2F && LedCommand[1] == 0x06) {
                 // USER_TO_DO one_wire_set_mode 已屏蔽，待添加新的接口
                 // extern void one_wire_set_mode(u8 m);
                 // one_wire_set_mode(LedCommand[2]); //配置模式
-                os_time_dly(1);
                 // enable_one_wire();  //使用发送数据
-                // extern u8 counting_flag ;
-                // extern u8 set_time;
-                // extern u8 stop_cnt;
-                // if(LedCommand[2] == 0 && counting_flag == 0)
-                // if(LedCommand[2] == 0)
-                // {
-                //     // counting_flag = 1;  //开始计时
-                //     set_time = 1;    //允许修改时间
-                // }
 
-                Send_buffer[6] = 0x2F;
-                Send_buffer[7] = 0x06;
-                Send_buffer[8] = LedCommand[2];
-                // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-                // ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 9, ATT_OP_AUTO_READ_CCC);
-                fff3_buf_len = 9;
+                user_ble_notify_motor_mode(); //回读电机模式
             }
 
             // --------------------------------设置电机转速-----------------------------------
@@ -904,14 +414,9 @@ void parse_zd_data(unsigned char *LedCommand)
                 // USER_TO_DO one_wire_set_period 已屏蔽，待添加新的接口
                 // extern void one_wire_set_period(u8 p);
                 // one_wire_set_period(LedCommand[2]);
-                os_time_dly(1);
                 // enable_one_wire();
-                Send_buffer[6] = 0x2F;
-                Send_buffer[7] = 0x07;
-                Send_buffer[8] = LedCommand[2];
-                // app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer,9, ATT_OP_AUTO_READ_CCC);
-                // ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 9, ATT_OP_AUTO_READ_CCC);
-                fff3_buf_len = 9;
+
+                user_ble_notify_motor_speed(); //回读电机转速
             }
         }
     }
@@ -963,10 +468,19 @@ void tuya_fb_sw_state(void)
  */
 void zd_fb_2_app(u8 *p, u8 len)
 {
-    // uint8_t Send_buffer[50];            //发送缓存
-    // memcpy(Send_buffer,Ble_Addr, 6);
-    // memcpy(Send_buffer+6, p, len);
-    // ble_comm_att_send_data(fd_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, len+6, ATT_OP_AUTO_READ_CCC);
+    // 照参考工程：数据前带 6 字节蓝牙地址，经 fff1 通知发出
+    uint8_t buf[50];
+    extern int ble_comm_att_send_data(u16 conn_handle, u16 att_handle,
+                                      u8 *data, u16 len, att_op_type_e op_type);
+
+    if (len > 44) {
+        return;
+    }
+    memcpy(buf, Ble_Addr, 6);
+    memcpy(buf + 6, p, len);
+    ble_comm_att_send_data(user_ble_notify_get_connection_handle(),
+                           ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, buf,
+                           len + 6, ATT_OP_AUTO_READ_CCC);
 }
 
 /* -------------------------------------DPID_CONTROL_DATA 调节模式----------------------------- */

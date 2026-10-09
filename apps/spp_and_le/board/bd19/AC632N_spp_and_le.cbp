@@ -133,8 +133,7 @@
 					<Add directory="../../../user_app/hardware/led" />
 					<Add directory="../../../../include_lib/driver/cpu/bd19/asm" />
 					<Add directory="../../../user_app/hardware/sound_coutrol" />
-					<Add directory="../../../user_app/user_report" />
-					<Add directory="../../../user_app/det_50hz" />
+					<Add directory="../../../../include_lib/btstack/le" />
 				</Compiler>
 				<Linker>
 					<Add option="-flto" />
@@ -714,9 +713,6 @@
 		</Unit>
 		<Unit filename="../../../user_app/ad_key/ad_key_app.h" />
 		<Unit filename="../../../user_app/ad_key/adkey.h" />
-		<Unit filename="../../../user_app/det_50hz/det_50hz.c">
-			<Option compilerVar="CC" />
-		</Unit>
 		<Unit filename="../../../user_app/hardware/led/led_driver.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -757,6 +753,14 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../../../user_app/protocol/dp_data_tran.h" />
+		<Unit filename="../../../user_app/protocol/user_ble_notify.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../../user_app/protocol/user_ble_notify.h" />
+		<Unit filename="../../../user_app/protocol/user_ble_notify_app.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../../user_app/protocol/user_ble_notify_app.h" />
 		<Unit filename="../../../user_app/rf24g/rf24g.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -777,13 +781,6 @@
 		<Unit filename="../../../user_app/save_flash/save_flash.h" />
 		<Unit filename="../../../user_app/user_include.h" />
 		<Unit filename="../../../user_app/user_main.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="../../../user_app/user_report/user_report.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="../../../user_app/user_report/user_report.h" />
-		<Unit filename="../../../user_app/user_report/user_report_app.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../../../user_app/ws2812-fx-lib/Adafruit_NeoPixel_C/Adafruit_NeoPixel.H" />

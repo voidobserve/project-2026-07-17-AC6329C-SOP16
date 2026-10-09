@@ -51,7 +51,6 @@ void double_meteor(void);
 // void fc_music(void);
 
 // extern LED_STATE led_state;
-extern u8 is_rgbw;
 volatile fc_effect_t fc_effect; // 幻彩灯串效果数据
 
 // 效果数据初始化
@@ -81,12 +80,12 @@ void fc_data_init(void)
     fc_effect.sequence = NEO_RGBW;
 
     //流星
-    // fc_effect.metemor_on_off = 0x01;        //开关
-    // fc_effect.metemor_effect_index = 1;     //效果编号
-    // fc_effect.speed = 100;                    //变化速度
-    // fc_effect.meteor_period = 8;            //默认8秒  周期值
-    // fc_effect.period_cnt = fc_effect.meteor_period * 1000;  //ms,运行时的计数器
-    // fc_effect.mode_cycle = 0;   //模式完成一个循环的标志
+    fc_effect.metemor_on_off = 0x01;                       //开关
+    fc_effect.metemor_effect_index = 1;                    //效果编号
+    fc_effect.speed = 100;                                 //变化速度
+    fc_effect.meteor_period = 8;                           //默认8秒  周期值
+    fc_effect.period_cnt = fc_effect.meteor_period * 1000; //ms,运行时的计数器
+    fc_effect.mode_cycle = 0; //模式完成一个循环的标志
     //电机
     // fc_effect.base_ins.mode = 4;   //360转
     // fc_effect.base_ins.period = 8;  //速度8s
@@ -123,7 +122,7 @@ void full_color_init(void)
     soft_turn_on_the_light(); //软开灯，灯为开状态
     set_fc_effect();          //效果实现调度
 
-    // custom_meteor_effect(); //实现上电，LED的流星效果
+    custom_meteor_effect(); //实现上电，LED的流星效果
 }
 
 /**
@@ -366,7 +365,8 @@ void change_meteor_mode(void)
  */
 void set_mereor_mode(u8 m)
 {
-    if (m <= 22) //void custom_meteor_effect(void)有关
+    if (m <= 22)
+    // if (m <= 18) //app 下发 18 种流星效果，超出无效（void custom_meteor_effect(void)有关）
     {
         fc_effect.metemor_effect_index = m;
         printf(" fc_effect.metemor_effect_index  = %d",
@@ -1691,24 +1691,18 @@ void fc_static_effect(u8 n)
 {
     fc_effect.Now_state = IS_STATIC;
     fc_effect.dream_scene.c_n = 1;
-    if (is_rgbw) {
-        if (fc_static_map[n] != WHITE) {
-            fc_effect.rgb.r = (fc_static_map[n] >> 16) & 0xff;
-            fc_effect.rgb.g = (fc_static_map[n] >> 8) & 0xff;
-            fc_effect.rgb.b = (fc_static_map[n]) & 0xff;
-            fc_effect.w = 0;
-
-        } else {
-            fc_effect.b = 255;
-            fc_effect.w = 255;
-        }
-    } else {
+    // 设备固定为 RGBW：彩色走 RGB，白色走 W 通道
+    if (fc_static_map[n] != WHITE) {
         fc_effect.rgb.r = (fc_static_map[n] >> 16) & 0xff;
         fc_effect.rgb.g = (fc_static_map[n] >> 8) & 0xff;
         fc_effect.rgb.b = (fc_static_map[n]) & 0xff;
+        fc_effect.w = 0;
+
+    } else {
+        fc_effect.b = 255;
+        fc_effect.w = 255;
     }
 
-    // save_user_data_area3();
     os_taskq_post("msg_task", 1, MSG_USER_SAVE_INFO);
     set_fc_effect();
 }

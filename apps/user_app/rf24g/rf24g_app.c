@@ -22,7 +22,7 @@
 #include "rf24g_driver.h"
 
 #include "led_strand_effect.h"
-#include "user_report_app.h"
+#include "user_ble_notify_app.h"
 
 extern const rf24_key_handle_func_t
     rf24g_key_type_28keys_handle_func_buff[RF24G_TYPE_28KEY_EVENT_MAX]; // 变量声明
@@ -74,13 +74,13 @@ void rf24g_key_r1c1_press_handle(void)
 
     if (fc_effect.Now_state == IS_STATIC) {
         bright_plus();
-        user_report_brightness(fc_effect.b);
+        user_ble_notify_light_brightness();
 #if USER_DEBUG_ENABLE
         printf("fc_effect.b == %u\n", (u16)fc_effect.b);
 #endif
     } else if (fc_effect.Now_state == IS_light_music) {
         ls_sensitive_plus();
-        user_report_sound_control_sensitive(fc_effect.sound.sensitive);
+        user_ble_notify_sensitive();
 #if USER_DEBUG_ENABLE
         printf("fc_effect.sound.sensitive == %u\n",
                (u16)fc_effect.sound.sensitive);
@@ -103,13 +103,13 @@ void rf24g_key_r1c1_hold_handle(void)
 
     if (fc_effect.Now_state == IS_STATIC) {
         bright_plus();
-        user_report_brightness(fc_effect.b);
+        user_ble_notify_light_brightness();
 #if USER_DEBUG_ENABLE
         printf("fc_effect.b == %u\n", (u16)fc_effect.b);
 #endif
     } else if (fc_effect.Now_state == IS_light_music) {
         ls_sensitive_plus();
-        user_report_sound_control_sensitive(fc_effect.sound.sensitive);
+        user_ble_notify_sensitive();
 #if USER_DEBUG_ENABLE
         printf("fc_effect.sound.sensitive == %u\n",
                (u16)fc_effect.sound.sensitive);
@@ -132,13 +132,13 @@ void rf24g_key_r1c2_press_handle(void)
 
     if (fc_effect.Now_state == IS_STATIC) {
         bright_sub();
-        user_report_brightness(fc_effect.b);
+        user_ble_notify_light_brightness();
 #if USER_DEBUG_ENABLE
         printf("fc_effect.b == %u\n", (u16)fc_effect.b);
 #endif
     } else if (fc_effect.Now_state == IS_light_music) {
         ls_sensitive_sub();
-        user_report_sound_control_sensitive(fc_effect.sound.sensitive);
+        user_ble_notify_sensitive();
 #if USER_DEBUG_ENABLE
         printf("fc_effect.sound.sensitive == %u\n",
                (u16)fc_effect.sound.sensitive);
@@ -161,13 +161,13 @@ void rf24g_key_r1c2_hold_handle(void)
 
     if (fc_effect.Now_state == IS_STATIC) {
         bright_sub();
-        user_report_brightness(fc_effect.b);
+        user_ble_notify_light_brightness();
 #if USER_DEBUG_ENABLE
         printf("fc_effect.b == %u\n", (u16)fc_effect.b);
 #endif
     } else if (fc_effect.Now_state == IS_light_music) {
         ls_sensitive_sub();
-        user_report_sound_control_sensitive(fc_effect.sound.sensitive);
+        user_ble_notify_sensitive();
 #if USER_DEBUG_ENABLE
         printf("fc_effect.sound.sensitive == %u\n",
                (u16)fc_effect.sound.sensitive);
@@ -403,7 +403,7 @@ void rf24g_key_r4c4_press_handle(void)
         printf("fc_effect.report_speed == %u\n", (u16)fc_effect.report_speed);
 #endif
         set_fc_effect();
-        user_report_speed(fc_effect.report_speed);
+        user_ble_notify_light_speed();
     }
 }
 
@@ -426,7 +426,7 @@ void rf24g_key_r4c4_hold_handle(void)
         printf("fc_effect.report_speed == %u\n", (u16)fc_effect.report_speed);
 #endif
         set_fc_effect();
-        user_report_speed(fc_effect.report_speed);
+        user_ble_notify_light_speed();
     }
 }
 
@@ -535,7 +535,7 @@ void rf24g_key_r5c4_press_handle(void)
         printf("fc_effect.report_speed == %u\n", (u16)fc_effect.report_speed);
 #endif
         set_fc_effect();
-        user_report_speed(fc_effect.report_speed);
+        user_ble_notify_light_speed();
     }
 }
 
@@ -558,7 +558,7 @@ void rf24g_key_r5c4_hold_handle(void)
         printf("fc_effect.report_speed == %u\n", (u16)fc_effect.report_speed);
 #endif
         set_fc_effect();
-        user_report_speed(fc_effect.report_speed);
+        user_ble_notify_light_speed();
     }
 }
 
@@ -576,7 +576,7 @@ void rf24g_key_r6c1_press_handle(void)
     fc_effect.music.m = 3;
     fc_effect.Now_state = IS_light_music;
     set_fc_effect();
-    user_report_sound_control_mode(fc_effect.music.m);
+    user_ble_notify_sound_mode();
 }
 
 void rf24g_key_r6c2_press_handle(void)
@@ -593,7 +593,7 @@ void rf24g_key_r6c2_press_handle(void)
     fc_effect.music.m = 0;
     fc_effect.Now_state = IS_light_music;
     set_fc_effect();
-    user_report_sound_control_mode(fc_effect.music.m);
+    user_ble_notify_sound_mode();
 }
 
 void rf24g_key_r6c3_press_handle(void)
@@ -612,7 +612,7 @@ void rf24g_key_r6c3_press_handle(void)
     fc_effect.music.m = 2;
     fc_effect.Now_state = IS_light_music;
     set_fc_effect();
-    user_report_sound_control_mode(fc_effect.music.m);
+    user_ble_notify_sound_mode();
 }
 
 void rf24g_key_r6c4_press_handle(void)
@@ -629,7 +629,7 @@ void rf24g_key_r6c4_press_handle(void)
     fc_effect.music.m = 1;
     fc_effect.Now_state = IS_light_music;
     set_fc_effect();
-    user_report_sound_control_mode(fc_effect.music.m);
+    user_ble_notify_sound_mode();
 }
 
 void rf24g_key_r7c1_press_handle(void)

@@ -6,8 +6,10 @@
 #include "asm/ledc.h"
 #include "asm/gpio.h"
 
-#define MIC_PIN  IO_PORTA_08
-#define LEDC_PIN IO_PORTB_07
+#define MIC_PIN IO_PORTA_08
+// 流星灯控制信号输出引脚：USB0DM（11脚）
+// 注：PB7 已被电机 MOTOR_PIN_3 占用；USBDM 在本产品无 220V 过零检测功能，空闲
+#define LEDC_PIN IO_PORT_DM
 
 void led_state_init(void);
 void mic_gpio_init();
