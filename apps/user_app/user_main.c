@@ -11,6 +11,8 @@
 #include "user_config.h"
 #include "user_ble_notify.h"
 
+#include "dev_config.h"
+
 void user_msg_handle_task(void *p);
 void user_main(void *p);
 void user_notify_task(void *p);
@@ -20,8 +22,10 @@ void user_init(void)
     extern void led_state_init(void);
     led_state_init(); // 初始化 LEDC（流星灯驱动引脚），必须在 full_color_init 之前
     led_driver_init();
+#if !USE_TEST_BOARD
     motor_24byj48_init();
     motor_init();
+#endif
     sound_control_init();
 
     user_data_init();
@@ -77,7 +81,7 @@ void user_msg_handle_task(void *p)
         } break;
         }
 #endif
-    } // while (1)
+    }
 }
 
 void user_main(void *p)
@@ -87,9 +91,7 @@ void user_main(void *p)
         // printf("fc_effect.rgb.w == %u\n", (u16)fc_effect.rgb.w);
 
         user_data_save_handle();
-
-        time_clock_handler(); // 闹钟
-
+  
         /****添加 处理函数 start**/
         check_mic_sound();    // 采集声音并计算平均值
         music_static_sound(); // 声控，七彩灯定色转换
@@ -121,5 +123,7 @@ void user_10ms_isr(void)
 // 在定时器中断内调用
 void user_125us_isr(void)
 {
+#if !USE_TEST_BOARD
     motor_handle_125us();
+#endif
 }

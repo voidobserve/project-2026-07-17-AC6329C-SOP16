@@ -30,7 +30,6 @@
 #include "ble_user.h"
 #include "le_gatt_common.h"
 
-#include "rf24g.h"
 #include "rf24g_driver.h"
 
 #define LOG_TAG_CONST       GATT_CLIENT

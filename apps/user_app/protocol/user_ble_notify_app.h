@@ -16,7 +16,9 @@ void user_ble_notify_sound_mode(void);
 void user_ble_notify_meteor_pwr_sta(void);
 void user_ble_notify_meteor_speed(void) ;
 void user_ble_notify_meteor_period(void);
+#if 0
 void user_ble_notify_alarm_data(unsigned char alarm_index);
+#endif
 void user_ble_notify_syn_end(void);
 
 void user_ble_notify_dev_all_info(void);

@@ -67,7 +67,7 @@ void fc_data_init(void)
     // fc_effect.rgb.g = 0;
     // fc_effect.rgb.b = 0;
     // fc_effect.w = 255;
-    fc_effect.dream_scene.c_n = 1; //颜色数量为1
+    fc_effect.dream_scene.c_n = 1; // 颜色数量为1
     fc_effect.b = 255;             // 亮度
 
     fc_effect.report_speed = 80; // 速度值 80%
@@ -116,7 +116,6 @@ extern uint16_t WS2812FX_mode_comet_1(void);
 //全彩效果初始化
 void full_color_init(void)
 {
-    // printf("full_color_init");
     WS2812FX_init(fc_effect.led_num + 1, fc_effect.sequence); //初始化ws2811
     WS2812FX_setBrightness(fc_effect.b);
     soft_turn_on_the_light(); //软开灯，灯为开状态
@@ -720,9 +719,9 @@ void set_on_off_led(u8 on_off)
 {
     fc_effect.on_off_flag = on_off;
     if (fc_effect.on_off_flag == DEVICE_ON) {
-        soft_turn_on_the_light(); //开灯
+        soft_turn_on_the_light(); // 开灯
     } else {
-        soft_rurn_off_lights(); //关灯
+        soft_rurn_off_lights(); // 关灯
     }
 }
 
@@ -896,6 +895,7 @@ void set_static_mode(u8 r, u8 g, u8 b)
     fc_effect.rgb.r = r;
     fc_effect.rgb.g = g;
     fc_effect.rgb.b = b;
+    fc_effect.rgb.w = 0;
     set_fc_effect(); //效果调度
 }
 
@@ -1014,25 +1014,25 @@ static void ls_scene_effect(void)
         single_c_breath();
         break;
 
-    case MODE_MIXED_WHITE_BREATH:
-        extern u16 colorful_light_mixed_white_breathing(void);
-        WS2812FX_setSegment_colorOptions(
-            0,                                     //第0段
-            0,                                     // 起始位置
-            0,                                     //结束位置
-            &colorful_light_mixed_white_breathing, //效果
-            0, //颜色，WS2812FX_setColors设置
-            fc_effect.dream_scene
-                .mixed_white_breath_speed, // 速度 （混白色呼吸 不依靠该传参，这里可以随便填）
-            SIZE_MEDIUM);                  //选项，这里像素点大小：3
+    // case MODE_MIXED_WHITE_BREATH:
+    //     extern u16 colorful_light_mixed_white_breathing(void);
+    //     WS2812FX_setSegment_colorOptions(
+    //         0,                                     //第0段
+    //         0,                                     // 起始位置
+    //         0,                                     //结束位置
+    //         &colorful_light_mixed_white_breathing, //效果
+    //         0, //颜色，WS2812FX_setColors设置
+    //         fc_effect.dream_scene
+    //             .mixed_white_breath_speed, // 速度 （混白色呼吸 不依靠该传参，这里可以随便填）
+    //         SIZE_MEDIUM);                  //选项，这里像素点大小：3
 
-        WS2812FX_set_coloQty(0, fc_effect.dream_scene.c_n);
-        ls_set_colors(fc_effect.dream_scene.c_n, &fc_effect.dream_scene.rgb);
+    //     WS2812FX_set_coloQty(0, fc_effect.dream_scene.c_n);
+    //     ls_set_colors(fc_effect.dream_scene.c_n, &fc_effect.dream_scene.rgb);
 
-        WS2812FX_start();
+    //     WS2812FX_start();
 
-        // printf("fc_effect.dream_scene.mixed_white_breath_speed = %u\n", (u16)fc_effect.dream_scene.mixed_white_breath_speed);
-        break;
+    //     // printf("fc_effect.dream_scene.mixed_white_breath_speed = %u\n", (u16)fc_effect.dream_scene.mixed_white_breath_speed);
+    //     break;
 
     case MODE_COLORFUL_BREATH:
         WS2812FX_setSegment_colorOptions(0,                         // 第0段
@@ -1665,6 +1665,7 @@ void set_ls_lenght(u16 l)
     set_fc_effect();
 }
 
+#if 0
 #define MAX_STATIC_N 11
 // 静态效果颜色map
 const u32 fc_static_map[MAX_STATIC_N] = {
@@ -1680,12 +1681,14 @@ const u32 fc_static_map[MAX_STATIC_N] = {
     PINK,    //9
     GRAY,
 };
+#endif
 
 void set_IS_light_scene_state(void)
 {
     fc_effect.Now_state = IS_light_scene;
 }
 
+#if 0
 // 利用fc_effect结构体，构建内置效果
 void fc_static_effect(u8 n)
 {
@@ -1706,6 +1709,7 @@ void fc_static_effect(u8 n)
     os_taskq_post("msg_task", 1, MSG_USER_SAVE_INFO);
     set_fc_effect();
 }
+#endif
 
 /**
  * @brief 设置七彩灯为静态模式，并且颜色为内置的常用颜色
@@ -1756,14 +1760,12 @@ void ls_set_color(uint8_t n, uint32_t c)
 // ------------------------------------------------W通道
 void set_w(u8 w)
 {
-
-    fc_effect.w = w;
     fc_effect.Now_state = IS_STATIC;
+    fc_effect.w = w;
     fc_effect.rgb.r = 0;
     fc_effect.rgb.g = 0;
     fc_effect.rgb.b = 0;
-    // printf("w = %d", fc_effect.w );
-    // printf("b = %d", fc_effect.b );
+    fc_effect.rgb.w = w;
     set_fc_effect();
 }
 
@@ -1790,6 +1792,7 @@ void music_static_sound(void)
     }
 }
 
+#if 0
 /**********************************  中道闹钟  *******************************************************/
 u8 set_week[ALARM_NUMBER][7];
 ALARM_CLOCK alarm_clock[3];
@@ -1952,6 +1955,7 @@ void time_clock_handler(void)
     countdown_handler(1);
     countdown_handler(2);
 }
+#endif
 
 // 利用fc_effect结构体，构建动态模式效果
 void fc_dynamic_effect(u8 n)
@@ -2049,7 +2053,7 @@ void fc_dynamic_effect(u8 n)
         fc_effect.Now_state = IS_light_scene;
         break;
 
-    case 0x11: //混白色渐变
+    case 0x11: // 混白色 呼吸
         ls_set_color(0, WHITE);
         ls_set_color(1, BLACK);
         fc_effect.dream_scene.change_type = MODE_SINGLE_C_BREATH;
@@ -2057,10 +2061,10 @@ void fc_dynamic_effect(u8 n)
         fc_effect.Now_state = IS_light_scene;
         break;
 
-    case 0x12: //纯白色渐变
-        ls_set_color(0, WHITE);
+    case 0x12: // 纯白色 呼吸
+        ls_set_color(0, PURE_WHITE);
         ls_set_color(1, BLACK);
-        fc_effect.dream_scene.change_type = MODE_BREATH_W;
+        fc_effect.dream_scene.change_type = MODE_SINGLE_C_BREATH;
         fc_effect.dream_scene.c_n = 2;
         fc_effect.Now_state = IS_light_scene;
         break;
@@ -2158,12 +2162,12 @@ void fc_dynamic_effect(u8 n)
         fc_effect.Now_state = IS_light_scene;
         break;
 
-    case 254: { // 混白色呼吸
-        ls_set_color(0, WHITE);
-        fc_effect.dream_scene.change_type = MODE_MIXED_WHITE_BREATH;
-        fc_effect.dream_scene.c_n = 1;
-        fc_effect.Now_state = IS_light_scene;
-    } break;
+    // case 254: { // 混白色呼吸
+    //     ls_set_color(0, WHITE);
+    //     fc_effect.dream_scene.change_type = MODE_MIXED_WHITE_BREATH;
+    //     fc_effect.dream_scene.c_n = 1;
+    //     fc_effect.Now_state = IS_light_scene;
+    // } break;
 
         // case 255:
         // { // 纯白色呼吸

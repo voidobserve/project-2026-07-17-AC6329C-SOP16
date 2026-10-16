@@ -20,7 +20,7 @@
 //*********************************************************************************//
 //                                 UART配置                                        //
 //*********************************************************************************//
-// TEST ONLY 测试时使能，原本未使能
+// REVIEW 实际使用时，需要屏蔽该模块
 #define TCFG_UART0_ENABLE					ENABLE_THIS_MOUDLE                     //串口打印模块使能
 // #define TCFG_UART0_ENABLE					DISABLE_THIS_MOUDLE                     //串口打印模块使能
 #define TCFG_UART0_RX_PORT					NO_CONFIG_PORT                         //串口接收脚配置（用于打印可以选择NO_CONFIG_PORT）

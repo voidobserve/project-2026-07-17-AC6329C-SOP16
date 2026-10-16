@@ -87,7 +87,7 @@ typedef enum
 
     MODE_COLORFUL_AUTO, // 七彩灯的自动模式，七色跳变 -> 七色滑翔 -> 七色呼吸 -> 连续渐变 -> 渐变带停顿 -> ...
 
-    MODE_MIXED_WHITE_BREATH, // 混白色呼吸
+    // MODE_MIXED_WHITE_BREATH, // 混白色呼吸
 
 } change_type_e;
 
@@ -220,7 +220,7 @@ void full_color_init(void);
 void soft_rurn_off_lights(void);   //软关灯处理
 void soft_turn_on_the_light(void); //软开灯处理
 void ls_set_speed(uint8_t s);
-void fc_static_effect(u8 n);
+// void fc_static_effect(u8 n);
 void ls_set_color(uint8_t n, uint32_t c);
 void music_static_sound(void);
 

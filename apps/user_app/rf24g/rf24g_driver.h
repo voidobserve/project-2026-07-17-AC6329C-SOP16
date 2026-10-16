@@ -18,8 +18,8 @@
 // 客户的28键遥控器数据头
 enum
 {
-    RF24G_TYPE_28KEY_FIXVAL_1 = 0x55,
-    RF24G_TYPE_28KEY_FIXVAL_2 = 0xAA,
+    RF24G_FIXVAL_1 = 0x55,
+    RF24G_FIXVAL_2 = 0xAA,
 };
 
 // 客户的28键遥控器键值

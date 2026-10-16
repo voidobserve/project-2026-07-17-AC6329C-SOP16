@@ -533,7 +533,7 @@ static int multi_make_set_adv_data(void)
     info[3] = 0xD9;
     info[4] = 0x03;
     info[5] = 0x86;
-    info[6] = 0x07;
+    info[6] = 0x08;
     le_controller_get_mac(&info[7]);    //获取ble的蓝牙public地址
 
     offset += make_eir_packet_data(&buf[offset], offset, HCI_EIR_DATATYPE_MANUFACTURER_SPECIFIC_DATA, info, 13);

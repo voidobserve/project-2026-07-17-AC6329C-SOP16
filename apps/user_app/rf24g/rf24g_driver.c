@@ -149,26 +149,19 @@ void rf24g_driver_package_process(adv_report_t *adv_report)
         return;
     }
 
-    if (!(adv_report->data[2] == RF24G_TYPE_28KEY_FIXVAL_1 &&
-          adv_report->data[3] == RF24G_TYPE_28KEY_FIXVAL_2)) {
+    if (!(adv_report->data[2] == RF24G_FIXVAL_1 &&
+          adv_report->data[3] == RF24G_FIXVAL_2)) {
         // 固定值不对，直接返回
         return;
     }
 
-    if (adv_report->rssi >= -60) {
-        put_buf(adv_report->data, adv_report->length);
-    }
+    // TEST ONLY
+    // if (adv_report->rssi >= -60) {
+    //     put_buf(adv_report->data, adv_report->length);
+    // }
 
-    /*
-        USER_TO_DO
-
-        两支遥控包格式几乎相同（都是 55 AA 头、键值在 payload[10]），
-        但键值范围重叠（参考 24 键用 0x01~0x18，
-        现有 28 键用 0x14~0x35，0x14~0x18 五个键值冲突），需要区分规则
-    */
-
-    // USER_TO_DO 获取键值
-    // rf24g_key.key_val = (u8)((rf24g_remote_package_t *)ptr)->key_val;
+    // 获取键值
+    rf24g_key.key_val = (u8)adv_report->data[12];
     rf24g_key.is_update = 1;
 }
 
@@ -184,9 +177,9 @@ void rf24g_driver_package_handle(void *ptr, u8 len)
 
     if (len >= 10 &&
         ((rf24g_remote_package_t *)ptr)->fix_val_1 ==
-            RF24G_TYPE_28KEY_FIXVAL_1 &&
+            RF24G_FIXVAL_1 &&
         ((rf24g_remote_package_t *)ptr)->fix_val_2 ==
-            RF24G_TYPE_28KEY_FIXVAL_2) {
+            RF24G_FIXVAL_2) {
         // printf_buf(ptr, len);
         // printf("key == %02x\n", (u16)((rf24g_remote_package_t*)ptr)->key_val);
         // printf("is_hold == %02x\n", (u16)((rf24g_remote_package_t*)ptr)->is_hold);

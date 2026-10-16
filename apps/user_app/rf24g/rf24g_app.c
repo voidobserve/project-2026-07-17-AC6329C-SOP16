@@ -4,7 +4,6 @@
 
 #include "task.h"
 #include "event.h"
-#include "rf24g.h"
 #include "led_strip_sys.h"
 #include "board_ac632n_demo_cfg.h"
 #include "led_strand_effect.h"

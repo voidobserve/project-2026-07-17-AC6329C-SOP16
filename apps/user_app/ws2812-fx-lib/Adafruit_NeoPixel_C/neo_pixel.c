@@ -31,7 +31,8 @@ static uint16_t          numLEDs;    ///< Number of RGB LEDs in strip
 static uint16_t          numBytes;   ///< Size of 'pixels' buffer below
 //static int16_t           pin;        ///< Output pin number (-1 if not yet set)
 static uint8_t           brightness; ///< Strip brightness 0-255 (stored as +1)
-static uint8_t            pixels[300];     ///< Holds LED color values (3 or 4 bytes each)   配置RAM大小
+///< Holds LED color values (3 or 4 bytes each)   配置RAM大小
+static uint8_t     pixels[300] __attribute__((aligned(4)));    
  uint8_t           rOffset;    ///< Red index within each 3- or 4-byte pixel
  uint8_t           gOffset;    ///< Index of green byte
  uint8_t           bOffset;    ///< Index of blue byte

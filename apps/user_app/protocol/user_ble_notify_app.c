@@ -193,6 +193,7 @@ void user_ble_notify_meteor_period(void)
     user_ble_notify_param_put(buf, buf_len);
 }
 
+#if 0
 // notify 闹钟（定时）数据
 void user_ble_notify_alarm_data(unsigned char alarm_index)
 {
@@ -210,6 +211,7 @@ void user_ble_notify_alarm_data(unsigned char alarm_index)
 
     user_ble_notify_param_put(buf, buf_len);
 }
+#endif
 
 // 同步结束指令
 void user_ble_notify_syn_end(void)
@@ -241,8 +243,12 @@ void user_ble_notify_dev_all_info(void)
     user_ble_notify_meteor_pwr_sta();
     user_ble_notify_meteor_speed();
     user_ble_notify_meteor_period();
+
+#if 0
     user_ble_notify_alarm_data(0);
     user_ble_notify_alarm_data(1);
     user_ble_notify_alarm_data(2);
-    user_ble_notify_syn_end();
+#endif
+
+    // user_ble_notify_syn_end();
 }

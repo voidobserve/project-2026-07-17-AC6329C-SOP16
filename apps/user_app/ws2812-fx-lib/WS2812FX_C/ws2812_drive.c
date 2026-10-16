@@ -18,7 +18,7 @@ extern uint8_t bOffset; ///< Index of blue byte
 extern u8 send_rgbbuf_flag;
 // 流星灯带 ledc 发送缓冲：最多 17 个像素(16流星+1)，白光字节流按 3 字节/灯位
 // 发送需覆盖 ceil(16/3)=6 个灯位，留足余量并保证发送不越界
-u8 buf[64]; //使用中断实现效果时，必须需要全局变量
+u8 buf[64] __attribute__((aligned(4))); //使用中断实现效果时，必须需要全局变量
 
 /**
  * @brief 灯具的驱动集成，包括七彩的驱动，幻彩的驱动

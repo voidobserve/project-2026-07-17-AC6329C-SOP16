@@ -36,37 +36,10 @@ void led_state_init(void)
     ledc_init(&ledc_data);
 }
 
-void led_pwr_on(void)
-{
-    gpio_disable_fun_output_port(IO_PORTA_02);
-    gpio_set_die(IO_PORTA_02, 1);
-    gpio_set_direction(IO_PORTA_02, 0);
-    gpio_set_pull_up(IO_PORTA_02, 1);
-    gpio_set_pull_down(IO_PORTA_02, 0); //1，下拉；0，不下拉
-
-    gpio_direction_output(IO_PORTA_02, 1);
-}
 /*********************************mic脚IO口初始化***************************************************************/
 
 void mic_gpio_init()
 {
-    // #define AD_CH_PA1    (0x0)
-    // #define AD_CH_PA3    (0x1)
-    // #define AD_CH_PA5    (0x2)
-    // #define AD_CH_PA7    (0x3)
-    // #define AD_CH_PA8    (0x4)
-    // #define AD_CH_DP1    (0x5)
-    // #define AD_CH_DM1    (0x6)
-    // #define AD_CH_PB1    (0x7)
-    // #define AD_CH_PA9    (0x8)
-    // #define AD_CH_PB4    (0x9)
-    // #define AD_CH_DP0    (0xA)
-    // #define AD_CH_DM0    (0xB)
-    // #define AD_CH_DB6    (0xC)
-    // #define AD_CH_PMU    (0xD)
-    // #define AD_CH_OSC32K     (0xE)
-    // #define AD_CH_BT     (0xF)
-
     adc_add_sample_ch(AD_CH_PA8); //注意：初始化AD_KEY之前，先初始化ADC
     gpio_set_die(IO_PORTA_08, 0);
     gpio_set_direction(IO_PORTA_08, 1);

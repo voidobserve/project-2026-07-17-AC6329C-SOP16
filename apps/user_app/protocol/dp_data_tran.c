@@ -17,8 +17,8 @@ DP协议转置，提取DP点有效数据
 #include "ble_user.h"
 #include "btstack/le/ble_api.h"
 #include "led_strip_drive.h"
-#include "user_ble_notify.h"      // BLE notify 反馈通道
-#include "user_ble_notify_app.h"  // 各状态 notify 接口
+#include "user_ble_notify.h"     // BLE notify 反馈通道
+#include "user_ble_notify_app.h" // 各状态 notify 接口
 // #include "one_wire.h"
 dp_data_header_t dp_data_header; //涂鸦DP数据头
 dp_switch_led_t dp_switch_led;   //DPID_SWITCH_LED开关
@@ -26,7 +26,7 @@ dp_work_mode_t dp_work_mode;     //DPID_WORK_MODE工作模式
 dp_countdown_t dp_countdown;     //DPID_COUNTDOWN倒计时
 dp_music_data_t dp_music_data;   //DPID_MUSIC_DATA音乐灯
 
-dp_draw_tool_t dp_draw_tool;   //DPID_DRAW_TOOL 涂抹功能
+dp_draw_tool_t dp_draw_tool; //DPID_DRAW_TOOL 涂抹功能
 
 /************************************************************************************
  *@  函数：string_hex_Byte
@@ -219,206 +219,205 @@ void parse_zd_data(unsigned char *LedCommand)
         user_ble_notify_dev_all_info();
     }
 
-    // else
-    {
-        //---------------------------------接收到开关灯命令-----------------------------------
-        if (LedCommand[0] == 0x01 && LedCommand[1] == 0x01 &&
-            gpio_read(IO_PORTB_05) == 0) {
+    //---------------------------------接收到开关灯命令-----------------------------------
+    if (LedCommand[0] == 0x01 && LedCommand[1] == 0x01) {
+        extern void set_on_off_led(u8 on_off);
+        set_on_off_led(LedCommand[2]);
+        user_ble_notify_light_pwr_sta(); //回读开关状态
+    }
 
-            extern void set_on_off_led(u8 on_off);
-            set_on_off_led(LedCommand[2]);
-            user_ble_notify_light_pwr_sta(); //回读开关状态
+#if 0
+    //---------------------------------接收到设备时间数据，无需返回应答-----------------------------------
+    if (LedCommand[0] == 0x06 && LedCommand[1] == 0x02) {
+        extern TIME_CLOCK time_clock;
+        time_clock.hour = LedCommand[2]; //更新时间数据
+        time_clock.minute = LedCommand[3];
+        time_clock.second = LedCommand[4];
+        time_clock.week = LedCommand[5];
+    }
+    //-----------------------------------接收到闹钟数据-----------------------------------------
+    if (LedCommand[0] == 0x05) {
+        extern ALARM_CLOCK alarm_clock[3];
+
+        if (LedCommand[1] == 0x00) {
+            alarm_clock[0].hour = LedCommand[2];
+            alarm_clock[0].minute = LedCommand[3];
+            alarm_clock[0].on_off = LedCommand[4];
+            alarm_clock[0].mode = LedCommand[5];
+            parse_alarm_data(0);
         }
-        //---------------------------------接收到设备时间数据，无需返回应答-----------------------------------
-        if (LedCommand[0] == 0x06 && LedCommand[1] == 0x02) {
-            extern TIME_CLOCK time_clock;
-            time_clock.hour = LedCommand[2]; //更新时间数据
-            time_clock.minute = LedCommand[3];
-            time_clock.second = LedCommand[4];
-            time_clock.week = LedCommand[5];
+        if (LedCommand[1] == 0x01) {
+            alarm_clock[1].hour = LedCommand[2];
+            alarm_clock[1].minute = LedCommand[3];
+            alarm_clock[1].on_off = LedCommand[4];
+            alarm_clock[1].mode = LedCommand[5];
+            parse_alarm_data(1);
         }
-        //-----------------------------------接收到闹钟数据-----------------------------------------
-        if (LedCommand[0] == 0x05) {
-            extern ALARM_CLOCK alarm_clock[3];
-
-            if (LedCommand[1] == 0x00) {
-                alarm_clock[0].hour = LedCommand[2];
-                alarm_clock[0].minute = LedCommand[3];
-                alarm_clock[0].on_off = LedCommand[4];
-                alarm_clock[0].mode = LedCommand[5];
-                parse_alarm_data(0);
-            }
-            if (LedCommand[1] == 0x01) {
-                alarm_clock[1].hour = LedCommand[2];
-                alarm_clock[1].minute = LedCommand[3];
-                alarm_clock[1].on_off = LedCommand[4];
-                alarm_clock[1].mode = LedCommand[5];
-                parse_alarm_data(1);
-            }
-            if (LedCommand[1] == 0x02) {
-                alarm_clock[2].hour = LedCommand[2];
-                alarm_clock[2].minute = LedCommand[3];
-                alarm_clock[2].on_off = LedCommand[4];
-                alarm_clock[2].mode = LedCommand[5];
-                parse_alarm_data(2);
-            }
-
-            user_ble_notify_alarm_data(LedCommand[1]); //回读闹钟数据
+        if (LedCommand[1] == 0x02) {
+            alarm_clock[2].hour = LedCommand[2];
+            alarm_clock[2].minute = LedCommand[3];
+            alarm_clock[2].on_off = LedCommand[4];
+            alarm_clock[2].mode = LedCommand[5];
+            parse_alarm_data(2);
         }
-        //--------------------------下面所有的操作都需要在开灯状态下操作-----------------------------------
 
-        if (get_on_off_state()) {
-            //---------------------------------更新RGB 色盘-----------------------------------
-            if (LedCommand[0] == 0x04 && LedCommand[1] == 0x01 &&
-                LedCommand[2] == 0x1e) {
-                extern void set_static_mode(u8 r, u8 g, u8 b);
+        user_ble_notify_alarm_data(LedCommand[1]); //回读闹钟数据
+    }
+#endif
+    //--------------------------下面所有的操作都需要在开灯状态下操作-----------------------------------
 
-                set_static_mode(
-                    LedCommand[3], LedCommand[4],
-                    LedCommand[5]); //配好颜色，在service中会调回PWM驱动修改颜色
-            }
-            //---------------------------------静态（模式）任务处理-----------------------------------
-            if (LedCommand[0] == 0x04 && LedCommand[1] == 0x02 &&
-                LedCommand[2] >= 0 && LedCommand[2] < 0x07) {
-                switch (LedCommand[2]) {
-                case 0:
-                    fc_static_effect(0);
-                    break; //R
+    if (!get_on_off_state()) {
+        return;
+    }
 
-                case 1:
-                    fc_static_effect(2);
-                    break; //B
+    //---------------------------------更新RGB 色盘-----------------------------------
+    if (LedCommand[0] == 0x04 && LedCommand[1] == 0x01 &&
+        LedCommand[2] == 0x1e) {
+        extern void set_static_mode(u8 r, u8 g, u8 b);
 
-                case 2:
-                    fc_static_effect(1);
-                    break; //G
+        set_static_mode(
+            LedCommand[3], LedCommand[4],
+            LedCommand[5]); //配好颜色，在service中会调回PWM驱动修改颜色
+    }
+    //---------------------------------静态（模式）任务处理-----------------------------------
+    if (LedCommand[0] == 0x04 && LedCommand[1] == 0x02 && LedCommand[2] >= 0 &&
+        LedCommand[2] < 0x07) {
+        switch (LedCommand[2]) {
+        case 0:
+            led_colorful_light_set_static_color(RED);
+            break;
 
-                case 3:
-                    fc_static_effect(5);
-                    break; //CYAN
+        case 1:
+            led_colorful_light_set_static_color(BLUE);
+            break;
 
-                case 4:
-                    fc_static_effect(4);
-                    break; //YELLOW
+        case 2:
+            led_colorful_light_set_static_color(GREEN);
+            break;
 
-                case 5:
-                    fc_static_effect(7);
-                    break; //PURPLE
+        case 3: 
+            led_colorful_light_set_static_color(CYAN);
+            break;  
 
-                case 6:
-                    fc_static_effect(3);
-                    break; //WHILE
-                }
-            }
-            //---------------------------------动态处理-----------------------------------
-            // if(LedCommand[0]==0x04 && LedCommand[1]==0x02 && LedCommand[2]>=0x07 && LedCommand[2]<=0x1e)
-            if (LedCommand[0] == 0x04 && LedCommand[1] == 0x02 &&
-                LedCommand[2] >= 0x07 && LedCommand[2] <= 0xFF) {
-                fc_dynamic_effect(LedCommand[2]);
-            }
-            //---------------------------------调节亮度0-100-----------------------------------
-            if (LedCommand[0] == 0x04 && LedCommand[1] == 0x03) {
-                extern void set_bright(u8 b);
-                set_bright(LedCommand[2]);
-                user_ble_notify_light_brightness(); //回读亮度
-            }
-            //---------------------------------调节速度0-100-----------------------------------
-            if (LedCommand[0] == 0x04 && LedCommand[1] == 0x04) {
-                // 范围0-100
-                ls_set_speed(LedCommand[2]);
-                user_ble_notify_light_speed(); //回读速度
-            }
-            //---------------------------------更改RGB接口-----------------------------------
-            if (LedCommand[0] == 0x04 && LedCommand[1] == 0x05) {
-                extern void set_rgb_sequence(u8 s);
-                set_rgb_sequence(LedCommand[2]);
-                user_ble_notify_rgb_sequence(); //回读RGB接口顺序
-            }
-            //---------------------------------W（灰度调节）控制----------------------------
-            if (LedCommand[0] == 0x04 && LedCommand[1] == 0x06) {
-                extern void set_w(u8 w);
-                set_w(LedCommand[2] * 255 / 100);
-            }
-            //---------------------------------手机音乐律动 手机麦克风-----------------------------------
-            if (LedCommand[0] == 0x06 && LedCommand[1] == 0x04) {
-                extern void set_static_mode(u8 r, u8 g, u8 b);
+        case 4: 
+            led_colorful_light_set_static_color(YELLOW);
+            break;  
 
-                if (fc_effect.music.m_type == 0x00) //手机麦模式
-                {
-                    set_bright(LedCommand[5]);
-                    set_static_mode(LedCommand[2], LedCommand[3],
-                                    LedCommand[4]);
-                }
-            }
-            //---------------------------------外麦声控模式-----------------------------------
-            if (LedCommand[0] == 0x06 && LedCommand[1] == 0x06) {
-                extern void set_music_mode(u8 m);
-                if (fc_effect.music.m_type == 0x01) //外模模式
-                {
-                    set_music_mode(LedCommand[2]);
-                    user_ble_notify_sound_mode(); //回读声控模式
-                }
-            }
-            //---------------------------------设备手机麦或者外麦-----------------------------------
-            if (LedCommand[0] == 0x06 && LedCommand[1] == 0x07) {
-                extern void set_music_type(u8 ty);
-                set_music_type(LedCommand[2]);
-                user_ble_notify_sound_ctl_type(); //回读声控类型
-            }
-            // --------------------------------流星模式-----------------------------------
-            if (LedCommand[0] == 0x2F && LedCommand[1] == 0x00 &&
-                fc_effect.metemor_on_off == 0x01) {
-                extern void set_mereor_mode(u8 m);
-                set_mereor_mode(LedCommand[2]);
-            }
-            //-------------------------------- 流星速度-----------------------------------
-            if (LedCommand[0] == 0x2F && LedCommand[1] == 0x01 &&
-                fc_effect.metemor_on_off == 0x01) {
-                extern void set_mereor_speed(u8 s);
-                set_mereor_speed(LedCommand[2]);
-                user_ble_notify_meteor_speed(); //回读流星速度
-            }
-            //-------------------------------- 流星开关-----------------------------------
-            if (LedCommand[0] == 0x2F && LedCommand[1] == 0x02) {
-                extern void set_on_off_meteor(u8 on_off);
-                set_on_off_meteor(LedCommand[2]);
-                user_ble_notify_meteor_pwr_sta(); //回读流星开关
-            }
+        case 5: 
+            led_colorful_light_set_static_color(PURPLE);
+            break;  
 
-            // --------------------------------流星灯时间间隔-----------------------------------
-            if (LedCommand[0] == 0x2F && LedCommand[1] == 0x03 &&
-                fc_effect.metemor_on_off == 0x01) {
-                extern void set_meteor_p(u8 p);
-                set_meteor_p(LedCommand[2]);
-                user_ble_notify_meteor_period(); //回读流星周期
-            }
-            //---------------------------------设置麦克风灵，电机，流星敏度-----------------------------------
-            if (LedCommand[0] == 0x2F && LedCommand[1] == 0x05) {
-                // extern void set_music_sensitive(u8 s);
-                // set_music_sensitive(LedCommand[2]);
-                set_sensitive(100 - LedCommand[2]);
-                user_ble_notify_sensitive(); //回读灵敏度
-            }
-            // ---------------------------------设置电机模式-----------------------------------
-            if (LedCommand[0] == 0x2F && LedCommand[1] == 0x06) {
-                // USER_TO_DO one_wire_set_mode 已屏蔽，待添加新的接口
-                // extern void one_wire_set_mode(u8 m);
-                // one_wire_set_mode(LedCommand[2]); //配置模式
-                // enable_one_wire();  //使用发送数据
-
-                user_ble_notify_motor_mode(); //回读电机模式
-            }
-
-            // --------------------------------设置电机转速-----------------------------------
-            if (LedCommand[0] == 0x2F && LedCommand[1] == 0x07) {
-                // USER_TO_DO one_wire_set_period 已屏蔽，待添加新的接口
-                // extern void one_wire_set_period(u8 p);
-                // one_wire_set_period(LedCommand[2]);
-                // enable_one_wire();
-
-                user_ble_notify_motor_speed(); //回读电机转速
-            }
+        case 6: 
+            led_colorful_light_set_static_color(PURE_WHITE);
+            break;
         }
+    }
+    //---------------------------------动态处理-----------------------------------
+    // if(LedCommand[0]==0x04 && LedCommand[1]==0x02 && LedCommand[2]>=0x07 && LedCommand[2]<=0x1e)
+    if (LedCommand[0] == 0x04 && LedCommand[1] == 0x02 &&
+        LedCommand[2] >= 0x07 && LedCommand[2] <= 0xFF) {
+        fc_dynamic_effect(LedCommand[2]);
+    }
+    //---------------------------------调节亮度0-100-----------------------------------
+    if (LedCommand[0] == 0x04 && LedCommand[1] == 0x03) {
+        extern void set_bright(u8 b);
+        set_bright(LedCommand[2]);
+        user_ble_notify_light_brightness(); //回读亮度
+    }
+    //---------------------------------调节速度0-100-----------------------------------
+    if (LedCommand[0] == 0x04 && LedCommand[1] == 0x04) {
+        // 范围0-100
+        ls_set_speed(LedCommand[2]);
+        user_ble_notify_light_speed(); //回读速度
+    }
+    //---------------------------------更改RGB接口-----------------------------------
+    if (LedCommand[0] == 0x04 && LedCommand[1] == 0x05) {
+        extern void set_rgb_sequence(u8 s);
+        set_rgb_sequence(LedCommand[2]);
+        user_ble_notify_rgb_sequence(); //回读RGB接口顺序
+    }
+    //---------------------------------W（灰度调节）控制----------------------------
+    if (LedCommand[0] == 0x04 && LedCommand[1] == 0x06) {
+        extern void set_w(u8 w);
+        set_w(LedCommand[2] * 255 / 100);
+    }
+    //---------------------------------手机音乐律动 手机麦克风-----------------------------------
+    if (LedCommand[0] == 0x06 && LedCommand[1] == 0x04) {
+        extern void set_static_mode(u8 r, u8 g, u8 b);
+
+        if (fc_effect.music.m_type == 0x00) //手机麦模式
+        {
+            set_bright(LedCommand[5]);
+            set_static_mode(LedCommand[2], LedCommand[3], LedCommand[4]);
+        }
+    }
+    //---------------------------------外麦声控模式-----------------------------------
+    if (LedCommand[0] == 0x06 && LedCommand[1] == 0x06) {
+        extern void set_music_mode(u8 m);
+        if (fc_effect.music.m_type == 0x01) //外模模式
+        {
+            set_music_mode(LedCommand[2]);
+            user_ble_notify_sound_mode(); //回读声控模式
+        }
+    }
+    //---------------------------------设备手机麦或者外麦-----------------------------------
+    if (LedCommand[0] == 0x06 && LedCommand[1] == 0x07) {
+        extern void set_music_type(u8 ty);
+        set_music_type(LedCommand[2]);
+        user_ble_notify_sound_ctl_type(); //回读声控类型
+    }
+    // --------------------------------流星模式-----------------------------------
+    if (LedCommand[0] == 0x2F && LedCommand[1] == 0x00 &&
+        fc_effect.metemor_on_off == 0x01) {
+        extern void set_mereor_mode(u8 m);
+        set_mereor_mode(LedCommand[2]);
+    }
+    //-------------------------------- 流星速度-----------------------------------
+    if (LedCommand[0] == 0x2F && LedCommand[1] == 0x01 &&
+        fc_effect.metemor_on_off == 0x01) {
+        extern void set_mereor_speed(u8 s);
+        set_mereor_speed(LedCommand[2]);
+        user_ble_notify_meteor_speed(); //回读流星速度
+    }
+    //-------------------------------- 流星开关-----------------------------------
+    if (LedCommand[0] == 0x2F && LedCommand[1] == 0x02) {
+        extern void set_on_off_meteor(u8 on_off);
+        set_on_off_meteor(LedCommand[2]);
+        user_ble_notify_meteor_pwr_sta(); //回读流星开关
+    }
+
+    // --------------------------------流星灯时间间隔-----------------------------------
+    if (LedCommand[0] == 0x2F && LedCommand[1] == 0x03 &&
+        fc_effect.metemor_on_off == 0x01) {
+        extern void set_meteor_p(u8 p);
+        set_meteor_p(LedCommand[2]);
+        user_ble_notify_meteor_period(); //回读流星周期
+    }
+    //---------------------------------设置麦克风灵，电机，流星敏度-----------------------------------
+    if (LedCommand[0] == 0x2F && LedCommand[1] == 0x05) {
+        // extern void set_music_sensitive(u8 s);
+        // set_music_sensitive(LedCommand[2]);
+        set_sensitive(100 - LedCommand[2]);
+        user_ble_notify_sensitive(); //回读灵敏度
+    }
+    // ---------------------------------设置电机模式-----------------------------------
+    if (LedCommand[0] == 0x2F && LedCommand[1] == 0x06) {
+        // USER_TO_DO one_wire_set_mode 已屏蔽，待添加新的接口
+        // extern void one_wire_set_mode(u8 m);
+        // one_wire_set_mode(LedCommand[2]); //配置模式
+        // enable_one_wire();  //使用发送数据
+
+        user_ble_notify_motor_mode(); //回读电机模式
+    }
+
+    // --------------------------------设置电机转速-----------------------------------
+    if (LedCommand[0] == 0x2F && LedCommand[1] == 0x07) {
+        // USER_TO_DO one_wire_set_period 已屏蔽，待添加新的接口
+        // extern void one_wire_set_period(u8 p);
+        // one_wire_set_period(LedCommand[2]);
+        // enable_one_wire();
+
+        user_ble_notify_motor_speed(); //回读电机转速
     }
 }
 
@@ -471,7 +470,8 @@ void zd_fb_2_app(u8 *p, u8 len)
     // 照参考工程：数据前带 6 字节蓝牙地址，经 fff1 通知发出
     uint8_t buf[50];
     extern int ble_comm_att_send_data(u16 conn_handle, u16 att_handle,
-                                      u8 *data, u16 len, att_op_type_e op_type);
+                                      u8 * data, u16 len,
+                                      att_op_type_e op_type);
 
     if (len > 44) {
         return;
