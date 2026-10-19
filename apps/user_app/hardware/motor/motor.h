@@ -6,13 +6,14 @@
 enum
 {
     MOTOR_MODE_STOP,             // 停止
-    MOTOR_MODE_FORWARD_ROTATION, // 电机模式 正转
-    MOTOR_MODE_REVERSE_ROTATION, // 电机模式 反转
 
     // 先正转，再反转
     MOTOR_MODE_FORWARD_THEN_REVERSE_ROTATION,
     // 先反转，再正转
     MOTOR_MODE_REVERSE_THEN_FORWARD_ROTATION,
+
+    MOTOR_MODE_REVERSE_ROTATION, // 电机模式 反转
+    MOTOR_MODE_FORWARD_ROTATION, // 电机模式 正转    
 
     MOTOR_MODE_SOUND_CONTROL, // 电机模式 声控
 };
@@ -37,7 +38,7 @@ extern volatile motor_t motor;
 	调节电机转速时，限制的最快转速
 
 	由于客户选的电机质量比较差，不能达到理论的4秒转一圈，
-	这里要实际测试客户的电机可以转多块，再给个保守值
+	这里要实际测试客户的电机可以转多快，再给个保守值
 */
 #define MOTOR_THE_FASTEST_SPEED_SEC_PER_ROUND 10
 

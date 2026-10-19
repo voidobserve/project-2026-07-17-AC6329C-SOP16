@@ -12,7 +12,7 @@
 
 volatile motor_t motor;
 
-// USER_TO_DO 可能需要改成从 flash 中读出数据，再根据数据进行初始化
+// REVIEW 需要确认上电后，有没有从flash中恢复数据，恢复原来的电机模式、电机转速
 void motor_init(void)
 {
     motor.mode = MOTOR_MODE_FORWARD_ROTATION;
@@ -92,8 +92,6 @@ void motor_set_mode(motor_mode_t mode)
 
 void motor_handle_125us(void)
 {
-    // static u16 step = 0;
-
     motor_24byj48_time_add();
     if (0 == motor_24byj48_time_expire()) {
         return;

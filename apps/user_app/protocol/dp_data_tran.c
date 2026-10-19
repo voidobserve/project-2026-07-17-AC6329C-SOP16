@@ -207,15 +207,11 @@ unsigned short dp_extract_data_handle(unsigned char *buff)
     return (dp_data_header.len + sizeof(dp_data_header_t));
 }
 
-u8 Ble_Addr[6]; //蓝牙地址
-
 /* 解析中道数据，主要是静态模式，和动态效果的“基本”效果 */
 void parse_zd_data(unsigned char *LedCommand)
 {
-
-    if (LedCommand[0] == 0x01 && LedCommand[1] == 0x03) //与APP同步数据
-    {
-        // 一次性下发设备全部状态
+    if (LedCommand[0] == 0x01 && LedCommand[1] == 0x03) {
+        // APP的同步指令，与APP同步数据
         user_ble_notify_dev_all_info();
     }
 
@@ -223,50 +219,11 @@ void parse_zd_data(unsigned char *LedCommand)
     if (LedCommand[0] == 0x01 && LedCommand[1] == 0x01) {
         extern void set_on_off_led(u8 on_off);
         set_on_off_led(LedCommand[2]);
-        user_ble_notify_light_pwr_sta(); //回读开关状态
+        user_ble_notify_light_pwr_sta(); //
     }
 
-#if 0
-    //---------------------------------接收到设备时间数据，无需返回应答-----------------------------------
-    if (LedCommand[0] == 0x06 && LedCommand[1] == 0x02) {
-        extern TIME_CLOCK time_clock;
-        time_clock.hour = LedCommand[2]; //更新时间数据
-        time_clock.minute = LedCommand[3];
-        time_clock.second = LedCommand[4];
-        time_clock.week = LedCommand[5];
-    }
-    //-----------------------------------接收到闹钟数据-----------------------------------------
-    if (LedCommand[0] == 0x05) {
-        extern ALARM_CLOCK alarm_clock[3];
-
-        if (LedCommand[1] == 0x00) {
-            alarm_clock[0].hour = LedCommand[2];
-            alarm_clock[0].minute = LedCommand[3];
-            alarm_clock[0].on_off = LedCommand[4];
-            alarm_clock[0].mode = LedCommand[5];
-            parse_alarm_data(0);
-        }
-        if (LedCommand[1] == 0x01) {
-            alarm_clock[1].hour = LedCommand[2];
-            alarm_clock[1].minute = LedCommand[3];
-            alarm_clock[1].on_off = LedCommand[4];
-            alarm_clock[1].mode = LedCommand[5];
-            parse_alarm_data(1);
-        }
-        if (LedCommand[1] == 0x02) {
-            alarm_clock[2].hour = LedCommand[2];
-            alarm_clock[2].minute = LedCommand[3];
-            alarm_clock[2].on_off = LedCommand[4];
-            alarm_clock[2].mode = LedCommand[5];
-            parse_alarm_data(2);
-        }
-
-        user_ble_notify_alarm_data(LedCommand[1]); //回读闹钟数据
-    }
-#endif
     //--------------------------下面所有的操作都需要在开灯状态下操作-----------------------------------
-
-    if (!get_on_off_state()) {
+    if (DEVICE_OFF == get_on_off_state()) {
         return;
     }
 
@@ -295,51 +252,54 @@ void parse_zd_data(unsigned char *LedCommand)
             led_colorful_light_set_static_color(GREEN);
             break;
 
-        case 3: 
+        case 3:
             led_colorful_light_set_static_color(CYAN);
-            break;  
+            break;
 
-        case 4: 
+        case 4:
             led_colorful_light_set_static_color(YELLOW);
-            break;  
+            break;
 
-        case 5: 
+        case 5:
             led_colorful_light_set_static_color(PURPLE);
-            break;  
+            break;
 
-        case 6: 
+        case 6:
             led_colorful_light_set_static_color(PURE_WHITE);
             break;
         }
     }
-    //---------------------------------动态处理-----------------------------------
-    // if(LedCommand[0]==0x04 && LedCommand[1]==0x02 && LedCommand[2]>=0x07 && LedCommand[2]<=0x1e)
+
     if (LedCommand[0] == 0x04 && LedCommand[1] == 0x02 &&
         LedCommand[2] >= 0x07 && LedCommand[2] <= 0xFF) {
+        // 动态模式
         fc_dynamic_effect(LedCommand[2]);
     }
     //---------------------------------调节亮度0-100-----------------------------------
     if (LedCommand[0] == 0x04 && LedCommand[1] == 0x03) {
         extern void set_bright(u8 b);
         set_bright(LedCommand[2]);
-        user_ble_notify_light_brightness(); //回读亮度
+        user_ble_notify_light_brightness(); // 亮度
     }
     //---------------------------------调节速度0-100-----------------------------------
     if (LedCommand[0] == 0x04 && LedCommand[1] == 0x04) {
         // 范围0-100
         ls_set_speed(LedCommand[2]);
-        user_ble_notify_light_speed(); //回读速度
+        user_ble_notify_light_speed(); // 速度
     }
     //---------------------------------更改RGB接口-----------------------------------
     if (LedCommand[0] == 0x04 && LedCommand[1] == 0x05) {
         extern void set_rgb_sequence(u8 s);
         set_rgb_sequence(LedCommand[2]);
-        user_ble_notify_rgb_sequence(); //回读RGB接口顺序
+        user_ble_notify_rgb_sequence(); // RGB接口顺序
     }
     //---------------------------------W（灰度调节）控制----------------------------
     if (LedCommand[0] == 0x04 && LedCommand[1] == 0x06) {
-        extern void set_w(u8 w);
-        set_w(LedCommand[2] * 255 / 100);
+        // app下发的是0-100，需要转换成0-255
+        u32 color = 0;
+        // 结合app下发的数据，限制颜色为纯白色，app下发的数据只改变白色分量
+        color = (((u32)LedCommand[2] * 255 / 100) << 24) & PURE_WHITE;
+        led_colorful_light_set_static_color(color);
     }
     //---------------------------------手机音乐律动 手机麦克风-----------------------------------
     if (LedCommand[0] == 0x06 && LedCommand[1] == 0x04) {
@@ -357,14 +317,14 @@ void parse_zd_data(unsigned char *LedCommand)
         if (fc_effect.music.m_type == 0x01) //外模模式
         {
             set_music_mode(LedCommand[2]);
-            user_ble_notify_sound_mode(); //回读声控模式
+            user_ble_notify_sound_ctl_mode(); // 声控模式
         }
     }
     //---------------------------------设备手机麦或者外麦-----------------------------------
     if (LedCommand[0] == 0x06 && LedCommand[1] == 0x07) {
         extern void set_music_type(u8 ty);
         set_music_type(LedCommand[2]);
-        user_ble_notify_sound_ctl_type(); //回读声控类型
+        user_ble_notify_sound_ctl_type(); // 声控类型
     }
     // --------------------------------流星模式-----------------------------------
     if (LedCommand[0] == 0x2F && LedCommand[1] == 0x00 &&
@@ -377,13 +337,13 @@ void parse_zd_data(unsigned char *LedCommand)
         fc_effect.metemor_on_off == 0x01) {
         extern void set_mereor_speed(u8 s);
         set_mereor_speed(LedCommand[2]);
-        user_ble_notify_meteor_speed(); //回读流星速度
+        user_ble_notify_meteor_speed(); // 流星速度
     }
     //-------------------------------- 流星开关-----------------------------------
     if (LedCommand[0] == 0x2F && LedCommand[1] == 0x02) {
         extern void set_on_off_meteor(u8 on_off);
         set_on_off_meteor(LedCommand[2]);
-        user_ble_notify_meteor_pwr_sta(); //回读流星开关
+        user_ble_notify_meteor_pwr_sta(); // 流星开关
     }
 
     // --------------------------------流星灯时间间隔-----------------------------------
@@ -391,33 +351,31 @@ void parse_zd_data(unsigned char *LedCommand)
         fc_effect.metemor_on_off == 0x01) {
         extern void set_meteor_p(u8 p);
         set_meteor_p(LedCommand[2]);
-        user_ble_notify_meteor_period(); //回读流星周期
+        user_ble_notify_meteor_period(); // 流星周期
     }
     //---------------------------------设置麦克风灵，电机，流星敏度-----------------------------------
     if (LedCommand[0] == 0x2F && LedCommand[1] == 0x05) {
-        // extern void set_music_sensitive(u8 s);
-        // set_music_sensitive(LedCommand[2]);
         set_sensitive(100 - LedCommand[2]);
-        user_ble_notify_sensitive(); //回读灵敏度
+        user_ble_notify_sensitive(); // 灵敏度
     }
     // ---------------------------------设置电机模式-----------------------------------
     if (LedCommand[0] == 0x2F && LedCommand[1] == 0x06) {
-        // USER_TO_DO one_wire_set_mode 已屏蔽，待添加新的接口
-        // extern void one_wire_set_mode(u8 m);
-        // one_wire_set_mode(LedCommand[2]); //配置模式
-        // enable_one_wire();  //使用发送数据
 
-        user_ble_notify_motor_mode(); //回读电机模式
+        fc_effect.motor_mode = LedCommand[2];
+        motor_set_mode(fc_effect.motor_mode);
+        user_ble_notify_motor_mode(); // 电机模式
+
+#if USER_DEBUG_ENABLE
+        printf("app set motor mode == %u\n", LedCommand[2]);
+        printf("fc_effect.motor_mode == %u\n", (u16)fc_effect.motor_mode);
+#endif
     }
 
     // --------------------------------设置电机转速-----------------------------------
     if (LedCommand[0] == 0x2F && LedCommand[1] == 0x07) {
-        // USER_TO_DO one_wire_set_period 已屏蔽，待添加新的接口
-        // extern void one_wire_set_period(u8 p);
-        // one_wire_set_period(LedCommand[2]);
-        // enable_one_wire();
-
-        user_ble_notify_motor_speed(); //回读电机转速
+        fc_effect.motor_sec_per_round = LedCommand[2];
+        motor_set_speed_sec_per_round(fc_effect.motor_sec_per_round);
+        user_ble_notify_motor_speed(); // 电机转速
     }
 }
 
@@ -458,29 +416,6 @@ void tuya_fb_sw_state(void)
     p_dp->len = __SWP16(1);
     // dp_data[4] = fc_effect.on_off_flag;
     dp_data[4] = 1; //默认开机
-}
-/**
- * @brief 向app反馈信息
- *
- * @param p   数据内容
- * @param len  数据长度
- */
-void zd_fb_2_app(u8 *p, u8 len)
-{
-    // 照参考工程：数据前带 6 字节蓝牙地址，经 fff1 通知发出
-    uint8_t buf[50];
-    extern int ble_comm_att_send_data(u16 conn_handle, u16 att_handle,
-                                      u8 * data, u16 len,
-                                      att_op_type_e op_type);
-
-    if (len > 44) {
-        return;
-    }
-    memcpy(buf, Ble_Addr, 6);
-    memcpy(buf + 6, p, len);
-    ble_comm_att_send_data(user_ble_notify_get_connection_handle(),
-                           ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, buf,
-                           len + 6, ATT_OP_AUTO_READ_CCC);
 }
 
 /* -------------------------------------DPID_CONTROL_DATA 调节模式----------------------------- */

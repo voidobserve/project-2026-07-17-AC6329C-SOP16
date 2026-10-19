@@ -20,6 +20,7 @@
 #include "led_colorful_anim.h"
 #include "motor.h"
 
+#include "user_config.h"
 #include "user_include.h"
 
 extern void printf_buf(u8 *buf, u32 len);
@@ -45,7 +46,6 @@ void ls_strobe(void);
 void w_grandual(void);
 void single_c_breath(void);
 void custom_meteor_effect(void);
-void fb_led_on_off_state(void);
 void strand_meteor(u8 index);
 void double_meteor(void);
 // void fc_music(void);
@@ -60,20 +60,19 @@ void fc_data_init(void)
     fc_effect.on_off_flag = DEVICE_ON; // 灯为开启状态
     fc_effect.led_num = 16;            // 灯带的总灯珠数量
     fc_effect.Now_state = IS_STATIC;   // 当前运行状态 静态
+
+    // 默认让W通道对应值为0，由RGB组成混白色
     fc_effect.rgb.r = 255;
     fc_effect.rgb.g = 255;
     fc_effect.rgb.b = 255;
-    fc_effect.rgb.w = 0; //
-    // fc_effect.rgb.g = 0;
-    // fc_effect.rgb.b = 0;
-    // fc_effect.w = 255;
+    fc_effect.rgb.w = 0;           //
     fc_effect.dream_scene.c_n = 1; // 颜色数量为1
     fc_effect.b = 255;             // 亮度
 
-    fc_effect.report_speed = 80; // 速度值 80%
-    // fc_effect.dream_scene.speed = 500 - (u32)fc_effect.report_speed * (500 - 10) / 100;
+    fc_effect.speed_percent = 80; // 速度值 80%
+    // fc_effect.dream_scene.speed = 500 - (u32)fc_effect.speed_percent * (500 - 10) / 100;
     fc_effect.dream_scene.speed =
-        LED_COLORFUL_ANIM_SPEED_VAL_MAP(fc_effect.report_speed);
+        LED_COLORFUL_ANIM_SPEED_PERCENT_TO_VAL(fc_effect.speed_percent);
     // fc_effect.dream_scene.speed = 100;
     fc_effect.dream_scene.mixed_white_breath_speed =
         (u16)4000; // 初始值为 4000，对应 4秒
@@ -102,10 +101,6 @@ void fc_data_init(void)
     fc_effect.sound.v = 0;
     fc_effect.sound.sensitive = 30;
     fc_effect.sound.valid = 0;
-    //闹钟
-    zd_countdown[0].set_on_off = DEVICE_OFF;
-    zd_countdown[1].set_on_off = DEVICE_OFF;
-    zd_countdown[2].set_on_off = DEVICE_OFF;
 }
 // WS2812FX_mode_comet
 // WS2812FX_mode_scan
@@ -124,84 +119,6 @@ void full_color_init(void)
     custom_meteor_effect(); //实现上电，LED的流星效果
 }
 
-/**
- * @brief 向app反馈灯开关状态
- *
- */
-void fb_led_on_off_state(void)
-{
-    uint8_t Send_buffer[6];
-    Send_buffer[0] = 0x01;
-    Send_buffer[1] = 0x01;
-    Send_buffer[2] = fc_effect.on_off_flag; //
-    extern void zd_fb_2_app(u8 * p, u8 len);
-    zd_fb_2_app(Send_buffer, 3);
-}
-/**
- * @brief 反馈音乐模式
- *
- */
-void fb_led_music_mode(void)
-{
-    uint8_t Send_buffer[6];
-    Send_buffer[0] = 0x06;
-    Send_buffer[1] = 0x06;
-    Send_buffer[2] = fc_effect.music.m; //
-    extern void zd_fb_2_app(u8 * p, u8 len);
-    zd_fb_2_app(Send_buffer, 3);
-}
-
-/**
- * @brief 反馈流星速度
- *
- */
-void fd_meteor_speed(void)
-{
-    uint8_t Send_buffer[6];
-    Send_buffer[0] = 0x2F;
-    Send_buffer[1] = 0x01;
-    Send_buffer[2] = 110 - (fc_effect.speed / 3);
-    extern void zd_fb_2_app(u8 * p, u8 len);
-    zd_fb_2_app(Send_buffer, 3);
-}
-
-/**
- * @brief 反馈流星周期
- *
- */
-void fd_meteor_cycle(void)
-{
-    uint8_t Send_buffer[6];
-    Send_buffer[0] = 0x2F;
-    Send_buffer[1] = 0x03;
-    Send_buffer[2] = fc_effect.meteor_period;
-    extern void zd_fb_2_app(u8 * p, u8 len);
-    zd_fb_2_app(Send_buffer, 3);
-}
-
-/**
- * @brief 反馈流星开关
- *
- */
-void fd_meteor_on_off(void)
-{
-    uint8_t Send_buffer[6];
-    Send_buffer[6] = 0x2F;
-    Send_buffer[7] = 0x02;
-    Send_buffer[8] = fc_effect.metemor_on_off;
-    extern void zd_fb_2_app(u8 * p, u8 len);
-    zd_fb_2_app(Send_buffer, 3);
-}
-
-void turn_on_meteor(void)
-{
-    fc_effect.metemor_on_off = 0x01;
-}
-void turn_off_meteor(void)
-{
-    fc_effect.metemor_on_off = 0x02;
-}
-
 /**************************************************效果调度函数*****************************************************/
 /**
  * @brief 效果调度函数，想要实现效果，必须要有调度函数
@@ -210,30 +127,25 @@ void turn_off_meteor(void)
 // void   flash_printf(void);
 void set_fc_effect(void)
 {
-    // printf("set_fc_effect\n");
-
     if (fc_effect.on_off_flag == DEVICE_ON) {
         fc_effect.period_cnt = 0;
         switch (fc_effect.Now_state) {
             //幻彩场景
         case IS_light_scene:
-            fc_effect.w = 0;
             set_bright(100);
             ls_scene_effect();
             break;
-            //配对模式
-            // case ACT_TY_PAIR:  // 配对完成，要恢复fc_effect.Now_state
-            //     fc_pair_effect();
-            //     break;
-            //自定义效果模式
+        //配对模式
+        // case ACT_TY_PAIR:  // 配对完成，要恢复fc_effect.Now_state
+        //     fc_pair_effect();
+        //     break;
+        //自定义效果模式
         // case ACT_CUSTOM:
         //     // custom_effect();
 
         //   //  custom_meteor_effect();
         //     break;
         case IS_light_music:
-
-            fc_effect.w = 0;
             set_bright(100);
             /* code */
 
@@ -242,9 +154,8 @@ void set_fc_effect(void)
             extern uint16_t fc_music_static(void);
             extern uint16_t fc_music_twinkle(void);
 
-            if (fc_effect.music.m == 0) //能量1
-            {
-                // WS2812FX_setMode(&fc_music_gradual);
+            if (fc_effect.music.m == 0) {
+                // 能量1
                 WS2812FX_setSegment_colorOptions(
                     0,                           //第0段
                     0, 0,                        //起始位置，结束位置
@@ -256,9 +167,8 @@ void set_fc_effect(void)
                 WS2812FX_start();
             }
 
-            if (fc_effect.music.m == 1) //节奏1
-            {
-                // WS2812FX_setMode(&fc_music_breath);
+            if (fc_effect.music.m == 1) {
+                // 节奏1
                 WS2812FX_setSegment_colorOptions(
                     0,                //第0段
                     0, 0,             //起始位置，结束位置
@@ -270,8 +180,8 @@ void set_fc_effect(void)
                 WS2812FX_start();
             }
 
-            if (fc_effect.music.m == 2) //频谱1
-            {
+            if (fc_effect.music.m == 2) {
+                // 频谱1
                 WS2812FX_setSegment_colorOptions(
                     0,                           //第0段
                     0, 0,                        //起始位置，结束位置
@@ -283,9 +193,8 @@ void set_fc_effect(void)
                 WS2812FX_start();
             }
 
-            if (fc_effect.music.m == 3) //滚动
-            {
-                // WS2812FX_setMode(&fc_music_twinkle);
+            if (fc_effect.music.m == 3) {
+                // 滚动
                 WS2812FX_setSegment_colorOptions(
                     0,                 //第0段
                     0, 0,              //起始位置，结束位置
@@ -302,13 +211,11 @@ void set_fc_effect(void)
             //静态模式
         case IS_STATIC:
             static_mode();
-            // printf("IS_STATIC");
             break;
         default:
             break;
         }
-
-    } //if(fc_effect.on_off_flag == DEVICE_ON)
+    }
 }
 
 // -------------------------------------------------------------------------------------------------工具
@@ -364,14 +271,17 @@ void change_meteor_mode(void)
  */
 void set_mereor_mode(u8 m)
 {
-    if (m <= 22)
-    // if (m <= 18) //app 下发 18 种流星效果，超出无效（void custom_meteor_effect(void)有关）
-    {
-        fc_effect.metemor_effect_index = m;
-        printf(" fc_effect.metemor_effect_index  = %d",
-               fc_effect.metemor_effect_index);
-        custom_meteor_effect();
+    if (m > 18) {
+        // 超出了模式索引
+        return;
     }
+
+    fc_effect.metemor_effect_index = m;
+#if USER_DEBUG_ENABLE
+    printf(" fc_effect.metemor_effect_index == %u\n",
+           (u16)fc_effect.metemor_effect_index);
+#endif
+    custom_meteor_effect();
 }
 
 //设置流星速度 0 - 100    0-330ms
@@ -417,15 +327,17 @@ u8 get_meteor_on_off(void)
 
     return fc_effect.metemor_on_off;
 }
-//------------------------------------------------------自动定义效果：天奕流星效果
+
 void custom_meteor_effect(void)
 {
-    printf("custom_meteor_effect");
+#if USER_DEBUG_ENABLE
+    printf("%s %d\n", __FUNCTION__, __LINE__);
+#endif
+
     fc_effect.period_cnt = 0;
     if (fc_effect.metemor_on_off == 0x01) {
         //流星效果                                    单流星
         if (fc_effect.metemor_effect_index == 1) {
-
             WS2812FX_stop();
             WS2812FX_setSegment_colorOptions(
                 1,                      //第0段
@@ -638,36 +550,12 @@ void custom_meteor_effect(void)
                 0);                   //选项，这里像素点大小：3 REVERSE决定方向
 
             WS2812FX_start();
-
-        }
-
-        else if (fc_effect.metemor_effect_index == 19 ||
-                 fc_effect.metemor_effect_index == 20 ||
-                 fc_effect.metemor_effect_index == 21) //
-        {
-            strand_meteor(fc_effect.metemor_effect_index);
-
-        } else if (fc_effect.metemor_effect_index == 22) {
-            double_meteor();
         }
     }
 
     // save_user_data_area3();//保存参数配置到flash
     os_taskq_post("msg_task", 1, MSG_USER_SAVE_INFO);
 }
-
-// void flash_printf(void)
-// {
-//     printf("fc_effect.on_off_flag  = %d", fc_effect.on_off_flag);
-//     printf("fc_effect.Now_state  = %d", fc_effect.Now_state);
-
-//     printf("fc_effect.rgb.r = %d", fc_effect.rgb.r);
-//     printf("fc_effect.rgb.g = %d", fc_effect.rgb.g);
-//     printf("fc_effect.rgb.b = %d", fc_effect.rgb.b);
-//     printf("fc_effect.w = %d", fc_effect.w);
-//     printf("fc_effect.b  = %d", fc_effect.b);
-
-// }
 
 /***************************************************软件关机*****************************************************/
 //附加功能的变量赋值
@@ -692,7 +580,6 @@ void soft_rurn_off_lights(void) //软关灯处理
 
     motor_set_mode(MOTOR_MODE_STOP);
 
-    // fb_led_on_off_state();    //与app同步开关状态
     printf("soft_rurn_off_light!!\n");
 }
 /**************************************************软件开机*****************************************************/
@@ -704,10 +591,9 @@ void soft_turn_on_the_light(void) //软开灯处理
     motor_set_mode(fc_effect.motor_mode);
     motor_set_speed_sec_per_round(fc_effect.motor_sec_per_round);
 
-    // fb_led_on_off_state();  //与app同步开关状态
-
-    printf("soft_turn_on_the_light!!\n");
-    //  flash_printf();
+#if USER_DEBUG_ENABLE
+    printf("%s %d\n", __FUNCTION__, __LINE__);
+#endif
 }
 
 ON_OFF_FLAG get_on_off_state(void)
@@ -727,23 +613,18 @@ void set_on_off_led(u8 on_off)
 
 void set_on_off_meteor(u8 on_off)
 {
-
     fc_effect.metemor_on_off = on_off;
     if (fc_effect.metemor_on_off == 0x01) {
-
         custom_meteor_effect();
-    }
-
-    else {
-
+    } else {
         WS2812FX_stop();
         WS2812FX_setSegment_colorOptions(
-            1,                        //第0段
-            1, fc_effect.led_num - 1, //起始位置，结束位置
-            &close_metemor,           //效果
-            0,                        //颜色
-            fc_effect.speed,          //速度
-            0);                       //选项，这里像素点大小：3 REVERSE决定方向
+            1,                        // 第0段
+            1, fc_effect.led_num - 1, // 起始位置，结束位置
+            &close_metemor,           // 效果
+            0,                        // 颜色
+            fc_effect.speed,          // 速度
+            0);                       // 选项，这里像素点大小：3 REVERSE决定方向
         WS2812FX_start();
     }
 }
@@ -773,9 +654,7 @@ void set_music_mode(u8 m)
     printf("\n set_music_mode = %d", m);
     fc_effect.music.m = m;
     fc_effect.Now_state = IS_light_music;
-
-    fb_led_music_mode();
-    // save_user_data_area3();
+    user_ble_notify_sound_ctl_mode();
     os_taskq_post("msg_task", 1, MSG_USER_SAVE_INFO);
     set_fc_effect();
 }
@@ -891,7 +770,6 @@ void set_music_type(u8 ty)
 void set_static_mode(u8 r, u8 g, u8 b)
 {
     fc_effect.Now_state = IS_STATIC;
-    fc_effect.w = 0;
     fc_effect.rgb.r = r;
     fc_effect.rgb.g = g;
     fc_effect.rgb.b = b;
@@ -969,8 +847,6 @@ static void ls_scene_effect(void)
         break;
 
     case MODE_JUMP: //标准跳变
-        // standard_jump();
-        // standart_jump_fix();
 
         WS2812FX_setSegment_colorOptions(0,                       // 第0段
                                          0,                       // 起始位置
@@ -983,10 +859,15 @@ static void ls_scene_effect(void)
         WS2812FX_set_coloQty(0, fc_effect.dream_scene.c_n);
         ls_set_colors(fc_effect.dream_scene.c_n, &fc_effect.dream_scene.rgb);
         WS2812FX_start();
-        break;
 
-    case MODE_MUTIL_C_GRADUAL: //多段同时渐变
-        // mutil_c_grandual();
+#if USER_DEBUG_ENABLE
+        // printf("anim jump\n");
+        // printf("anim speed percent == %u\n", (u16)fc_effect.speed_percent);
+        // printf("anim speed == %u\n", fc_effect.dream_scene.speed);
+#endif
+        break;
+    case MODE_MUTIL_C_GRADUAL:
+        // 多种颜色渐变
         WS2812FX_setSegment_colorOptions(
             0,                           // 第0段
             0,                           // 起始位置
@@ -999,7 +880,11 @@ static void ls_scene_effect(void)
         WS2812FX_set_coloQty(0, fc_effect.dream_scene.c_n);
         ls_set_colors(fc_effect.dream_scene.c_n, &fc_effect.dream_scene.rgb);
         WS2812FX_start();
-
+#if USER_DEBUG_ENABLE
+        // printf("anim multi color gradual\n"); // 多种颜色渐变
+        // printf("anim speed percent == %u\n", (u16)fc_effect.speed_percent);
+        // printf("anim speed == %u\n", fc_effect.dream_scene.speed);
+#endif
         break;
 
     case MODE_BREATH_W: //白色渐变
@@ -1014,25 +899,25 @@ static void ls_scene_effect(void)
         single_c_breath();
         break;
 
-    // case MODE_MIXED_WHITE_BREATH:
-    //     extern u16 colorful_light_mixed_white_breathing(void);
-    //     WS2812FX_setSegment_colorOptions(
-    //         0,                                     //第0段
-    //         0,                                     // 起始位置
-    //         0,                                     //结束位置
-    //         &colorful_light_mixed_white_breathing, //效果
-    //         0, //颜色，WS2812FX_setColors设置
-    //         fc_effect.dream_scene
-    //             .mixed_white_breath_speed, // 速度 （混白色呼吸 不依靠该传参，这里可以随便填）
-    //         SIZE_MEDIUM);                  //选项，这里像素点大小：3
+        // case MODE_MIXED_WHITE_BREATH:
+        //     extern u16 colorful_light_mixed_white_breathing(void);
+        //     WS2812FX_setSegment_colorOptions(
+        //         0,                                     //第0段
+        //         0,                                     // 起始位置
+        //         0,                                     //结束位置
+        //         &colorful_light_mixed_white_breathing, //效果
+        //         0, //颜色，WS2812FX_setColors设置
+        //         fc_effect.dream_scene
+        //             .mixed_white_breath_speed, // 速度 （混白色呼吸 不依靠该传参，这里可以随便填）
+        //         SIZE_MEDIUM);                  //选项，这里像素点大小：3
 
-    //     WS2812FX_set_coloQty(0, fc_effect.dream_scene.c_n);
-    //     ls_set_colors(fc_effect.dream_scene.c_n, &fc_effect.dream_scene.rgb);
+        //     WS2812FX_set_coloQty(0, fc_effect.dream_scene.c_n);
+        //     ls_set_colors(fc_effect.dream_scene.c_n, &fc_effect.dream_scene.rgb);
 
-    //     WS2812FX_start();
+        //     WS2812FX_start();
 
-    //     // printf("fc_effect.dream_scene.mixed_white_breath_speed = %u\n", (u16)fc_effect.dream_scene.mixed_white_breath_speed);
-    //     break;
+        //     // printf("fc_effect.dream_scene.mixed_white_breath_speed = %u\n", (u16)fc_effect.dream_scene.mixed_white_breath_speed);
+        //     break;
 
     case MODE_COLORFUL_BREATH:
         WS2812FX_setSegment_colorOptions(0,                         // 第0段
@@ -1400,7 +1285,7 @@ void w_grandual(void)
 //
 void single_c_breath(void)
 {
-
+#if 0
     extern uint16_t WS2812FX_mode_breath(void);
     WS2812FX_setSegment_colorOptions(0,                     //第0段
                                      0, 0,                  //起始位置，结束位置
@@ -1408,6 +1293,19 @@ void single_c_breath(void)
                                      0, //颜色，WS2812FX_setColors设置
                                      fc_effect.dream_scene.speed, //速度
                                      SIZE_MEDIUM); //选项，这里像素点大小：3
+
+    WS2812FX_set_coloQty(0, fc_effect.dream_scene.c_n);
+    ls_set_colors(fc_effect.dream_scene.c_n, &fc_effect.dream_scene.rgb);
+    WS2812FX_start();
+#endif
+
+    WS2812FX_setSegment_colorOptions(0, //第0段
+                                     0, // 起始位置
+                                     0, // 结束位置
+                                     &led_strip_rgb_scene_anim_breath, //效果
+                                     0, //颜色，WS2812FX_setColors设置
+                                     fc_effect.dream_scene.speed, //速度
+                                     NO_OPTIONS);                 // 选项
 
     WS2812FX_set_coloQty(0, fc_effect.dream_scene.c_n);
     ls_set_colors(fc_effect.dream_scene.c_n, &fc_effect.dream_scene.rgb);
@@ -1424,18 +1322,6 @@ void single_c_breath(void)
 // }
 
 /*----------------------------------API----------------------------------*/
-
-// --------------------------------------速度
-const uint16_t speed_map[] = {// 30,
-                              // 100,
-                              // 150,
-                              // 200,
-                              // 250,
-                              // 300
-                              0, 25, 50, 75, 100
-
-};
-u8 speed_index = 0;
 
 u16 get_max_sp(void)
 {
@@ -1469,82 +1355,56 @@ void ls_sensitive_sub(void)
         fc_effect.sound.sensitive = 10;
     }
 
-    // printf("fc_effect.music.s = %d", fc_effect.music.s);
     set_fc_effect();
 }
 
 /*********************************************************/
 //速度调节
 // s:1%-100%
-void ls_set_speed(uint8_t s)
+void ls_set_speed(uint8_t speed_percent)
 {
-
-    // fc_effect.speed = s;
-    fc_effect.dream_scene.speed = 500 - (500 * s / 100);
-    if (fc_effect.dream_scene.speed <= get_max_sp()) {
-        fc_effect.dream_scene.speed = get_max_sp();
+    if (speed_percent > 100) {
+        speed_percent = 100;
     }
+
+    fc_effect.speed_percent = speed_percent;
+    fc_effect.dream_scene.speed =
+        LED_COLORFUL_ANIM_SPEED_PERCENT_TO_VAL(fc_effect.speed_percent);
+
+    // fc_effect.dream_scene.speed = 500 - (500 * speed_percent / 100);
+    // if (fc_effect.dream_scene.speed <= get_max_sp()) {
+    //     fc_effect.dream_scene.speed = get_max_sp();
+    // }
     set_fc_effect();
 }
 
 // 动态模式下，增加速度
 void ls_speed_plus(void)
 {
-    if (fc_effect.report_speed < 100 - 10) {
-        fc_effect.report_speed += 10;
+    if (fc_effect.speed_percent < 100 - 10) {
+        fc_effect.speed_percent += 10;
     } else {
-        fc_effect.report_speed = 100;
+        fc_effect.speed_percent = 100;
     }
 
-    // 将速度百分比值映射到 10 ~ 500 的速度值
-    // fc_effect.dream_scene.speed =
-    //     500 - ((u32)fc_effect.report_speed * (500 - 10) / 100);
     fc_effect.dream_scene.speed =
-        LED_COLORFUL_ANIM_SPEED_VAL_MAP(fc_effect.report_speed);
-
-    // 速度值越小，速度越快
-    // if (fc_effect.dream_scene.speed > 10 + 50)
-    // {
-    //     fc_effect.dream_scene.speed -= 50;
-    // }
-    // else
-    // {
-    //     fc_effect.dream_scene.speed = 10;
-    // }
-
-    // printf("fc_effect.dream_scene.speed= %d", fc_effect.dream_scene.speed);
-    // set_fc_effect();
+        LED_COLORFUL_ANIM_SPEED_PERCENT_TO_VAL(fc_effect.speed_percent);
 }
 
 // 动态模式下，减小速度
 void ls_speed_sub(void)
 {
-    if (fc_effect.report_speed > 0 + 10) {
-        fc_effect.report_speed -= 10;
+    if (fc_effect.speed_percent > 0 + 10) {
+        fc_effect.speed_percent -= 10;
     } else {
-        fc_effect.report_speed = 0;
+        fc_effect.speed_percent = 0;
     }
 
-    // 将速度百分比值映射到 10 ~ 500 的速度值
-    // fc_effect.dream_scene.speed =
-    //     500 - ((u32)fc_effect.report_speed * (500 - 10) / 100);
     fc_effect.dream_scene.speed =
-        LED_COLORFUL_ANIM_SPEED_VAL_MAP(fc_effect.report_speed);
-
-    // // 速度值越小，速度越快
-    // if (fc_effect.dream_scene.speed < 500 - 50)
-    // {
-    //     fc_effect.dream_scene.speed += 50;
-    // }
-    // else
-    // {
-    //     fc_effect.dream_scene.speed = 500;
-    // }
-
-    // printf("fc_effect.dream_scene.speed= %d", fc_effect.dream_scene.speed);
-    // set_fc_effect();
+        LED_COLORFUL_ANIM_SPEED_PERCENT_TO_VAL(fc_effect.speed_percent);
 }
 
+#if 0
 // --------------------------------------播放
 // 继续播放
 void ls_play(void)
@@ -1556,6 +1416,7 @@ void ls_pause(void)
 {
     WS2812FX_pause();
 }
+#endif
 
 // --------------------------------------流星灯周期
 void set_meteor_p(u8 p)
@@ -1610,12 +1471,18 @@ u8 get_effect_p(void)
 // }
 
 // ------------------------------------------------亮度  0-100
-// 0-100
-void set_bright(u8 b)
+/**
+ * @brief 设置亮度
+ * 
+ * @param brightness_percent 
+ */
+void set_bright(u8 brightness_percent)
 {
-    if (b == 0)
-        b = 10;
-    fc_effect.b = 255 * b / 100;
+    if (brightness_percent > 100) {
+        brightness_percent = 100;
+    }
+
+    fc_effect.b = 25 + (255 - 25) * brightness_percent / 100;
 
     WS2812FX_setBrightness(fc_effect.b);
 }
@@ -1623,23 +1490,42 @@ void set_bright(u8 b)
 // 灯光亮度 增加
 void bright_plus(void)
 {
-    if (fc_effect.b < 255 - 50) {
-        fc_effect.b += 50;
+    u8 brightness_percent;
+
+    if (fc_effect.b <= 25) {
+        brightness_percent = 0;
     } else {
-        fc_effect.b = 255;
+        brightness_percent = ((u16)fc_effect.b - 25) * 100 / (255 - 25);
     }
+
+    if (brightness_percent <= 90) {
+        brightness_percent += 10;
+    } else {
+        brightness_percent = 100;
+    }
+
+    fc_effect.b = 25 + ((u16)255 - 25) * brightness_percent / 100;
     WS2812FX_setBrightness(fc_effect.b);
 }
 
 // 灯光亮度 减小
 void bright_sub(void)
 {
-    if (fc_effect.b > 10 + 50) {
-        fc_effect.b -= 50;
+    u8 brightness_percent;
+
+    if (fc_effect.b <= 25) {
+        brightness_percent = 0;
     } else {
-        fc_effect.b = 10;
+        brightness_percent = ((u16)fc_effect.b - 25) * 100 / (255 - 25);
     }
 
+    if (brightness_percent >= 10) {
+        brightness_percent -= 10;
+    } else {
+        brightness_percent = 0;
+    }
+
+    fc_effect.b = 25 + ((u16)255 - 25) * brightness_percent / 100;
     WS2812FX_setBrightness(fc_effect.b);
 }
 
@@ -1688,29 +1574,6 @@ void set_IS_light_scene_state(void)
     fc_effect.Now_state = IS_light_scene;
 }
 
-#if 0
-// 利用fc_effect结构体，构建内置效果
-void fc_static_effect(u8 n)
-{
-    fc_effect.Now_state = IS_STATIC;
-    fc_effect.dream_scene.c_n = 1;
-    // 设备固定为 RGBW：彩色走 RGB，白色走 W 通道
-    if (fc_static_map[n] != WHITE) {
-        fc_effect.rgb.r = (fc_static_map[n] >> 16) & 0xff;
-        fc_effect.rgb.g = (fc_static_map[n] >> 8) & 0xff;
-        fc_effect.rgb.b = (fc_static_map[n]) & 0xff;
-        fc_effect.w = 0;
-
-    } else {
-        fc_effect.b = 255;
-        fc_effect.w = 255;
-    }
-
-    os_taskq_post("msg_task", 1, MSG_USER_SAVE_INFO);
-    set_fc_effect();
-}
-#endif
-
 /**
  * @brief 设置七彩灯为静态模式，并且颜色为内置的常用颜色
  *
@@ -1757,17 +1620,18 @@ void ls_set_color(uint8_t n, uint32_t c)
     }
 }
 
+#if 0
 // ------------------------------------------------W通道
 void set_w(u8 w)
 {
-    fc_effect.Now_state = IS_STATIC;
-    fc_effect.w = w;
+    fc_effect.Now_state = IS_STATIC; 
     fc_effect.rgb.r = 0;
     fc_effect.rgb.g = 0;
     fc_effect.rgb.b = 0;
     fc_effect.rgb.w = w;
     set_fc_effect();
 }
+#endif
 
 extern void WS2812FX_trigger();
 extern u8 get_sound_result(void);
@@ -1792,175 +1656,9 @@ void music_static_sound(void)
     }
 }
 
-#if 0
-/**********************************  中道闹钟  *******************************************************/
-u8 set_week[ALARM_NUMBER][7];
-ALARM_CLOCK alarm_clock[3];
-TIME_CLOCK time_clock;
-void set_zd_countdown_state(u8 s, u8 index)
-{
-
-    zd_countdown[index].set_on_off = s; //计时开关或者闹钟开关
-}
-
-/**
- * @brief 闹钟数据出解析
- *
- * @param index
- */
-void parse_alarm_data(int index)
-{
-
-    /*解析循环星期*/
-    u8 p_mode;
-    p_mode = alarm_clock[index].mode;
-    for (int i = 0; i < 7; i++) {
-        if (p_mode & 0x01)
-            set_week[index][i] = i + 1;
-
-        else
-            set_week[index][i] = 0;
-        p_mode = p_mode >> 1;
-    }
-
-    if (alarm_clock[index].on_off == 0x80) //闹钟开
-    {
-        printf("open alarm");
-        set_zd_countdown_state(DEVICE_ON, index); //开启闹钟
-    }
-
-    if (alarm_clock[index].on_off == 0x00) //闹钟关
-    {
-        printf("close alarm");
-        set_zd_countdown_state(DEVICE_OFF, index); //关闭闹钟
-    }
-}
-
-/**
- * @brief 关闭中道闹钟
- *
- */
-void close_alarm(int index)
-{
-    uint8_t Send_buffer[6]; //发送缓存
-
-    zd_countdown[index].set_on_off = 0;
-    alarm_clock[index].on_off = 0;
-    Send_buffer[0] = 0x05;
-    Send_buffer[1] = index;
-    Send_buffer[2] = alarm_clock[index].hour;
-    Send_buffer[3] = alarm_clock[index].minute;
-    Send_buffer[4] = 0;
-    Send_buffer[5] = alarm_clock[index].mode;
-    extern void zd_fb_2_app(u8 * p, u8 len);
-    zd_fb_2_app(Send_buffer, 6);
-}
-
-/**
- * @brief 闹钟处理
- *
- * @param index 闹钟编号
- */
-
-void countdown_handler(int index)
-{
-    if (zd_countdown[index].set_on_off) //闹钟开启
-    {
-
-        if (time_clock.hour == alarm_clock[index].hour &&
-            time_clock.minute == alarm_clock[index].minute) {
-
-            if ((alarm_clock[index].mode & 0x7f) == 0) //没有星期
-            {
-                if ((alarm_clock[index].mode >> 7)) //闹钟设置里灯的状态
-                {
-                    soft_turn_on_the_light();
-                    close_alarm(index);
-                    // save_user_data_area3();
-                    os_taskq_post("msg_task", 1, MSG_USER_SAVE_INFO);
-                } else {
-                    soft_rurn_off_lights();
-                    close_alarm(index);
-                    // save_user_data_area3();
-                    os_taskq_post("msg_task", 1, MSG_USER_SAVE_INFO);
-                }
-
-            } else {
-
-                for (int i = 0; i < 7; i++) {
-
-                    if (time_clock.week == set_week[index][i]) {
-
-                        if ((alarm_clock[index].mode >> 7)) {
-
-                            soft_turn_on_the_light();
-                            close_alarm(index);
-                            // save_user_data_area3();
-                            os_taskq_post("msg_task", 1, MSG_USER_SAVE_INFO);
-                        } else {
-                            soft_rurn_off_lights();
-                            close_alarm(index);
-                            // save_user_data_area3();
-                            os_taskq_post("msg_task", 1, MSG_USER_SAVE_INFO);
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-u8 calculate_ms = 0;
-/**
- * @brief 放在主函数的while中，10ms调用一次
- *
- */
-void time_clock_handler(void)
-{
-
-    calculate_ms++;
-    if (calculate_ms == 100) //秒
-    {
-        calculate_ms = 0;
-        time_clock.second++;
-
-        if (time_clock.second == 60) //分
-        {
-            time_clock.second = 0;
-            time_clock.minute++;
-
-            if (time_clock.minute == 60) //时
-            {
-                time_clock.minute = 0;
-                time_clock.hour++;
-
-                if (time_clock.hour == 24) //日
-                {
-                    time_clock.hour = 0;
-                    time_clock.week++;
-                    if (time_clock.week == 8) //周
-                    {
-                        time_clock.week = 1;
-                    }
-                }
-            }
-        }
-        // printf("time_clock.hour  = %d",time_clock.hour );
-        // printf("time_clock.minute  = %d",time_clock.minute );
-        // printf("time_clock.second  = %d",time_clock.second );
-        // printf("time_clock.week  = %d",time_clock.week );
-    }
-
-    countdown_handler(0); //闹钟0
-    countdown_handler(1);
-    countdown_handler(2);
-}
-#endif
-
 // 利用fc_effect结构体，构建动态模式效果
 void fc_dynamic_effect(u8 n)
 {
-
     switch (n) {
     case 0x07: //3色跳变
         ls_set_color(0, BLUE);
@@ -1971,7 +1669,7 @@ void fc_dynamic_effect(u8 n)
         fc_effect.Now_state = IS_light_scene;
         break;
 
-    case 0x08: //7色跳变
+    case 0x08: // 7色跳变
         ls_set_color(0, BLUE);
         ls_set_color(1, GREEN);
         ls_set_color(2, RED);
@@ -1984,7 +1682,7 @@ void fc_dynamic_effect(u8 n)
         fc_effect.Now_state = IS_light_scene;
         break;
 
-    case 0x09: //3色渐变
+    case 0x09: // 三色渐变
         ls_set_color(0, BLUE);
         ls_set_color(1, GREEN);
         ls_set_color(2, RED);
@@ -1993,7 +1691,7 @@ void fc_dynamic_effect(u8 n)
         fc_effect.Now_state = IS_light_scene;
         break;
 
-    case 0x0A: //七彩渐变
+    case 0x0A: // 七色渐变
         ls_set_color(0, BLUE);
         ls_set_color(1, GREEN);
         ls_set_color(2, RED);
@@ -2008,64 +1706,56 @@ void fc_dynamic_effect(u8 n)
 
     case 0x0B:
         ls_set_color(0, RED);
-        ls_set_color(1, BLACK);
         fc_effect.dream_scene.change_type = MODE_SINGLE_C_BREATH;
-        fc_effect.dream_scene.c_n = 2;
+        fc_effect.dream_scene.c_n = 1;
         fc_effect.Now_state = IS_light_scene;
         break;
 
     case 0x0c:
         ls_set_color(0, BLUE);
-        ls_set_color(1, BLACK);
         fc_effect.dream_scene.change_type = MODE_SINGLE_C_BREATH;
-        fc_effect.dream_scene.c_n = 2;
+        fc_effect.dream_scene.c_n = 1;
         fc_effect.Now_state = IS_light_scene;
         break;
     case 0x0D:
         ls_set_color(0, GREEN);
-        ls_set_color(1, BLACK);
         fc_effect.dream_scene.change_type = MODE_SINGLE_C_BREATH;
-        fc_effect.dream_scene.c_n = 2;
+        fc_effect.dream_scene.c_n = 1;
         fc_effect.Now_state = IS_light_scene;
         break;
 
     case 0x0E:
         ls_set_color(0, CYAN);
-        ls_set_color(1, BLACK);
         fc_effect.dream_scene.change_type = MODE_SINGLE_C_BREATH;
-        fc_effect.dream_scene.c_n = 2;
+        fc_effect.dream_scene.c_n = 1;
         fc_effect.Now_state = IS_light_scene;
         break;
 
     case 0x0F:
         ls_set_color(0, YELLOW);
-        ls_set_color(1, BLACK);
         fc_effect.dream_scene.change_type = MODE_SINGLE_C_BREATH;
-        fc_effect.dream_scene.c_n = 2;
+        fc_effect.dream_scene.c_n = 1;
         fc_effect.Now_state = IS_light_scene;
         break;
 
     case 0x10:
         ls_set_color(0, PURPLE);
-        ls_set_color(1, BLACK);
         fc_effect.dream_scene.change_type = MODE_SINGLE_C_BREATH;
-        fc_effect.dream_scene.c_n = 2;
+        fc_effect.dream_scene.c_n = 1;
         fc_effect.Now_state = IS_light_scene;
         break;
 
     case 0x11: // 混白色 呼吸
         ls_set_color(0, WHITE);
-        ls_set_color(1, BLACK);
         fc_effect.dream_scene.change_type = MODE_SINGLE_C_BREATH;
-        fc_effect.dream_scene.c_n = 2;
+        fc_effect.dream_scene.c_n = 1;
         fc_effect.Now_state = IS_light_scene;
         break;
 
     case 0x12: // 纯白色 呼吸
         ls_set_color(0, PURE_WHITE);
-        ls_set_color(1, BLACK);
         fc_effect.dream_scene.change_type = MODE_SINGLE_C_BREATH;
-        fc_effect.dream_scene.c_n = 2;
+        fc_effect.dream_scene.c_n = 1;
         fc_effect.Now_state = IS_light_scene;
         break;
 
@@ -2093,7 +1783,7 @@ void fc_dynamic_effect(u8 n)
         fc_effect.Now_state = IS_light_scene;
         break;
 
-    case 0x16: //七色频闪
+    case 0x16: // 七色频闪
         ls_set_color(0, BLUE);
         ls_set_color(1, GREEN);
         ls_set_color(2, RED);
@@ -2155,25 +1845,12 @@ void fc_dynamic_effect(u8 n)
         fc_effect.dream_scene.c_n = 1;
         fc_effect.Now_state = IS_light_scene;
         break;
-    case 0x1e:
+    case 0x1d:
         ls_set_color(0, WHITE);
         fc_effect.dream_scene.change_type = MODE_STROBE;
         fc_effect.dream_scene.c_n = 1;
         fc_effect.Now_state = IS_light_scene;
         break;
-
-    // case 254: { // 混白色呼吸
-    //     ls_set_color(0, WHITE);
-    //     fc_effect.dream_scene.change_type = MODE_MIXED_WHITE_BREATH;
-    //     fc_effect.dream_scene.c_n = 1;
-    //     fc_effect.Now_state = IS_light_scene;
-    // } break;
-
-        // case 255:
-        // { // 纯白色呼吸
-
-        // }
-        // break;
     }
     set_fc_effect();
 }

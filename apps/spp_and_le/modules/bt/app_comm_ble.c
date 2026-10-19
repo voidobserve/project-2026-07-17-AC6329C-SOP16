@@ -31,9 +31,8 @@
 #include "le_client_demo.h"
 #include "app_comm_bt.h"
 
-
-#define LOG_TAG_CONST       COMM_BLE
-#define LOG_TAG             "[COMM_BLE]"
+#define LOG_TAG_CONST COMM_BLE
+#define LOG_TAG       "[COMM_BLE]"
 #define LOG_ERROR_ENABLE
 #define LOG_DEBUG_ENABLE
 #define LOG_INFO_ENABLE
@@ -64,7 +63,6 @@ extern void ble_standard_dut_test_init(void);
 void btstack_ble_start_before_init(const ble_init_cfg_t *cfg, int param)
 {
     u8 tmp_ble_addr[6];
-    extern u8 Ble_Addr[6];
 
     if (!cfg) {
         cfg = &ble_default_config;
@@ -78,7 +76,6 @@ void btstack_ble_start_before_init(const ble_init_cfg_t *cfg, int param)
         lib_make_ble_address(tmp_ble_addr, (void *)bt_get_mac_addr());
     }
 
-    memcpy(Ble_Addr,tmp_ble_addr,6);
     le_controller_set_mac((void *)tmp_ble_addr);
 
     log_info("---ble's address");
@@ -88,7 +85,6 @@ void btstack_ble_start_before_init(const ble_init_cfg_t *cfg, int param)
     extern void bt_ble_before_start_init(void);
     bt_ble_before_start_init();
 #endif
-
 }
 
 /*************************************************************************************************/
@@ -205,5 +201,3 @@ int bt_comm_ble_hci_event_handler(struct bt_event *bt)
 }
 
 #endif
-
-

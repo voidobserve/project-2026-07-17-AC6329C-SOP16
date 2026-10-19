@@ -179,10 +179,9 @@ typedef struct
     motor_mode_t motor_mode; // 电机模式
 
     // 向app反馈的数据
-    u8 report_speed;
+    u8 speed_percent;
 } fc_effect_t;
 
-countdown_t zd_countdown[ALARM_NUMBER];
 // typedef struct _LED_STATE {
 //   u32 ledlight;                   //灯条的亮度，范围由Light_Max，Light_Min决定
 //   u32 ledlight_temp;              //亮度的百分比，取值范围0-100
@@ -207,7 +206,7 @@ extern ALARM_CLOCK alarm_clock[3];
 
 void bright_plus(void);
 void bright_sub(void);
-void set_bright(u8 b);
+void set_bright(u8 brightness_percent);
 
 void ls_sensitive_plus(void);
 void ls_sensitive_sub(void);
@@ -219,7 +218,7 @@ void set_fc_effect(void);
 void full_color_init(void);
 void soft_rurn_off_lights(void);   //软关灯处理
 void soft_turn_on_the_light(void); //软开灯处理
-void ls_set_speed(uint8_t s);
+void ls_set_speed(uint8_t speed_percent);
 // void fc_static_effect(u8 n);
 void ls_set_color(uint8_t n, uint32_t c);
 void music_static_sound(void);
@@ -228,7 +227,7 @@ void set_static_mode(u8 r, u8 g, u8 b);
 void fc_dynamic_effect(u8 n);
 
 // 流星灯
-void meteor_period_sub(void);   // 流星周期计时（每10ms调用一次）
+void meteor_period_sub(void);    // 流星周期计时（每10ms调用一次）
 void custom_meteor_effect(void); // 根据 metemor_effect_index 设置流星效果
 void set_mereor_mode(u8 m);      // 设置流星模式（app下发，上限18种）
 

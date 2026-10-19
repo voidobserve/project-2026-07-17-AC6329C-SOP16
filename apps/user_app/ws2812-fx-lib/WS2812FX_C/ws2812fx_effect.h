@@ -105,7 +105,7 @@ uint16_t WS2812FX_mode_comet_6(void);
 uint16_t fc_double_meteor(void);
 void close_metemor(void);
 
-
+u16 led_strip_rgb_scene_anim_breath(void);
 
 
 

@@ -761,14 +761,14 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../../../user_app/protocol/user_ble_notify_app.h" />
-		<Unit filename="../../../user_app/rf24g/rf24g.c">
-			<Option compilerVar="CC" />
-		</Unit>
 		<Unit filename="../../../user_app/rf24g/rf24g.h" />
 		<Unit filename="../../../user_app/rf24g/rf24g_app.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../../../user_app/rf24g/rf24g_app.h" />
+		<Unit filename="../../../user_app/rf24g/rf24g_driver_4x7_28_keys.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="../../../user_app/rf24g/rf24g_driver.c">
 			<Option compilerVar="CC" />
 		</Unit>

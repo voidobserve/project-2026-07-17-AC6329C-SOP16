@@ -36,7 +36,7 @@ void user_ble_notify_light_brightness(void)
     u8 buf_len = 0;
     buf[buf_len++] = 0x04;
     buf[buf_len++] = 0x03;
-    buf[buf_len++] = fc_effect.b * 100 / 255;
+    buf[buf_len++] = (u16)fc_effect.b * 100 / 255;
 
     user_ble_notify_param_put(buf, buf_len);
 }
@@ -47,7 +47,7 @@ void user_ble_notify_light_speed(void)
     u8 buf_len = 0;
     buf[buf_len++] = 0x04;
     buf[buf_len++] = 0x04;
-    buf[buf_len++] = fc_effect.report_speed;
+    buf[buf_len++] = fc_effect.speed_percent;
     user_ble_notify_param_put(buf, buf_len);
 }
 
@@ -102,29 +102,30 @@ void user_ble_notify_motor_mode(void)
     u8 buf_len = 0;
     buf[buf_len++] = 0x2F;
     buf[buf_len++] = 0x06;
-    switch (fc_effect.motor_mode) {
-    case MOTOR_MODE_STOP:
-        buf[buf_len++] = 0x00;
-        break;
-    case MOTOR_MODE_FORWARD_ROTATION:
-        buf[buf_len++] = 0x02;
-        break;
-    case MOTOR_MODE_REVERSE_ROTATION:
-        buf[buf_len++] = 0x01;
-        break;
-    case MOTOR_MODE_FORWARD_THEN_REVERSE_ROTATION:
-        buf[buf_len++] = 0x03;
-        break;
-    case MOTOR_MODE_REVERSE_THEN_FORWARD_ROTATION:
-        buf[buf_len++] = 0x04;
-        break;
-    case MOTOR_MODE_SOUND_CONTROL:
-        buf[buf_len++] = 0x05;
-        break;
-    default:
-        buf[buf_len++] = 0x00;
-        break;
-    }
+    // switch (fc_effect.motor_mode) {
+    // case MOTOR_MODE_STOP:
+    //     buf[buf_len++] = 0x00;
+    //     break;
+    // case MOTOR_MODE_FORWARD_ROTATION:
+    //     buf[buf_len++] = 0x02;
+    //     break;
+    // case MOTOR_MODE_REVERSE_ROTATION:
+    //     buf[buf_len++] = 0x01;
+    //     break;
+    // case MOTOR_MODE_FORWARD_THEN_REVERSE_ROTATION:
+    //     buf[buf_len++] = 0x03;
+    //     break;
+    // case MOTOR_MODE_REVERSE_THEN_FORWARD_ROTATION:
+    //     buf[buf_len++] = 0x04;
+    //     break;
+    // case MOTOR_MODE_SOUND_CONTROL:
+    //     buf[buf_len++] = 0x05;
+    //     break;
+    // default:
+    //     buf[buf_len++] = 0x00;
+    //     break;
+    // }
+    buf[buf_len++] = fc_effect.motor_mode;
     user_ble_notify_param_put(buf, buf_len);
 }
 
@@ -148,7 +149,7 @@ void user_ble_notify_sound_ctl_type(void)
     user_ble_notify_param_put(buf, buf_len);
 }
 
-void user_ble_notify_sound_mode(void)
+void user_ble_notify_sound_ctl_mode(void)
 {
     u8 buf[10] = {0};
     u8 buf_len = 0;
@@ -239,7 +240,7 @@ void user_ble_notify_dev_all_info(void)
     user_ble_notify_motor_mode();
     user_ble_notify_rgb_sequence();
     user_ble_notify_sound_ctl_type();
-    user_ble_notify_sound_mode();
+    user_ble_notify_sound_ctl_mode();
     user_ble_notify_meteor_pwr_sta();
     user_ble_notify_meteor_speed();
     user_ble_notify_meteor_period();

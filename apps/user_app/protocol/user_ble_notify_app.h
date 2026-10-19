@@ -12,7 +12,7 @@ void user_ble_notify_motor_speed(void);
 void user_ble_notify_motor_mode(void);
 void user_ble_notify_rgb_sequence(void);
 void user_ble_notify_sound_ctl_type(void);
-void user_ble_notify_sound_mode(void);
+void user_ble_notify_sound_ctl_mode(void);
 void user_ble_notify_meteor_pwr_sta(void);
 void user_ble_notify_meteor_speed(void) ;
 void user_ble_notify_meteor_period(void);

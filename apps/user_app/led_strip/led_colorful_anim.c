@@ -11,7 +11,8 @@ u16 led_colorful_anim_jump(void)
 {
     volatile u16 anim_speed = 0;
     // 根据传递过来的速度对应的百分比值，进行映射
-    anim_speed = LED_COLORFUL_ANIM_SPEED_VAL_MAP(fc_effect.report_speed);
+    anim_speed =
+        LED_COLORFUL_ANIM_SPEED_PERCENT_TO_VAL(fc_effect.speed_percent);
     if (_seg_rt->aux_param == 0) {
         // 刚进入该函数
         _seg_rt->aux_param = 1;
@@ -24,10 +25,6 @@ u16 led_colorful_anim_jump(void)
                            _seg->start, _seg_len);
     _seg_rt->counter_mode_step++;
     _seg_rt->counter_mode_step %= _seg->c_n;
-    // if (_seg_rt->counter_mode_step == 0)
-    // {
-    //     // ws2811fx_set_cycle = 1;
-    // }
 
     return anim_speed;
 }
@@ -42,7 +39,8 @@ u16 led_colorful_anim_gradual(void)
     int lum = _seg_rt->counter_mode_step;
     u16 anim_speed;
 
-    anim_speed = LED_COLORFUL_ANIM_SPEED_VAL_MAP(fc_effect.report_speed) / 10;
+    anim_speed =
+        LED_COLORFUL_ANIM_SPEED_PERCENT_TO_VAL(fc_effect.speed_percent) / 10;
 
     if (lum > 255)
         lum = 511 - lum; // lum = 0 -> 255 -> 0
@@ -84,7 +82,6 @@ u16 led_colorful_anim_gradual(void)
         SET_CYCLE;
     }
 
-    // return (_seg->speed / 5);
     return anim_speed;
 }
 
@@ -98,7 +95,8 @@ u16 led_colorful_anim_breath(void)
 
     u8 brightness_max = fc_effect.b;
     u16 anim_speed = 0;
-    anim_speed = LED_COLORFUL_ANIM_SPEED_VAL_MAP(fc_effect.report_speed);
+    anim_speed =
+        LED_COLORFUL_ANIM_SPEED_PERCENT_TO_VAL(fc_effect.speed_percent);
 
     static u32 dest_color = BLACK; // 目标颜色
     /*
@@ -225,8 +223,9 @@ u16 led_colorful_anim_gradual_by_pause(void)
         原本返回的速度值范围：10 ~ 500 ，
         现在根据传递过来的速度对应的百分比值，映射到 10 ~ 500 ，
     */
-    // anim_speed = (500 - (u32)fc_effect.report_speed * (500 - 10) / 100);
-    anim_speed = LED_COLORFUL_ANIM_SPEED_VAL_MAP(fc_effect.report_speed) / 10;
+    // anim_speed = (500 - (u32)fc_effect.speed_percent * (500 - 10) / 100);
+    anim_speed =
+        LED_COLORFUL_ANIM_SPEED_PERCENT_TO_VAL(fc_effect.speed_percent) / 10;
 
     if (lum > 255) {
         // lum = 0 -> 255 -> 0
@@ -307,8 +306,9 @@ u16 led_colorful_anim_slide(void)
         原本支持的动画速度：200 ~ 5000
         现在根据传递过来的速度对应的百分比值，映射到 200 ~ 5000
     */
-    // anim_speed = 5000 - (u32)fc_effect.report_speed * (5000 - 200) / 100;
-    anim_speed = LED_COLORFUL_ANIM_SPEED_VAL_MAP(fc_effect.report_speed) * 10;
+    // anim_speed = 5000 - (u32)fc_effect.speed_percent * (5000 - 200) / 100;
+    anim_speed =
+        LED_COLORFUL_ANIM_SPEED_PERCENT_TO_VAL(fc_effect.speed_percent) * 10;
     steps = (float)anim_speed / 10.0f; // 每 10ms 一步
     if (steps < 1.0f) {
         steps = 1.0f;
@@ -475,9 +475,10 @@ u16 led_colorful_anim_auto(void)
             原本支持的动画速度：200 ~ 5000
             现在根据传递过来的速度对应的百分比值，映射到 200 ~ 5000
         */
-        // anim_speed = 5000 - (u32)fc_effect.report_speed * (5000 - 200) / 100;
+        // anim_speed = 5000 - (u32)fc_effect.speed_percent * (5000 - 200) / 100;
         anim_speed =
-            LED_COLORFUL_ANIM_SPEED_VAL_MAP(fc_effect.report_speed) * 10;
+            LED_COLORFUL_ANIM_SPEED_PERCENT_TO_VAL(fc_effect.speed_percent) *
+            10;
         steps = (float)anim_speed / 10.0f; // 每 10ms 一步
         if (steps < 1.0f) {
             steps = 1.0f;
@@ -539,7 +540,8 @@ u16 led_colorful_anim_auto(void)
             原本支持的动画速度：200 ~ 5000
             现在根据传递过来的速度对应的百分比值，映射到 200 ~ 5000
         */
-        anim_speed = LED_COLORFUL_ANIM_SPEED_VAL_MAP(fc_effect.report_speed);
+        anim_speed =
+            LED_COLORFUL_ANIM_SPEED_PERCENT_TO_VAL(fc_effect.speed_percent);
 
         static u32 dest_color = BLACK; // 目标颜色
         static volatile u32 temp_step =
@@ -625,7 +627,8 @@ u16 led_colorful_anim_auto(void)
         u16 anim_speed;
 
         anim_speed =
-            LED_COLORFUL_ANIM_SPEED_VAL_MAP(fc_effect.report_speed) / 10;
+            LED_COLORFUL_ANIM_SPEED_PERCENT_TO_VAL(fc_effect.speed_percent) /
+            10;
 
         if (lum > 255)
             lum = 511 - lum; // lum = 0 -> 255 -> 0
@@ -677,7 +680,8 @@ u16 led_colorful_anim_auto(void)
             现在根据传递过来的速度对应的百分比值，映射到 10 ~ 500 ，
         */
         anim_speed =
-            LED_COLORFUL_ANIM_SPEED_VAL_MAP(fc_effect.report_speed) / 10;
+            LED_COLORFUL_ANIM_SPEED_PERCENT_TO_VAL(fc_effect.speed_percent) /
+            10;
 
         if (lum > 255) {
             // lum = 0 -> 255 -> 0

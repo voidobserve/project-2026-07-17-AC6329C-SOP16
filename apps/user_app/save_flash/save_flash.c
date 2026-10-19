@@ -110,28 +110,7 @@ void user_data_save_handle(void)
         user_data_save();
     }
 }
-
-// void read_flash_device_status_init(void)
-// {
-//     int ret;
-//     save_flash_t save_flash3;
-//     memset((u8*)&save_flash3, 0, sizeof(save_flash_t));
-
-//     ret = syscfg_read(
-//         CFG_USER_SAVE_DATA_PAGE_ID,
-//         (u8*)(&save_flash3),
-//         sizeof(save_flash_t));
-
-//     if (save_flash3.header != USER_SAVE_DATA_VALID_CODE)  // 第一次上电
-//     {
-//         printf("first read flash");
-//         fc_data_init();
-//     }
-//     else
-//     {
-//         memcpy((u8*)(&fc_effect), (u8*)(&save_flash3.fc_save), sizeof(fc_effect_t));
-//     }
-// }
+ 
 
 // 把用户数据写到区域3
 void save_user_data_area3(void)

@@ -26,7 +26,7 @@ static volatile motor_24byj48_t *const this = &motor_24byj48;
 // 设置电机引脚输出
 static void motor_set_pins(u8 pattern)
 {
-#if !USER_DEBUG_ENABLE
+#if (0 == USER_DEBUG_ENABLE)
     // 调试使能时屏蔽：IO_PORT_DP 由 UART0 打印占用，不再驱动电机 IN1
     gpio_direction_output(MOTOR_PIN_1, (pattern & 0x01) ? 1 : 0);
 #endif
@@ -108,7 +108,7 @@ void motor_24byj48_init(void)
     motor_24byj48.dest_step_delay_us = 2000; // 默认 2000us 延迟
 
     // 初始化GPIO引脚为输出模式并设置初始值为0
-#if !USER_DEBUG_ENABLE
+#if (0 == USER_DEBUG_ENABLE)
     // 调试使能时屏蔽：IO_PORT_DP 由 UART0 打印占用，不初始化为电机输出
     gpio_set_direction(motor_24byj48.in1_pin, 0); //
     gpio_direction_output(motor_24byj48.in1_pin, 0);
@@ -212,7 +212,7 @@ void motor_24byj48_step(motor_direction_t direction)
     }
 
     // 设置引脚输出
-#if !USER_DEBUG_ENABLE
+#if (0 == USER_DEBUG_ENABLE)
     // 调试使能时屏蔽：IO_PORT_DP 由 UART0 打印占用，不输出电机 IN1 波形
     gpio_direction_output(this->in1_pin, (pattern & 0x01) ? 1 : 0);
 #endif
@@ -320,7 +320,7 @@ void motor_24byj48_move_steps(motor_24byj48_t *motor, u32 steps,
 void motor_24byj48_stop(void)
 {
     // 关闭所有线圈
-#if !USER_DEBUG_ENABLE
+#if (0 == USER_DEBUG_ENABLE)
     // 调试使能时屏蔽：IO_PORT_DP 由 UART0 打印占用，不驱动电机 IN1
     gpio_direction_output(this->in1_pin, 0);
 #endif

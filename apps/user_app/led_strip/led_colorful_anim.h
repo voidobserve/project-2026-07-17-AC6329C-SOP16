@@ -14,7 +14,7 @@
 	将传递过来的速度百分比值映射到
 	LED_COLORFUL_ANIM_MAX_SPEED_VAL ~ LED_COLORFUL_ANIM_MIN_SPEED_VAL
 */
-#define LED_COLORFUL_ANIM_SPEED_VAL_MAP(speed_percent)                         \
+#define LED_COLORFUL_ANIM_SPEED_PERCENT_TO_VAL(speed_percent)                         \
     (LED_COLORFUL_ANIM_MIN_SPEED_VAL -                                         \
      (u32)(speed_percent) *                                                    \
          (LED_COLORFUL_ANIM_MIN_SPEED_VAL - LED_COLORFUL_ANIM_MAX_SPEED_VAL) / \
