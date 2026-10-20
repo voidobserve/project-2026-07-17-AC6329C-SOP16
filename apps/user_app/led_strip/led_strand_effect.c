@@ -69,28 +69,21 @@ void fc_data_init(void)
     fc_effect.dream_scene.c_n = 1; // 颜色数量为1
     fc_effect.b = 255;             // 亮度
 
-    fc_effect.speed_percent = 80; // 速度值 80%
-    // fc_effect.dream_scene.speed = 500 - (u32)fc_effect.speed_percent * (500 - 10) / 100;
+    fc_effect.speed_percent = 80; // 速度值 80% 
     fc_effect.dream_scene.speed =
-        LED_COLORFUL_ANIM_SPEED_PERCENT_TO_VAL(fc_effect.speed_percent);
-    // fc_effect.dream_scene.speed = 100;
+        LED_COLORFUL_ANIM_SPEED_PERCENT_TO_VAL(fc_effect.speed_percent); 
     fc_effect.dream_scene.mixed_white_breath_speed =
         (u16)4000; // 初始值为 4000，对应 4秒
     fc_effect.sequence = NEO_RGBW;
 
-    //流星
+    // 流星
     fc_effect.metemor_on_off = 0x01;                       //开关
     fc_effect.metemor_effect_index = 1;                    //效果编号
     fc_effect.speed = 100;                                 //变化速度
     fc_effect.meteor_period = 8;                           //默认8秒  周期值
     fc_effect.period_cnt = fc_effect.meteor_period * 1000; //ms,运行时的计数器
     fc_effect.mode_cycle = 0; //模式完成一个循环的标志
-    //电机
-    // fc_effect.base_ins.mode = 4;   //360转
-    // fc_effect.base_ins.period = 8;  //速度8s
-    // fc_effect.base_ins.dir = 0;  // 0: 正转  1：
-    // fc_effect.base_ins.music_mode = 0;
-
+    // 电机
     fc_effect.motor_mode = MOTOR_MODE_FORWARD_ROTATION; // 正转
     // fc_effect.motor_sec_per_round = 20; // 默认 电机转速
     fc_effect.motor_sec_per_round =
@@ -1336,10 +1329,10 @@ u16 get_max_sp(void)
 // 增加声控模式的灵敏度
 void ls_sensitive_plus(void)
 {
-    if (fc_effect.sound.sensitive < 100 - 10) {
-        fc_effect.sound.sensitive += 10;
+    if (fc_effect.sound.sensitive >= 10) {
+        fc_effect.sound.sensitive -= 10;
     } else {
-        fc_effect.sound.sensitive = 100;
+        fc_effect.sound.sensitive = 0;
     }
 
     //    printf("fc_effect.music.s = %d", fc_effect.music.s);
@@ -1349,10 +1342,10 @@ void ls_sensitive_plus(void)
 // 减小声控模式的灵敏度
 void ls_sensitive_sub(void)
 {
-    if (fc_effect.sound.sensitive > 10 + 10) {
-        fc_effect.sound.sensitive -= 10;
+    if (fc_effect.sound.sensitive <= 100 - 10) {
+        fc_effect.sound.sensitive += 10;
     } else {
-        fc_effect.sound.sensitive = 10;
+        fc_effect.sound.sensitive = 100;
     }
 
     set_fc_effect();
@@ -1487,16 +1480,22 @@ void set_bright(u8 brightness_percent)
     WS2812FX_setBrightness(fc_effect.b);
 }
 
+u8 get_brightness_percent(void)
+{
+    if (fc_effect.b <= 25) {
+        return 0;
+    }
+    if (fc_effect.b >= 255) {
+        return 100;
+    }
+
+    return ((u16)(fc_effect.b - 25) * 100 + 115) / 230;
+}
+
 // 灯光亮度 增加
 void bright_plus(void)
 {
-    u8 brightness_percent;
-
-    if (fc_effect.b <= 25) {
-        brightness_percent = 0;
-    } else {
-        brightness_percent = ((u16)fc_effect.b - 25) * 100 / (255 - 25);
-    }
+    u8 brightness_percent = get_brightness_percent();
 
     if (brightness_percent <= 90) {
         brightness_percent += 10;
@@ -1504,20 +1503,13 @@ void bright_plus(void)
         brightness_percent = 100;
     }
 
-    fc_effect.b = 25 + ((u16)255 - 25) * brightness_percent / 100;
-    WS2812FX_setBrightness(fc_effect.b);
+    set_bright(brightness_percent);
 }
 
 // 灯光亮度 减小
 void bright_sub(void)
 {
-    u8 brightness_percent;
-
-    if (fc_effect.b <= 25) {
-        brightness_percent = 0;
-    } else {
-        brightness_percent = ((u16)fc_effect.b - 25) * 100 / (255 - 25);
-    }
+    u8 brightness_percent = get_brightness_percent();
 
     if (brightness_percent >= 10) {
         brightness_percent -= 10;
@@ -1525,8 +1517,7 @@ void bright_sub(void)
         brightness_percent = 0;
     }
 
-    fc_effect.b = 25 + ((u16)255 - 25) * brightness_percent / 100;
-    WS2812FX_setBrightness(fc_effect.b);
+    set_bright(brightness_percent);
 }
 
 void updata_sp(void)

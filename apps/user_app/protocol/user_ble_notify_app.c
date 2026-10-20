@@ -36,7 +36,7 @@ void user_ble_notify_light_brightness(void)
     u8 buf_len = 0;
     buf[buf_len++] = 0x04;
     buf[buf_len++] = 0x03;
-    buf[buf_len++] = (u16)fc_effect.b * 100 / 255;
+    buf[buf_len++] = get_brightness_percent();
 
     user_ble_notify_param_put(buf, buf_len);
 }
@@ -67,24 +67,16 @@ void user_ble_notify_sensitive(void)
     u8 buf_len = 0;
     buf[buf_len++] = 0x2F;
     buf[buf_len++] = 0x05;
-    buf[buf_len++] = fc_effect.sound.sensitive;
+    buf[buf_len++] = 100 - fc_effect.sound.sensitive;
     user_ble_notify_param_put(buf, buf_len);
 }
 
-void user_ble_notify_light_color(void)
-{
-    u8 buf[10] = {0};
-    u8 buf_len = 0;
-    buf[buf_len++] = 0x04;
-    buf[buf_len++] = 0x01;
-    buf[buf_len++] = 0x1e;
-    buf[buf_len++] = fc_effect.rgb.r;
-    buf[buf_len++] = fc_effect.rgb.g;
-    buf[buf_len++] = fc_effect.rgb.b;
-    user_ble_notify_param_put(buf, buf_len);
-}
-
-// notify 电机转速（每圈秒数）
+/**
+ * @brief notify 电机转速（每圈秒数）
+ * 
+ * @note 当前工程不返回电机转速，因为跟app中的电机转速对不上，上下限不同
+ * 
+ */
 void user_ble_notify_motor_speed(void)
 {
     u8 buf[10] = {0};
@@ -235,8 +227,7 @@ void user_ble_notify_dev_all_info(void)
     user_ble_notify_light_speed();
     user_ble_notify_light_len();
     user_ble_notify_sensitive();
-    user_ble_notify_light_color();
-    user_ble_notify_motor_speed();
+    // user_ble_notify_motor_speed();
     user_ble_notify_motor_mode();
     user_ble_notify_rgb_sequence();
     user_ble_notify_sound_ctl_type();

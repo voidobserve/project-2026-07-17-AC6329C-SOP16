@@ -7,7 +7,6 @@ void user_ble_notify_light_brightness(void);
 void user_ble_notify_light_speed(void);
 void user_ble_notify_light_len(void);
 void user_ble_notify_sensitive(void);
-void user_ble_notify_light_color(void);
 void user_ble_notify_motor_speed(void);
 void user_ble_notify_motor_mode(void);
 void user_ble_notify_rgb_sequence(void);

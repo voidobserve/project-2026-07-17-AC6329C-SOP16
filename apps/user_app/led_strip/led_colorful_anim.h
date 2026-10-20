@@ -4,7 +4,7 @@
 #include "typedef.h"
 
 // 七彩灯动画最大速度对应的数值
-#define LED_COLORFUL_ANIM_MAX_SPEED_VAL ((u16)200)
+#define LED_COLORFUL_ANIM_MAX_SPEED_VAL ((u16)100)
 
 // 七彩灯动画最小速度对应的数值
 #define LED_COLORFUL_ANIM_MIN_SPEED_VAL ((u16)5000)

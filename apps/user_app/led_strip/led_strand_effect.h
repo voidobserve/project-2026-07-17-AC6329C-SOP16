@@ -152,12 +152,12 @@ typedef struct
 /*----------------------------幻彩灯串效果大结构体----------------------------------*/
 typedef struct
 {
-    unsigned char on_off_flag;   //开关状态
-    unsigned char led_num;       //灯点数
-    color_t rgb;                 //静态模式颜色
-    unsigned char b;             //亮度
-    unsigned short speed;        //8档  速度
-    unsigned char meteor_period; //周期值，单位秒
+    unsigned char on_off_flag;   // 开关状态
+    unsigned char led_num;       // 灯点数
+    color_t rgb;                 // 静态模式颜色
+    unsigned char b;             // 亮度
+    unsigned short speed;        // 流星灯速度值
+    unsigned char meteor_period; // 周期值，单位秒
     unsigned char
         mode_cycle; //1:模式完成一个循环。0：正在跑，和meteor_period搭配用
     u16 period_cnt; //ms,运行时的计数器
@@ -207,6 +207,7 @@ extern ALARM_CLOCK alarm_clock[3];
 void bright_plus(void);
 void bright_sub(void);
 void set_bright(u8 brightness_percent);
+u8 get_brightness_percent(void);
 
 void ls_sensitive_plus(void);
 void ls_sensitive_sub(void);

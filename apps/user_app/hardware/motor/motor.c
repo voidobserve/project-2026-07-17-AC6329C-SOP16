@@ -19,6 +19,8 @@ void motor_init(void)
     motor.speed_sec_per_round = 8;
     motor.phase = 0;
     motor.step = 0;
+    motor.sound_trigger_flag = 0;
+    motor.sound_fast_hold_cnt = 0;
 }
 
 /**
@@ -86,13 +88,40 @@ void motor_set_mode(motor_mode_t mode)
     motor.mode = mode;
     motor.phase = 0;
     motor.step = 0;
+    motor.sound_trigger_flag = 0;
+    motor.sound_fast_hold_cnt = 0;
 
     motor_24byj48_stop();
+}
+
+/**
+ * @brief 声控信号触发，检测到声音时调用
+ *
+ * 声控模式下，会让电机快速转动一段时间（持续检测到信号会不断重新计时），
+ * 没有信号时慢速转动
+ */
+void motor_sound_control_trigger(void)
+{
+    if (MOTOR_MODE_SOUND_CONTROL == motor.mode) {
+        motor.sound_trigger_flag = 1;
+    }
 }
 
 void motor_handle_125us(void)
 {
     motor_24byj48_time_add();
+
+    if (MOTOR_MODE_SOUND_CONTROL == motor.mode) {
+        if (motor.sound_trigger_flag) {
+            // 检测到声控信号，重新开始计算快速转动的时间
+            motor.sound_trigger_flag = 0;
+            // 处理函数每 125us 调用一次，1ms 对应 8 次
+            motor.sound_fast_hold_cnt = (u32)MOTOR_SOUND_CONTROL_FAST_HOLD_MS * 8;
+        } else if (motor.sound_fast_hold_cnt > 0) {
+            motor.sound_fast_hold_cnt--;
+        }
+    }
+
     if (0 == motor_24byj48_time_expire()) {
         return;
     }
@@ -161,8 +190,24 @@ void motor_handle_125us(void)
             motor.phase = 0;
         }
         break;
-    case MOTOR_MODE_SOUND_CONTROL:
+    case MOTOR_MODE_SOUND_CONTROL: {
+        /*
+            声控模式：有声控信号时快速转动一段时间，没有信号时慢速转动
 
+            每步都对比当前转速并纠正，
+            防止其他地方（比如 APP 设置转速、开关机流程）改动转速后与声控状态不一致
+        */
+        u8 target_speed_sec_per_round =
+            (motor.sound_fast_hold_cnt > 0)
+                ? MOTOR_SOUND_CONTROL_FAST_SPEED_SEC_PER_ROUND
+                : MOTOR_SOUND_CONTROL_SLOW_SPEED_SEC_PER_ROUND;
+
+        if (motor.speed_sec_per_round != target_speed_sec_per_round) {
+            motor_set_speed_sec_per_round(target_speed_sec_per_round);
+        }
+
+        motor_24byj48_step(MOTOR_DIR_CW);
         break;
+    }
     }
 }

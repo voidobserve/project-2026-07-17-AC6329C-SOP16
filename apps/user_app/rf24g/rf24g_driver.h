@@ -59,7 +59,7 @@ extern volatile struct key_driver_para rf24g_driver_para;
 extern volatile rf24g_key_t rf24g_key;
 
 void rf24g_driver_package_process(adv_report_t *adv_report);
-void rf24g_driver_package_handle(void *ptr, u8 len);
+// void rf24g_driver_package_handle(void *ptr, u8 len);
 
 
 

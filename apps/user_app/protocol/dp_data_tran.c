@@ -277,9 +277,18 @@ void parse_zd_data(unsigned char *LedCommand)
     }
     //---------------------------------调节亮度0-100-----------------------------------
     if (LedCommand[0] == 0x04 && LedCommand[1] == 0x03) {
-        extern void set_bright(u8 b);
+#if USER_DEBUG_ENABLE
+        // uint8_t brightness_percent = 0;
+#endif
         set_bright(LedCommand[2]);
         user_ble_notify_light_brightness(); // 亮度
+
+#if USER_DEBUG_ENABLE
+        // brightness_percent = (uint16_t)fc_effect.b * 100 / 255;
+        // printf("app brightness_percent == %u\n", (uint16_t)LedCommand[2]);
+        // printf("brightness_percent == %u\n", (uint16_t)brightness_percent);
+        // printf("fc_effect.b == %u\n", fc_effect.b);        
+#endif
     }
     //---------------------------------调节速度0-100-----------------------------------
     if (LedCommand[0] == 0x04 && LedCommand[1] == 0x04) {
@@ -317,7 +326,6 @@ void parse_zd_data(unsigned char *LedCommand)
         if (fc_effect.music.m_type == 0x01) //外模模式
         {
             set_music_mode(LedCommand[2]);
-            user_ble_notify_sound_ctl_mode(); // 声控模式
         }
     }
     //---------------------------------设备手机麦或者外麦-----------------------------------
@@ -326,6 +334,15 @@ void parse_zd_data(unsigned char *LedCommand)
         set_music_type(LedCommand[2]);
         user_ble_notify_sound_ctl_type(); // 声控类型
     }
+
+    //-------------------------------- 流星开关------------------------------------
+    if (LedCommand[0] == 0x2F && LedCommand[1] == 0x02) {
+        extern void set_on_off_meteor(u8 on_off);
+        set_on_off_meteor(LedCommand[2]);
+        user_ble_notify_meteor_pwr_sta(); // 流星开关
+        return;
+    }
+
     // --------------------------------流星模式-----------------------------------
     if (LedCommand[0] == 0x2F && LedCommand[1] == 0x00 &&
         fc_effect.metemor_on_off == 0x01) {
@@ -339,13 +356,6 @@ void parse_zd_data(unsigned char *LedCommand)
         set_mereor_speed(LedCommand[2]);
         user_ble_notify_meteor_speed(); // 流星速度
     }
-    //-------------------------------- 流星开关-----------------------------------
-    if (LedCommand[0] == 0x2F && LedCommand[1] == 0x02) {
-        extern void set_on_off_meteor(u8 on_off);
-        set_on_off_meteor(LedCommand[2]);
-        user_ble_notify_meteor_pwr_sta(); // 流星开关
-    }
-
     // --------------------------------流星灯时间间隔-----------------------------------
     if (LedCommand[0] == 0x2F && LedCommand[1] == 0x03 &&
         fc_effect.metemor_on_off == 0x01) {
@@ -375,7 +385,7 @@ void parse_zd_data(unsigned char *LedCommand)
     if (LedCommand[0] == 0x2F && LedCommand[1] == 0x07) {
         fc_effect.motor_sec_per_round = LedCommand[2];
         motor_set_speed_sec_per_round(fc_effect.motor_sec_per_round);
-        user_ble_notify_motor_speed(); // 电机转速
+        // user_ble_notify_motor_speed(); // 电机转速
     }
 }
 

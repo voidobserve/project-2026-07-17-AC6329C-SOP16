@@ -272,6 +272,7 @@ void rf24g_key_r1c3_press_handle(void)
 
     // 关机
     soft_rurn_off_lights();
+    user_ble_notify_light_pwr_sta();
 }
 
 void rf24g_key_r1c4_press_handle(void)
@@ -282,6 +283,7 @@ void rf24g_key_r1c4_press_handle(void)
 
     // 开机
     soft_turn_on_the_light();
+    user_ble_notify_light_pwr_sta();
 }
 
 void rf24g_key_r2c1_press_handle(void)

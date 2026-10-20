@@ -17,6 +17,9 @@ void user_msg_handle_task(void *p);
 void user_main(void *p);
 void user_notify_task(void *p);
 
+// 声控检测结果，1：检测到声音（麦克风 ADC 采样，按灵敏度判断）
+extern u8 get_sound_result(void);
+
 void user_init(void)
 {
     extern void led_state_init(void);
@@ -95,6 +98,12 @@ void user_main(void *p)
         /****添加 处理函数 start**/
         check_mic_sound();    // 采集声音并计算平均值
         music_static_sound(); // 声控，七彩灯定色转换
+
+#if (0 == USE_TEST_BOARD)
+        if (get_sound_result()) {
+            motor_sound_control_trigger(); // 有声控信号，电机快速转动一段时间
+        }
+#endif
 
         meteor_period_sub(); // 流星周期控制（每10ms减一次）
 

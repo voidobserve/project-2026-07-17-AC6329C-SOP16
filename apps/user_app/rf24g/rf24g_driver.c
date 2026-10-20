@@ -2,6 +2,9 @@
 #include "event.h"   // key_driver 的按键事件定义
 #include "ble_api.h" // adv_report_t
 
+// #include "dev_config.h"
+#include "user_config.h"
+
 volatile rf24g_key_t rf24g_key;
 
 // 作用域为内部的函数声明
@@ -20,8 +23,6 @@ volatile struct key_driver_para rf24g_driver_para = {
     .key_type = KEY_DRIVER_TYPE_RF24GKEY,
     .get_value = __rf24g_get_key_val__,
 };
-
-
 
 static u8 __rf24g_get_key_val__(void)
 {
@@ -58,22 +59,31 @@ void rf24g_driver_package_process(adv_report_t *adv_report)
         return;
     }
 
+    // 协议固定标识字节
+    // 目前 24键和28键都是用同一个固定值，无法进行区分
     if (!(adv_report->data[2] == RF24G_FIXVAL_1 &&
           adv_report->data[3] == RF24G_FIXVAL_2)) {
         // 固定值不对，直接返回
         return;
     }
 
+#if USER_DEBUG_ENABLE
     // TEST ONLY
     // if (adv_report->rssi >= -60) {
     //     put_buf(adv_report->data, adv_report->length);
     // }
+#endif
 
-    // 获取键值
+    // 获取键值(24键和28键都是在这个字节获取键值，并且有键值重复，无法进行区分)
     rf24g_key.key_val = (u8)adv_report->data[12];
     rf24g_key.is_update = 1;
+
+#if USER_DEBUG_ENABLE
+    // printf("rf24g_key.key_val == %02x\n", (uint16_t)rf24g_key.key_val);
+#endif
 }
 
+#if 0
 /**
  * @brief 处理2.4G遥控器数据包
  *
@@ -97,3 +107,4 @@ void rf24g_driver_package_handle(void *ptr, u8 len)
         rf24g_key.is_update = 1;
     }
 }
+#endif

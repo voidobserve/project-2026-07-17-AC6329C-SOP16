@@ -24,10 +24,10 @@ void user_data_init(void)
                       sizeof(user_save_data_t));
 
 #if USER_DEBUG_ENABLE
-    printf("save_data.fc_save.motor_mode = %u\n",
-           (u16)save_data.fc_save.motor_mode);
-    printf("save_data.fc_save.motor_sec_per_round = %u\n",
-           (u16)save_data.fc_save.motor_sec_per_round);
+    // printf("save_data.fc_save.motor_mode = %u\n",
+    //        (u16)save_data.fc_save.motor_mode);
+    // printf("save_data.fc_save.motor_sec_per_round = %u\n",
+    //        (u16)save_data.fc_save.motor_sec_per_round);
 #endif
 
     if (save_data.data_valid_code != USER_SAVE_DATA_VALID_CODE) {
@@ -69,13 +69,13 @@ void user_data_save(void)
 
 #if USER_DEBUG_ENABLE
     printf("save info done \n");
-    printf("fc_effect.motor_mode = %u\n", (u16)fc_effect.motor_mode);
-    printf("fc_effect.motor_sec_per_round = %u\n",
-           (u16)fc_effect.motor_sec_per_round);
-    printf("save_data.fc_save.motor_mode = %u\n",
-           (u16)save_data.fc_save.motor_mode);
-    printf("save_data.fc_save.motor_sec_per_round = %u\n",
-           (u16)save_data.fc_save.motor_sec_per_round);
+    // printf("fc_effect.motor_mode = %u\n", (u16)fc_effect.motor_mode);
+    // printf("fc_effect.motor_sec_per_round = %u\n",
+    //        (u16)fc_effect.motor_sec_per_round);
+    // printf("save_data.fc_save.motor_mode = %u\n",
+    //        (u16)save_data.fc_save.motor_mode);
+    // printf("save_data.fc_save.motor_sec_per_round = %u\n",
+    //        (u16)save_data.fc_save.motor_sec_per_round);
 #endif
 }
 

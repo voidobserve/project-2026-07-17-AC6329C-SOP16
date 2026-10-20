@@ -766,12 +766,17 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../../../user_app/rf24g/rf24g_app.h" />
-		<Unit filename="../../../user_app/rf24g/rf24g_driver_4x7_28_keys.c">
-			<Option compilerVar="CC" />
-		</Unit>
 		<Unit filename="../../../user_app/rf24g/rf24g_driver.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="../../../user_app/rf24g/rf24g_driver_3x8_24_keys.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../../user_app/rf24g/rf24g_driver_3x8_24_keys.h" />
+		<Unit filename="../../../user_app/rf24g/rf24g_driver_4x7_28_keys.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../../user_app/rf24g/rf24g_driver_4x7_28_keys.h" />
 		<Unit filename="../../../user_app/rf24g/rf24g_server_driver.h" />
 		<Unit filename="../../../user_app/rf433/rf433.h" />
 		<Unit filename="../../../user_app/rf433/rf433_app.h" />

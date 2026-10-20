@@ -122,9 +122,7 @@ u8 get_sound_result(void)
         if (fc_effect.sound.c_v > fc_effect.sound.v) {
             if ((fc_effect.sound.c_v - fc_effect.sound.v) * 100 /
                     fc_effect.sound.v >
-                fc_effect.sound.sensitive) //很灵敏
-            //  if( (sound.v - sound.c_v)  > sound.sensitive*10) //灵敏差比较差
-            {
+                fc_effect.sound.sensitive) {
                 // printf("\n sound.v =%d",fc_effect.sound.v);
                 // printf("\n sound.c_v =%d",fc_effect.sound.c_v);
                 // WS2812FX_trigger(); //执行定时器效果
