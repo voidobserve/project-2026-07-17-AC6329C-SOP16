@@ -78,7 +78,7 @@ typedef enum
     MODE_SINGLE_METEOR = 23, //流星效果
     MODE_SINGLE_C_BREATH = 24, //单色呼吸
     MODE_GRADUAL = 25,         //标准渐变，彩虹颜色
-    MODE_BREATH_W = 26,        //W通道呼吸
+    // MODE_BREATH_W = 26,        // W通道呼吸
     // MODE_MUTIL_C_BREATH,
 
     MODE_COLORFUL_BREATH,
@@ -110,9 +110,6 @@ typedef struct
     unsigned char seg_size;    //段大小
     unsigned char c_n;         //颜色数量
     color_t rgb[MAX_NUM_COLORS];
-    unsigned short speed; //由档位决定
-
-    u16 mixed_white_breath_speed; // 混白色呼吸的速度 目前固定只有 4秒 和 8秒，数值对应 4000 和 8000
 } dream_scene_t;
 
 /*----------------------------倒计时结构体----------------------------------*/

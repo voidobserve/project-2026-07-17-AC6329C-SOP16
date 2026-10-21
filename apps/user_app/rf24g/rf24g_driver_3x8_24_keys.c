@@ -142,10 +142,10 @@ void rf24g_key_r1c1_press_handle(void)
         bright_sub();
         user_ble_notify_light_brightness();
     } else if (fc_effect.Now_state == IS_light_scene) {
-		// USER_TO_DO 可能需要看看动画的速度值是否需要调整
-        fc_effect.dream_scene.speed = 400;
-        set_fc_effect();
-    } else if (fc_effect.Now_state == IS_light_music) { 
+        // 动画速度 减
+        ls_speed_sub();
+        user_ble_notify_light_speed();
+    } else if (fc_effect.Now_state == IS_light_music) {
         ls_sensitive_sub();
         user_ble_notify_sensitive();
     }
@@ -153,10 +153,38 @@ void rf24g_key_r1c1_press_handle(void)
 
 void rf24g_key_r1c2_press_handle(void)
 {
+    if (0 == fc_effect.on_off_flag) {
+        return;
+    }
+
+    if (fc_effect.Now_state == IS_STATIC) {
+        bright_plus();
+    } else if (fc_effect.Now_state == IS_light_scene) {
+        // 动画速度 加
+        ls_speed_plus();
+        user_ble_notify_light_speed();
+    } else if (fc_effect.Now_state == IS_light_music) {
+        ls_sensitive_plus();
+        user_ble_notify_sensitive();
+    }
 }
+
 void rf24g_key_r1c3_press_handle(void)
 {
+    // 短按时间 进行开灯
+    if (0 == fc_effect.on_off_flag) {
+        soft_turn_on_the_light();
+    }
 }
+
+void rf24g_key_r1c3_long_handle(void)
+{
+    // 长按事件 进行关灯
+    if (fc_effect.on_off_flag == DEVICE_ON) {
+        soft_rurn_off_lights();
+    }
+}
+
 void rf24g_key_r2c1_press_handle(void)
 {
     if (DEVICE_OFF == fc_effect.on_off_flag) {
@@ -166,36 +194,97 @@ void rf24g_key_r2c1_press_handle(void)
     // 红色
     led_colorful_light_set_static_color(RED);
 }
+
 void rf24g_key_r2c2_press_handle(void)
 {
+    if (DEVICE_OFF == fc_effect.on_off_flag) {
+        return;
+    }
+
+    // 绿色
+    led_colorful_light_set_static_color(GREEN);
 }
+
 void rf24g_key_r2c3_press_handle(void)
 {
+    if (DEVICE_OFF == fc_effect.on_off_flag) {
+        return;
+    }
+
+    // 蓝色
+    led_colorful_light_set_static_color(BLUE);
 }
+
 void rf24g_key_r3c1_press_handle(void)
 {
+    if (DEVICE_OFF == fc_effect.on_off_flag) {
+        return;
+    }
+
+    // 黄色
+    led_colorful_light_set_static_color(YELLOW);
 }
+
 void rf24g_key_r3c2_press_handle(void)
 {
+    if (DEVICE_OFF == fc_effect.on_off_flag) {
+        return;
+    }
+
+    // CYAN
+    led_colorful_light_set_static_color(CYAN);
 }
+
 void rf24g_key_r3c3_press_handle(void)
 {
+    if (DEVICE_OFF == fc_effect.on_off_flag) {
+        return;
+    }
+
+    // MAGENTA ，特点是红色和蓝色分量为最大值
+    led_colorful_light_set_static_color(MAGENTA);
 }
+
 void rf24g_key_r4c1_press_handle(void)
 {
+    if (DEVICE_OFF == fc_effect.on_off_flag) {
+        return;
+    }
+
+    // PURE_WHITE
+    led_colorful_light_set_static_color(PURE_WHITE);
 }
+
 void rf24g_key_r4c2_press_handle(void)
 {
+    uint32_t color =
+        ((uint32_t)0xFF << 16) | ((uint32_t)180 << 8) | ((uint32_t)20);
+
+    if (DEVICE_OFF == fc_effect.on_off_flag) {
+        return;
+    }
+
+    // 模拟白光(日光？)
+    led_colorful_light_set_static_color(color);
 }
+
 void rf24g_key_r4c3_press_handle(void)
 {
+    if (0 == fc_effect.on_off_flag) {
+        return;
+    }
+
+    // USER_TO_DO 动态模式切换，每次短按换一种动态模式
 }
+
 void rf24g_key_r5c1_press_handle(void)
 {
 }
+
 void rf24g_key_r5c2_press_handle(void)
 {
 }
+
 void rf24g_key_r5c3_press_handle(void)
 {
 }
@@ -232,6 +321,8 @@ const rf24_key_handle_func_t
         [RF24G_TYPE_24KEY_EVENT_R1C1_PRESS] = rf24g_key_r1c1_press_handle,
         [RF24G_TYPE_24KEY_EVENT_R1C2_PRESS] = rf24g_key_r1c2_press_handle,
         [RF24G_TYPE_24KEY_EVENT_R1C3_PRESS] = rf24g_key_r1c3_press_handle,
+
+        [RF24G_TYPE_24KEY_EVENT_R1C3_LONG] = rf24g_key_r1c3_long_handle,
 
         [RF24G_TYPE_24KEY_EVENT_R2C1_PRESS] = rf24g_key_r2c1_press_handle,
         [RF24G_TYPE_24KEY_EVENT_R2C2_PRESS] = rf24g_key_r2c2_press_handle,

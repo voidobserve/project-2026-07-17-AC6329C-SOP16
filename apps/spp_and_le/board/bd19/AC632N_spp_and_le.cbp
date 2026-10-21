@@ -730,6 +730,14 @@
 		</Unit>
 		<Unit filename="../../../user_app/hardware/sound_coutrol/sound_control.h" />
 		<Unit filename="../../../user_app/ir_key/ir_key_app.h" />
+		<Unit filename="../../../user_app/led_strip/led_anim_cfg.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../../user_app/led_strip/led_anim_cfg.h" />
+		<Unit filename="../../../user_app/led_strip/led_anim_utils.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../../user_app/led_strip/led_anim_utils.h" />
 		<Unit filename="../../../user_app/led_strip/led_colorful_anim.c">
 			<Option compilerVar="CC" />
 		</Unit>

@@ -2192,117 +2192,8 @@ uint16_t WS2812FX_mode_breath(void)
         SET_CYCLE;
         // ws2811fx_set_cycle = 1;
     }
-    return (fc_effect.dream_scene.speed / 50 * 10 +
-            fc_effect.dream_scene.speed % 50); //原来的速度对遥控调速变化太大了
-}
-
-/*
-	速度换算成「时长」
-	slow_ms：速度 0% 时一个动作周期要用的时间
-	fast_ms：速度 100% 时一个动作周期要用的时间
-*/
-static uint32_t anim_breath_cycle_time_ms(uint32_t slow_ms, uint32_t fast_ms)
-{
-    uint32_t speed =
-        fc_effect.speed_percent; // app 下发的动画速度百分比（0 ~ 100）
-
-    // 无符号运算，slow_ms < fast_ms 时会下溢成一个很大的数，这里先兜底
-    if (slow_ms <= fast_ms) {
-        return fast_ms;
-    }
-
-    if (speed > 100) {
-        speed = 100;
-    }
-
-    return slow_ms - (slow_ms - fast_ms) * speed / 100;
-}
-
-// 当前帧的间隔（ms）
-static uint16_t anim_frame_interval_ms(void)
-{
-    return 10;
-}
-
-/*
-	把「一个周期共 total_steps 步、目标时长 cycle_time_ms」换算成每帧要走多少步，
-	这样速度改变时，动画快慢会跟着变，而不是固定帧数。
-*/
-static uint16_t anim_breath_step_per_frame(uint16_t total_steps,
-                                           uint32_t cycle_time_ms)
-{
-    uint32_t frame_interval_ms = anim_frame_interval_ms(); // 当前帧间隔（ms）
-    uint32_t step_per_frame;                               // 每帧要走多少步
-
-    if (0 == cycle_time_ms) {
-        cycle_time_ms = 1;
-    }
-
-    step_per_frame =
-        ((uint32_t)total_steps * frame_interval_ms + cycle_time_ms - 1) /
-        cycle_time_ms;
-    if (step_per_frame < 1) {
-        step_per_frame = 1;
-    }
-    if (step_per_frame > 64) {
-        step_per_frame = 64;
-    }
-
-    return (uint16_t)step_per_frame;
-}
-
-/**
- * @brief 呼吸灯动画，只支持一个灯
- *      动画速度由 fc_effect.speed_percent 决定
- * 
- * @return u16 
- */
-u16 led_strip_rgb_scene_anim_breath(void)
-{
-    // 呼吸步骤 0 ~ 511（0~255 变亮，255~511 变暗）
-    u16 breath_step = (u16)_seg_rt->counter_mode_step;
-    // 每帧的呼吸步进（一个周期共 512 步）
-    u16 step_per_frame =
-        anim_breath_step_per_frame(512, anim_breath_cycle_time_ms(6000, 1000));
-    u8 breath_level;       // 这一帧的亮度等级 0 ~ 255
-    u32 color;             // 该灯这一帧的颜色（底色 -> 该段的颜色）
-    static u8 color_index; // 颜色索引
-
-    // 兜底：运行状态被外部改动过时，先夹回合法范围，避免 511 - breath_step 下溢
-    if (breath_step > 511) {
-        breath_step = 0;
-    }
-
-    // 0 -> 255 -> 0 的三角波，作为呼吸的亮度包络
-    if (breath_step > 255) {
-        breath_level = (u8)(511 - breath_step);
-    } else {
-        breath_level = (u8)breath_step;
-    }
-
-    /*
-        每段取颜色池里对应的颜色（按位置固定，不随周期变化），从底色渐变到该颜色。
-        取色下标会对颜色数量取模，所以段序号超过颜色数量时，
-        颜色会从头循环，不会把剩余的灯珠留黑。
-    */
-    color =
-        WS2812FX_color_blend(BLACK, _seg->colors[color_index], breath_level);
-    WS2812FX_setPixelColor(_seg->start, color);
-
-    // 一个呼吸周期结束：配色不变（每个灯的颜色由位置固定决定），只标记一轮完成
-    breath_step = (u16)(breath_step + step_per_frame);
-    if (breath_step > 511) {
-        breath_step = 0;
-        color_index++;
-        if (color_index >= _seg->c_n) {
-            // 颜色池用完，从头开始循环
-            color_index = 0;
-        }
-        SET_CYCLE;
-    }
-
-    _seg_rt->counter_mode_step = breath_step;
-    return anim_frame_interval_ms();
+    return (_seg->speed / 50 * 10 +
+            _seg->speed % 50); //原来的速度对遥控调速变化太大了
 }
 
 /*
@@ -2524,6 +2415,7 @@ uint16_t WS2812FX_mutil_c_gradual(void)
     return (_seg->speed / 5);
 }
 
+#if 0
 // w通道呼吸
 uint16_t breath_w(void)
 {
@@ -2559,9 +2451,10 @@ uint16_t breath_w(void)
         // ws2811fx_set_cycle = 1;
     }
     // return _seg->speed;
-    return (fc_effect.dream_scene.speed / 50 * 10 +
-            fc_effect.dream_scene.speed % 50); //原来的速度对遥控调速变化太大了
+    return (_seg->speed / 50 * 10 +
+            _seg->speed % 50); //原来的速度对遥控调速变化太大了
 }
+#endif
 
 // 支持多颜色频闪
 uint16_t WS2812FX_mutil_strobe(void)
@@ -2702,132 +2595,4 @@ uint16_t fc_music_twinkle(void)
         Adafruit_NeoPixel_fill(BLACK, _seg->start, _seg_len);
     }
     return 50;
-}
-
-/**
- * @brief 七彩灯的混白色呼吸动画
- *          一轮动画的时间 == fc_effect.dream_scene.mixed_white_breath_speed，单位：ms
- *          呼吸期间的最大亮度受 fc_effect.b 的影响
- *
- *      注意，时基要求是 20ms ，否则动画时间不准确
- *
- * @return u16
- */
-u16 colorful_light_mixed_white_breathing(void)
-{
-    // static u32 last_sys_time = 0;
-    // extern u32 sys_time_get(void);
-
-    static u32 dest_color = (u32)BLACK; // 目标颜色
-    /*
-        每个步骤用时至少10ms，因为ws2812fx_service() 10ms调用一次
-
-        从 0 到 511，
-        步长为1，共512个步骤，至少 5120 ms 完成一次循环
-        步长为2，共256个步骤，至少 2560 ms 完成一次循环
-
-        那么速度值与循环的关系
-        一次循环的时间 == 步骤 * 10ms
-        一次循环的时间 == 512 / 步长 * 10ms
-        速度值 == 512 / 步长 * 10ms
-        步长 == 512 * 10ms / 速度值
-
-
-        如果是从 0 到 指定亮度(brightness)
-        步长为1，共 brightness + 1 步，至少 brightness * 10 ms 完成一次循环
-        步长为2，共 (brightness + 1) / 2 步，至少 brightness * 10 ms / 2 完成一次循环
-
-        速度值与亮度值的关系
-        一次循环的时间 == (brightness + 1) / 步长 * 10ms
-        速度值 == (brightness + 1) / 步长 * 10ms
-        (brightness + 1) / 步长 == 速度值 / 10ms
-        (brightness + 1) == 速度值 / 10ms * 步长
-        步长 == (brightness + 1) * 10ms / 速度值
-
-        要求动画是从 0 到 指定亮度（brightness）再到 0，渐亮->渐灭->一轮动画完成
-        步长为 (brightness + 1) * 10ms * 2 / 速度值
-    */
-    static volatile u32 temp_step =
-        0; // 累计放大了1000倍的步长，超过1000后，才执行动画的下一步骤
-    static volatile u16 brightness = 0; // 亮度值
-    u16 speed =
-        fc_effect.dream_scene.mixed_white_breath_speed; // 接收外部的速度值
-    // u16 speed = (u16)10 * 1000;                            // 接收外部的速度值
-    u32 step = 0; // 步长（放大了1000倍）
-    // step = ((u32)fc_effect.b + 1) * 10 * 1000 * 2 / speed; // 实际测试这里的动画时间会比速度值多一倍，这里在分子上多乘以2（渐亮->渐灭->一轮动画完成）
-    /*
-        实际测试这里的动画时间会比速度值多一倍，这里在分子上多乘以2（渐亮->渐灭->一轮动画完成），
-        由于时基是20ms的，这里要再乘以2，总共多乘以4
-    */
-    step = ((u32)fc_effect.b + 1) * 10 * 1000 * 4 / speed;
-
-    if (0 == _seg_rt->counter_mode_step && 0 == _seg_rt->aux_param &&
-        0 == _seg_rt->counter_mode_call) {
-        /*
-            如果是第一次进入，设置默认颜色
-            当前颜色为黑色，向目标颜色渐变（看起来像呼吸渐亮）
-        */
-        // dest_color = (u32)_seg->colors[_seg_rt->aux_param];
-        dest_color = (u32)WHITE;
-        brightness = 0;
-        temp_step = 0;
-        Adafruit_NeoPixel_fill(BLACK, _seg->start, _seg_len);
-        // printf("pure_white begin\n");
-    }
-
-    temp_step += step;
-    if (temp_step >= 1000) {
-        // 有可能单次的步长会超过1000，这里用循环来逐个递减
-        while (1) {
-            if (temp_step < 1000) {
-                // 退出条件，当步长小于1000时，退出
-                break;
-            }
-
-            /*
-                没有固定最大亮度的呼吸：
-                brightness 变化范围： 0 -> brightness -> 0
-            */
-            _seg_rt->counter_mode_step++;
-            if (temp_step >= 1000) {
-                temp_step -= 1000;
-            } else {
-                temp_step = 0;
-            }
-
-            brightness = _seg_rt->counter_mode_step;
-            if (brightness > (u16)fc_effect.b) {
-                brightness = ((u16)fc_effect.b * 2) - brightness;
-            }
-
-            /*
-                0 -> fc_effect.b，共 fc_effect.b 个步骤，灯光渐亮
-                fc_effect.b -> 0，共 fc_effect.b 个步骤，灯光渐暗
-            */
-            if (_seg_rt->counter_mode_step >= ((u32)fc_effect.b * 2)) {
-                _seg_rt->counter_mode_step = 0;
-                temp_step = 0;
-                brightness = 0;
-
-                // printf("pure_white end\n");
-                dest_color = (u32)WHITE;
-
-                // Adafruit_NeoPixel_fill(BLACK, _seg->start, _seg_len); // 防止动画最后没有熄灭灯光
-                // dest_color = WS2812FX_color_blend(BLACK, _seg->colors[_seg_rt->aux_param], (u8)fc_effect.b);
-
-                // printf("__LINE__ %d\n", __LINE__);
-                SET_CYCLE;
-            }
-        }
-    }
-
-    u32 color = WS2812FX_color_blend(BLACK, dest_color, (u8)brightness);
-    Adafruit_NeoPixel_fill(color, _seg->start, _seg_len);
-
-    // printf("brightness %u\n", (u16)brightness); //
-    // printf("temp_step %lu\n", (u32)temp_step);  // 打印为0
-    // printf("step %lu\n", (u32)step);
-    // printf("_seg_rt->counter_mode_step %lu\n", (u32)_seg_rt->counter_mode_step);
-
-    return 1; // ws2812fx_service() 10ms调用一次，这个值只需要小于10
 }

@@ -47,6 +47,9 @@ keil MDK 编译器不支持二进制表示，因此首先要实现binary.h文件
 
 #include "user_config.h"
 
+#include "led_anim_cfg.h"
+#include "led_anim_utils.h"
+
 
 
 
@@ -102,6 +105,14 @@ ws218运行
 // extern unsigned long get_syn_time(void);
 extern u32 get_syn_time(void);
 
+/*
+    真实帧间隔（ms）：上一次 show 到这一次 show 的实际时长，供动画换算步长。
+    帧间隔不是常数：ws2812fx_service() 被任务循环调用，循环周期会被 BLE、2.4G、
+    电机中断、ADC、printf 等负载拉长，动画必须按真实时间走，否则两台设备会错位。
+*/
+volatile uint16_t g_anim_frame_ms = LED_ANIM_FRAME_MS;
+static volatile unsigned long last_show_ms;
+
 void WS2812FX_service() 
 {
   if(_running || _triggered) {
@@ -140,8 +151,18 @@ void WS2812FX_service()
     }
     if(doShow) {
     //  delay(1); // for ESP32 (see https://forums.adafruit.com/viewtopic.php?f=47&t=117327)
-      
-      
+      unsigned long elapsed = now - last_show_ms;
+
+      last_show_ms = now;
+      /* 长时间停顿（写 flash 等）落回默认值，避免一帧走掉一大截动画 */
+      if (elapsed > LED_ANIM_FRAME_MAX_MS) {
+        g_anim_frame_ms = LED_ANIM_FRAME_MS;
+      } else if (elapsed < 1) {
+        g_anim_frame_ms = 1;
+      } else {
+        g_anim_frame_ms = (uint16_t)elapsed;
+      }
+
       WS2812FX_show();
     }
     _triggered = false;
@@ -202,6 +223,8 @@ void WS2812FX_show(void) {
 
 void WS2812FX_start() {
   WS2812FX_resetSegmentRuntimes();
+  /* 重新开始后第一帧的真实间隔从这一刻算起，避免用上一轮的旧时间 */
+  last_show_ms = millis();
   _running = true;
 }
 

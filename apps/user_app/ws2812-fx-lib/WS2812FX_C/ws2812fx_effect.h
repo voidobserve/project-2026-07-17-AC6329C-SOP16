@@ -85,7 +85,7 @@ uint16_t WS2812FX_mode_multi_back_same(void);
 uint16_t WS2812FX_adj_rgb_sequence(void);
 uint16_t WS2812FX_mutil_c_jump(void);
 uint16_t WS2812FX_mutil_c_gradual(void);
-uint16_t breath_w(void);
+// uint16_t breath_w(void);
 uint16_t WS2812FX_mutil_strobe(void);
 uint16_t breath_rgb(void);
 
@@ -104,9 +104,5 @@ uint16_t WS2812FX_mode_comet_6(void);
 
 uint16_t fc_double_meteor(void);
 void close_metemor(void);
-
-u16 led_strip_rgb_scene_anim_breath(void);
-
-
 
 #endif

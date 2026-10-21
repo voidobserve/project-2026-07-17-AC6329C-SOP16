@@ -489,11 +489,8 @@ void rf24g_key_r4c4_press_handle(void)
     if (fc_effect.Now_state == IS_light_scene) {
         ls_speed_plus();
 #if USER_DEBUG_ENABLE
-        printf("fc_effect.dream_scene.speed == %u\n",
-               fc_effect.dream_scene.speed);
         printf("fc_effect.speed_percent == %u\n", (u16)fc_effect.speed_percent);
 #endif
-        set_fc_effect();
         user_ble_notify_light_speed();
     }
 }
@@ -512,11 +509,8 @@ void rf24g_key_r4c4_hold_handle(void)
     if (fc_effect.Now_state == IS_light_scene) {
         ls_speed_plus();
 #if USER_DEBUG_ENABLE
-        printf("fc_effect.dream_scene.speed == %u\n",
-               fc_effect.dream_scene.speed);
         printf("fc_effect.speed_percent == %u\n", (u16)fc_effect.speed_percent);
 #endif
-        set_fc_effect();
         user_ble_notify_light_speed();
     }
 }
@@ -621,11 +615,8 @@ void rf24g_key_r5c4_press_handle(void)
     if (fc_effect.Now_state == IS_light_scene) {
         ls_speed_sub();
 #if USER_DEBUG_ENABLE
-        printf("fc_effect.dream_scene.speed == %u\n",
-               fc_effect.dream_scene.speed);
         printf("fc_effect.speed_percent == %u\n", (u16)fc_effect.speed_percent);
 #endif
-        set_fc_effect();
         user_ble_notify_light_speed();
     }
 }
@@ -644,11 +635,8 @@ void rf24g_key_r5c4_hold_handle(void)
     if (fc_effect.Now_state == IS_light_scene) {
         ls_speed_sub();
 #if USER_DEBUG_ENABLE
-        printf("fc_effect.dream_scene.speed == %u\n",
-               fc_effect.dream_scene.speed);
         printf("fc_effect.speed_percent == %u\n", (u16)fc_effect.speed_percent);
 #endif
-        set_fc_effect();
         user_ble_notify_light_speed();
     }
 }
