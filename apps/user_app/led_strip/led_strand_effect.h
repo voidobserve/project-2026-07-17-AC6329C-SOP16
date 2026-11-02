@@ -164,7 +164,7 @@ typedef struct
     // countdown_t countdown;        //涂鸦倒计时
     u8 w;           //w通道灰度，RGB模式W必须为0，w模式RGB为0
     u8 breath_mode; //呼吸模式，0：红色，1：绿，2：蓝，3：W，4：七彩呼吸
-    u8 music_mode;
+    // u8 music_mode;
     music_t music;     //音乐
     sound_t sound;     //声控
     u8 metemor_on_off; //流星开关

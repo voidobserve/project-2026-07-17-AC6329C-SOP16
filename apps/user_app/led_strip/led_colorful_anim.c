@@ -69,7 +69,7 @@
 static volatile u8 anim_cycle_done;
 
 /* 按当前速度百分比，把 [slow_ms, fast_ms] 折算成实际时长 */
-static u16 anim_ms(u16 slow_ms, u16 fast_ms)
+static u16 led_anim_get_ms(u16 slow_ms, u16 fast_ms)
 {
     return led_anim_percent_to_ms(fc_effect.speed_percent, slow_ms, fast_ms);
 }
@@ -88,7 +88,7 @@ u16 led_colorful_anim_jump(void)
 
 #if USER_DEBUG_ENABLE
         printf("led_colorful_anim_jump: ms == %u\n",
-               anim_ms(JUMP_COLOR_MS_SLOW, JUMP_COLOR_MS_FAST));
+               led_anim_get_ms(JUMP_COLOR_MS_SLOW, JUMP_COLOR_MS_FAST));
 #endif
     }
 
@@ -99,7 +99,7 @@ u16 led_colorful_anim_jump(void)
         这个动画一帧就是一步，直接用毫秒累加判断：
         按定点步长累加要每帧取整，慢速档（4s 换一种颜色）会有千分之几的速率误差
     */
-    cycle_ms = anim_ms(JUMP_COLOR_MS_SLOW, JUMP_COLOR_MS_FAST);
+    cycle_ms = led_anim_get_ms(JUMP_COLOR_MS_SLOW, JUMP_COLOR_MS_FAST);
     cycle_acc += g_anim_frame_ms;
     while (cycle_acc >= cycle_ms) {
         cycle_acc -= cycle_ms;
@@ -136,13 +136,13 @@ u16 led_colorful_anim_gradual(void)
 
 #if USER_DEBUG_ENABLE
         printf("led_colorful_anim_gradual: ms == %u\n",
-               anim_ms(GRADUAL_COLOR_MS_SLOW, GRADUAL_COLOR_MS_FAST));
+               led_anim_get_ms(GRADUAL_COLOR_MS_SLOW, GRADUAL_COLOR_MS_FAST));
 #endif
     }
 
     step = led_anim_step_per_frame(
         GRADUAL_TOTAL_STEPS,
-        anim_ms(GRADUAL_COLOR_MS_SLOW, GRADUAL_COLOR_MS_FAST));
+        led_anim_get_ms(GRADUAL_COLOR_MS_SLOW, GRADUAL_COLOR_MS_FAST));
 
     step_acc += step;
     while (step_acc >= LED_ANIM_STEP_SCALE) {
@@ -202,7 +202,7 @@ u16 led_colorful_anim_breath(void)
 
 #if USER_DEBUG_ENABLE
         printf("led_colorful_anim_breath: ms == %u\n",
-               anim_ms(BREATH_CYCLE_MS_SLOW, BREATH_CYCLE_MS_FAST));
+               led_anim_get_ms(BREATH_CYCLE_MS_SLOW, BREATH_CYCLE_MS_FAST));
 #endif
     }
 
@@ -212,7 +212,7 @@ u16 led_colorful_anim_breath(void)
 
     step = led_anim_step_per_frame(
         BREATH_TOTAL_STEPS,
-        anim_ms(BREATH_CYCLE_MS_SLOW, BREATH_CYCLE_MS_FAST));
+        led_anim_get_ms(BREATH_CYCLE_MS_SLOW, BREATH_CYCLE_MS_FAST));
 
     step_acc += step;
     while (step_acc >= LED_ANIM_STEP_SCALE) {
@@ -266,12 +266,12 @@ u16 led_colorful_anim_strobe(void)
 
 #if USER_DEBUG_ENABLE
         printf("led_colorful_anim_strobe: ms == %u\n",
-               anim_ms(STROBE_CYCLE_MS_SLOW, STROBE_CYCLE_MS_FAST));
+               led_anim_get_ms(STROBE_CYCLE_MS_SLOW, STROBE_CYCLE_MS_FAST));
 #endif
     }
 
     // 亮场和灭场各占半个周期
-    half_ms = (u16)(anim_ms(STROBE_CYCLE_MS_SLOW, STROBE_CYCLE_MS_FAST) / 2);
+    half_ms = (u16)(led_anim_get_ms(STROBE_CYCLE_MS_SLOW, STROBE_CYCLE_MS_FAST) / 2);
 
     if (phase_on) {
         Adafruit_NeoPixel_fill(_seg->colors[color_index], _seg->start,
@@ -327,7 +327,7 @@ u16 led_colorful_anim_gradual_by_pause(void)
 
 #if USER_DEBUG_ENABLE
         printf("led_colorful_anim_gradual_by_pause: ms == %u\n",
-               anim_ms(PAUSE_COLOR_MS_SLOW, PAUSE_COLOR_MS_FAST));
+               led_anim_get_ms(PAUSE_COLOR_MS_SLOW, PAUSE_COLOR_MS_FAST));
 #endif
     }
 
@@ -339,7 +339,7 @@ u16 led_colorful_anim_gradual_by_pause(void)
         return LED_ANIM_FRAME_MS;
     }
 
-    cycle_ms = anim_ms(PAUSE_COLOR_MS_SLOW, PAUSE_COLOR_MS_FAST);
+    cycle_ms = led_anim_get_ms(PAUSE_COLOR_MS_SLOW, PAUSE_COLOR_MS_FAST);
     step = led_anim_step_per_frame(GRADUAL_TOTAL_STEPS, cycle_ms);
 
     step_acc += step;
@@ -362,7 +362,7 @@ u16 led_colorful_anim_gradual_by_pause(void)
                 anim_cycle_done = 1;
             }
             // 变化完成一个颜色后，停顿一段时间，再变换下一个颜色
-            hold_ms = anim_ms(PAUSE_HOLD_MS_SLOW, PAUSE_HOLD_MS_FAST);
+            hold_ms = led_anim_get_ms(PAUSE_HOLD_MS_SLOW, PAUSE_HOLD_MS_FAST);
             break;
         }
     }
@@ -408,11 +408,11 @@ u16 led_colorful_anim_slide(void)
 
 #if USER_DEBUG_ENABLE
         printf("led_colorful_anim_slide: ms == %u\n",
-               anim_ms(SLIDE_CYCLE_MS_SLOW, SLIDE_CYCLE_MS_FAST));
+               led_anim_get_ms(SLIDE_CYCLE_MS_SLOW, SLIDE_CYCLE_MS_FAST));
 #endif
     }
 
-    cycle_ms = anim_ms(SLIDE_CYCLE_MS_SLOW, SLIDE_CYCLE_MS_FAST);
+    cycle_ms = led_anim_get_ms(SLIDE_CYCLE_MS_SLOW, SLIDE_CYCLE_MS_FAST);
     // 一整圈 2π 分 cycle_ms / 实际帧间隔 步走完
     delta = TWO_PI / ((float)cycle_ms / (float)g_anim_frame_ms);
 

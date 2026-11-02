@@ -7,7 +7,7 @@
 
 	REVIEW 修改后，注意检查 board_ac632n_demo_cfg.h -> TCFG_UART0_ENABLE
 */
-#define USER_DEBUG_ENABLE 1
+#define USER_DEBUG_ENABLE 0
 
 
 

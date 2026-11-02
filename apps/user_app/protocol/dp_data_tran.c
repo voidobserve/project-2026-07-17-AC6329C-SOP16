@@ -1,10 +1,4 @@
-/*
-适用：
-产品ID: yxwh27s5
-品类：幻彩户外串灯-蓝牙
-协议：BLE
-DP协议转置，提取DP点有效数据
-*/
+
 #include "cpu.h"
 #include "led_strip_sys.h"
 #include "paint_tool.h"
@@ -287,7 +281,7 @@ void parse_zd_data(unsigned char *LedCommand)
         // brightness_percent = (uint16_t)fc_effect.b * 100 / 255;
         // printf("app brightness_percent == %u\n", (uint16_t)LedCommand[2]);
         // printf("brightness_percent == %u\n", (uint16_t)brightness_percent);
-        // printf("fc_effect.b == %u\n", fc_effect.b);        
+        // printf("fc_effect.b == %u\n", fc_effect.b);
 #endif
     }
     //---------------------------------调节速度0-100-----------------------------------

@@ -37,6 +37,9 @@ SpaceBeforeParens: ControlStatements
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: None
+# 尾随注释对齐
+AlignTrailingComments:
+  Kind: Always
 # 宏的对齐
 AlignConsecutiveMacros: true
 # 连续赋值对齐

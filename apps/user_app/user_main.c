@@ -109,10 +109,10 @@ void user_main(void *p)
 
         // 灯带长度固定 16（app 下发的长度值统一按 16 执行）
         // 正常时 led_num 恒为 16、条件不成立，零开销；被改动时立即纠正
-        if (fc_effect.led_num != 16) {
-            extern void set_ls_lenght(u16 l);
-            set_ls_lenght(16);
-        }
+        // if (fc_effect.led_num != 16) {
+        //     extern void set_ls_lenght(u16 l);
+        //     set_ls_lenght(16);
+        // }
 
         WS2812FX_service(); // 注意，实际 这里约 20ms 才调用一次动画
 

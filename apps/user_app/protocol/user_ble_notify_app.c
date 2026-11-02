@@ -41,6 +41,7 @@ void user_ble_notify_light_brightness(void)
     user_ble_notify_param_put(buf, buf_len);
 }
 
+// notify 速度百分比值
 void user_ble_notify_light_speed(void)
 {
     u8 buf[10] = {0};
@@ -57,7 +58,7 @@ void user_ble_notify_light_len(void)
     u8 buf_len = 0;
     buf[buf_len++] = 0x04;
     buf[buf_len++] = 0x08;
-    buf[buf_len++] = fc_effect.led_num >> 8;
+    buf[buf_len++] = fc_effect.led_num;
     user_ble_notify_param_put(buf, buf_len);
 }
 

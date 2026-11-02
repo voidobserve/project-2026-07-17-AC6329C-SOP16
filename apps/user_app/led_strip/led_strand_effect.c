@@ -72,7 +72,7 @@ void fc_data_init(void)
 {
     //灯具
     fc_effect.on_off_flag = DEVICE_ON; // 灯为开启状态
-    fc_effect.led_num = 16;            // 灯带的总灯珠数量
+    fc_effect.led_num = 1 + 16;        // 灯带的总灯珠数量（RGBW + 16颗流星灯）
     fc_effect.Now_state = IS_STATIC;   // 当前运行状态 静态
 
     // 默认让W通道对应值为0，由RGB组成混白色
@@ -130,94 +130,96 @@ void full_color_init(void)
 // void   flash_printf(void);
 void set_fc_effect(void)
 {
-    if (fc_effect.on_off_flag == DEVICE_ON) {
-        fc_effect.period_cnt = 0;
-        switch (fc_effect.Now_state) {
-            //幻彩场景
-        case IS_light_scene:
-            set_bright(100);
-            ls_scene_effect();
-            break;
-        //配对模式
-        // case ACT_TY_PAIR:  // 配对完成，要恢复fc_effect.Now_state
-        //     fc_pair_effect();
-        //     break;
-        //自定义效果模式
-        // case ACT_CUSTOM:
-        //     // custom_effect();
+    if (0 == fc_effect.on_off_flag) {
+        return;
+    }
 
-        //   //  custom_meteor_effect();
-        //     break;
-        case IS_light_music:
-            set_bright(100);
-            /* code */
+    fc_effect.period_cnt = 0;
+    switch (fc_effect.Now_state) {
+        //幻彩场景
+    case IS_light_scene:
+        set_bright(100);
+        ls_scene_effect();
+        break;
+    //配对模式
+    // case ACT_TY_PAIR:  // 配对完成，要恢复fc_effect.Now_state
+    //     fc_pair_effect();
+    //     break;
+    //自定义效果模式
+    // case ACT_CUSTOM:
+    //     // custom_effect();
 
-            extern uint16_t fc_music_gradual(void);
-            extern uint16_t fc_music_breath(void);
-            extern uint16_t fc_music_static(void);
-            extern uint16_t fc_music_twinkle(void);
+    //   //  custom_meteor_effect();
+    //     break;
+    case IS_light_music:
+        set_bright(100);
+        /* code */
 
-            if (fc_effect.music.m == 0) {
-                // 能量1
-                WS2812FX_setSegment_colorOptions(
-                    0,                       //第0段
-                    0, 0,                    //起始位置，结束位置
-                    &fc_music_gradual,       //效果 // 渐变，触发变色
-                    0,                       //颜色，WS2812FX_setColors设置
-                    colorful_led_frame_ms(), //速度
-                    0);
+        extern uint16_t fc_music_gradual(void);
+        extern uint16_t fc_music_breath(void);
+        extern uint16_t fc_music_static(void);
+        extern uint16_t fc_music_twinkle(void);
 
-                WS2812FX_start();
-            }
+        if (fc_effect.music.m == 0) {
+            // 能量1
+            WS2812FX_setSegment_colorOptions(
+                0,                       //第0段
+                0, 0,                    //起始位置，结束位置
+                &fc_music_gradual,       //效果 // 渐变，触发变色
+                0,                       //颜色，WS2812FX_setColors设置
+                colorful_led_frame_ms(), //速度
+                0);
 
-            if (fc_effect.music.m == 1) {
-                // 节奏1
-                WS2812FX_setSegment_colorOptions(
-                    0,                //第0段
-                    0, 0,             //起始位置，结束位置
-                    &fc_music_breath, //效果// 呼吸，触发渐亮-》渐暗，最后黑，每次变色
-                    0,                //颜色，WS2812FX_setColors设置
-                    colorful_led_frame_ms(), //速度
-                    0);
-
-                WS2812FX_start();
-            }
-
-            if (fc_effect.music.m == 2) {
-                // 频谱1
-                WS2812FX_setSegment_colorOptions(
-                    0,                       //第0段
-                    0, 0,                    //起始位置，结束位置
-                    &fc_music_static,        //效果  // 定色，触发换颜色
-                    0,                       //颜色，WS2812FX_setColors设置
-                    colorful_led_frame_ms(), //速度
-                    0);                      //选项，这里像素点大小：1
-
-                WS2812FX_start();
-            }
-
-            if (fc_effect.music.m == 3) {
-                // 滚动
-                WS2812FX_setSegment_colorOptions(
-                    0,                 //第0段
-                    0, 0,              //起始位置，结束位置
-                    &fc_music_twinkle, //效果 定色，触发黑->爆闪一下，每次变色
-                    0,                 //颜色，WS2812FX_setColors设置
-                    colorful_led_frame_ms(), //速度
-                    0);                      //选项，这里像素点大小：1
-                WS2812FX_start();
-            }
-            break;
-            // case IS_smear_adjust:
-            //     // fc_smear_adjust();
-            //     break;
-            //静态模式
-        case IS_STATIC:
-            static_mode();
-            break;
-        default:
-            break;
+            WS2812FX_start();
         }
+
+        if (fc_effect.music.m == 1) {
+            // 节奏1
+            WS2812FX_setSegment_colorOptions(
+                0,                //第0段
+                0, 0,             //起始位置，结束位置
+                &fc_music_breath, //效果// 呼吸，触发渐亮-》渐暗，最后黑，每次变色
+                0,                //颜色，WS2812FX_setColors设置
+                colorful_led_frame_ms(), //速度
+                0);
+
+            WS2812FX_start();
+        }
+
+        if (fc_effect.music.m == 2) {
+            // 频谱1
+            WS2812FX_setSegment_colorOptions(
+                0,                       //第0段
+                0, 0,                    //起始位置，结束位置
+                &fc_music_static,        //效果  // 定色，触发换颜色
+                0,                       //颜色，WS2812FX_setColors设置
+                colorful_led_frame_ms(), //速度
+                0);                      //选项，这里像素点大小：1
+
+            WS2812FX_start();
+        }
+
+        if (fc_effect.music.m == 3) {
+            // 滚动
+            WS2812FX_setSegment_colorOptions(
+                0,                       //第0段
+                0, 0,                    //起始位置，结束位置
+                &fc_music_twinkle,       //效果 定色，触发黑->爆闪一下，每次变色
+                0,                       //颜色，WS2812FX_setColors设置
+                colorful_led_frame_ms(), //速度
+                0);                      //选项，这里像素点大小：1
+            WS2812FX_start();
+        }
+        break;
+        // case IS_smear_adjust:
+        //     // fc_smear_adjust();
+        //     break;
+        //静态模式
+    case IS_STATIC:
+        static_mode();
+        break;
+    default:
+        break;
     }
 }
 
@@ -896,14 +898,14 @@ static void ls_scene_effect(void)
         //     w_grandual();
         //     break;
 
-    case MODE_STROBE: //标准频闪
+    case MODE_STROBE:                                               //标准频闪
         WS2812FX_setSegment_colorOptions(0,                         // 第0段
                                          0,                         // 起始位置
                                          0,                         // 结束位置
                                          &led_colorful_anim_strobe, //效果
                                          0, //颜色，WS2812FX_setColors设置
                                          colorful_led_frame_ms(), // 速度
-                                         NO_OPTIONS); //选项
+                                         NO_OPTIONS);             //选项
         WS2812FX_set_coloQty(0, fc_effect.dream_scene.c_n);
         ls_set_colors(fc_effect.dream_scene.c_n, &fc_effect.dream_scene.rgb);
         WS2812FX_start();
@@ -1476,6 +1478,7 @@ u8 get_brightness_percent(void)
         return 100;
     }
 
+    // fc_effect.b(25~255)映射到0%~100%，四舍五入
     return ((u16)(fc_effect.b - 25) * 100 + 115) / 230;
 }
 
@@ -1510,8 +1513,8 @@ void bright_sub(void)
 // ------------------------------------------------灯带长度
 void set_ls_lenght(u16 l)
 {
-    if (l > 16)
-        l = 16;
+    // if (l > 16)
+    //     l = 16;
     fc_effect.led_num = l;
     WS2812FX_stop();
     // 第0号像素是 RGBW 灯（PWM 驱动），白光灯带从第1号开始，所以要多开一个像素，
@@ -1733,6 +1736,7 @@ void fc_dynamic_effect(u8 n)
         break;
 
     case 0x13:
+        // 红绿渐变
         ls_set_color(0, RED);
         ls_set_color(1, GREEN);
         fc_effect.dream_scene.change_type = MODE_MUTIL_C_GRADUAL;
@@ -1741,6 +1745,7 @@ void fc_dynamic_effect(u8 n)
         break;
 
     case 0x14:
+        // 红蓝渐变(蓝红渐变)
         ls_set_color(0, BLUE);
         ls_set_color(1, RED);
         fc_effect.dream_scene.change_type = MODE_MUTIL_C_GRADUAL;
