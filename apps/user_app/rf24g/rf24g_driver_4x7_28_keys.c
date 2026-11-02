@@ -14,7 +14,7 @@
 #include "rf24g_driver_4x7_28_keys.h"
 #include "user_ble_notify_app.h"
 
-#if USE_RF24G_REMOTE == RF24G_REMOTE_4x7_28_KEYS
+#if (USE_RF24G_REMOTE == RF24G_REMOTE_4x7_28_KEYS)
 
 const u8 rf24g_key_type_28keys_table[][RF24G_KEY_EVENT_MAX + 1] = {
     {RF24G_TYPE_28KEY_KEY_VAL_R1C1, RF24G_TYPE_28KEY_EVENT_R1C1_PRESS,

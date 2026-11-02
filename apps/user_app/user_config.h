@@ -4,8 +4,10 @@
 
 /*
 	如果使能，会屏蔽 IO_PORT_DP 引脚对应的功能，专门用于打印输出
+
+	REVIEW 修改后，注意检查 board_ac632n_demo_cfg.h -> TCFG_UART0_ENABLE
 */
-#define USER_DEBUG_ENABLE 0
+#define USER_DEBUG_ENABLE 1
 
 
 

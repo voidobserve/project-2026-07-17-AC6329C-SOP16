@@ -4,7 +4,7 @@
 #include "dev_config.h"
 #include "rf24g_driver.h"
 
-#if USE_RF24G_REMOTE == RF24G_REMOTE_4x7_28_KEYS
+#if (USE_RF24G_REMOTE == RF24G_REMOTE_4x7_28_KEYS)
 // 客户的28键遥控器键值
 enum
 {
@@ -223,6 +223,7 @@ typedef void (*rf24_key_handle_func_t)(void);
 u8 rf24g_convert_to_key_event(u8 key_driver_value, u8 key_driver_event);
 extern const rf24_key_handle_func_t
     rf24g_key_type_28keys_handle_func_buff[RF24G_TYPE_28KEY_EVENT_MAX];
-#endif
 
+
+#endif
 #endif

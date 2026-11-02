@@ -4,7 +4,7 @@
 #include "dev_config.h"
 #include <stdint.h>
 
-#if USE_RF24G_REMOTE == RF24G_REMOTE_3x8_24_KEYS
+#if (USE_RF24G_REMOTE == RF24G_REMOTE_3x8_24_KEYS)
 
 // 24键遥控器键值
 enum

@@ -7,7 +7,9 @@
 #include "led_strand_effect.h"
 #include "user_ble_notify_app.h"
 
-#if USE_RF24G_REMOTE == RF24G_REMOTE_3x8_24_KEYS
+#include "dev_config.h"
+
+#if (USE_RF24G_REMOTE == RF24G_REMOTE_3x8_24_KEYS)
 
 const uint8_t rf24g_key_type_24keys_table[][RF24G_KEY_EVENT_MAX + 1] = {
     {RF24G_TYPE_24KEY_KEY_VAL_R1C1, RF24G_TYPE_24KEY_EVENT_R1C1_PRESS,
@@ -134,6 +136,10 @@ uint8_t rf24g_convert_to_key_event(uint8_t key_driver_value,
 
 void rf24g_key_r1c1_press_handle(void)
 {
+#if USER_DEBUG_ENABLE
+    printf("r1c1 press\n");
+#endif
+
     if (DEVICE_OFF == fc_effect.on_off_flag) {
         return;
     }
@@ -153,6 +159,10 @@ void rf24g_key_r1c1_press_handle(void)
 
 void rf24g_key_r1c2_press_handle(void)
 {
+#if USER_DEBUG_ENABLE
+    printf("r1c2 press\n");
+#endif
+
     if (0 == fc_effect.on_off_flag) {
         return;
     }
@@ -171,14 +181,23 @@ void rf24g_key_r1c2_press_handle(void)
 
 void rf24g_key_r1c3_press_handle(void)
 {
+#if USER_DEBUG_ENABLE
+    printf("r1c3 press\n");
+#endif
+
     // 短按时间 进行开灯
     if (0 == fc_effect.on_off_flag) {
+        // 设备原本处于关灯时，再执行开灯
         soft_turn_on_the_light();
     }
 }
 
 void rf24g_key_r1c3_long_handle(void)
 {
+#if USER_DEBUG_ENABLE
+    printf("r1c3 long\n");
+#endif
+
     // 长按事件 进行关灯
     if (fc_effect.on_off_flag == DEVICE_ON) {
         soft_rurn_off_lights();
