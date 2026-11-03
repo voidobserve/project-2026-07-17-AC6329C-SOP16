@@ -1,0 +1,326 @@
+« 10:48:35.612 -> �
+10:48:35.631 -> �
+10:48:35.649 -> �
+10:48:36.237 -> �
+get_chip_id:   9387
+get_vbat_trim: 6
+get_vbg_trim:  1
+[0-MSYS]--Reset Source : 0x1
+P11 SYS RESET
+[1-P11]--Reset Source : 0x4
+P33 SYS RESET
+[2-P33]--Reset Source : 0x1
+VDDIO POR
+10:48:36.240 -> 
+=================Version===============
+BTCTRLER-@20220314-$03ca118
+UPDATE-@20220314-$2189ddb
+=======================================
+[Info]: [SDFILE]VM size: 0x13c00 @ 0x2b300
+10:48:36.244 -> [Info]: [SDFILE]disk capacity 512 KB
+last file_addr:2a222 1020
+end_addr:2b300
+
+49 53 44 55 04 02 20 FF AF 48 47 27 D2 FF FF FF 
+[Debug]: [SDFILE]sdfile mount succ
+10:48:36.288 -> [Info]: [BOARD]Power init : D:\project\2026-07-17-天奕-迷你闪烁机-AC6329C-SOP16\code\project-2026-07-17-AC6329C-SOP16\apps\spp_and_le\board\bd19\board_ac632n_demo.c
+10:48:36.305 -> P3_WKUP_EN0        is 0x0
+P3_WKUP_EN1        is 0x0
+P3_WKUP_EDGE0      is 0x21
+P3_WKUP_EDGE1      is 0xa
+P3_WKUP_LEVEL0     is 0xff
+P3_WKUP_LEVEL1     is 0xf
+P3_WKUP_PND0       is 0x0
+P3_WKUP_PND1       is 0x0
+P3_AWKUP_EN        is 0x0
+P3_AWKUP_P_IE      is 0x0
+P3_AWKUP_N_IE      is 0x0
+P3_AWKUP_LEVEL     is 0x7
+P3_AWKUP_P_PND     is 0x0
+P3_AWKUP_N_PND     is 0x0
+P3_AWKUP_FLT0      is 0x4
+P3_AWKUP_FLT1      is 0x2
+P3_AWKUP_FLT2      is 0x4
+P3_AWKUP_INSEL     is 0x0
+P3_PORT_SEL0     is 0xc
+P3_PORT_SEL1     is 0x8
+P3_PORT_SEL2     is 0x11
+P3_PORT_SEL3     is 0x0
+P3_PORT_SEL4     is 0x15
+P3_PORT_SEL5     is 0xc
+P3_PORT_SEL6     is 0x14
+P3_PORT_SEL7     is 0x2
+P3_PORT_SEL8     is 0x10
+P3_PORT_SEL9     is 0x5
+P3_PORT_SEL10    is 0x14
+P3_PORT_SEL11    is 0x1a
+P3_APORT_SEL0   is 0x0
+P3_APORT_SEL1   is 0x12
+P3_APORT_SEL2   is 0x0
+10:48:36.414 -> trim: 1, wvdd_lev: 4
+10:48:36.523 -> trim: 1, pvdd_lev: 11 1012, pvdd_lev_l: 5
+10:48:36.530 -> adc_add_sample_ch() 0 5000d ffffffff
+add sample ch 5000d
+adc_add_sample_ch() 0 d 5000d
+adc_add_sample_ch() 1 d ffffffff
+add sample ch d
+10:48:36.540 -> vbg_adc_value = 274
+10:48:36.550 -> vbat_adc_value = 427
+vbat = 5008 mv
+10:48:36.553 -> [Info]: [USER_CFG]bt name config:RGBW Mini Lamp
+
+[Info]: [USER_CFG]rf config:10
+
+[Info]: [USER_CFG]warning_tone_v:340 poweroff_tone_v:330
+
+[Info]: [USER_CFG]auto_off_time:0
+
+10:48:36.558 -> [Info]: [USER_CFG]mac:
+
+AB 5E 10 C0 EA B8 
+[Info]: [USER_CFG]lrc cfg:
+
+E0 01 90 01 E0 01 8C 00 01 
+[Info]: [TEST-UPDATE]testbox msg handle reg:1e01e48
+
+10:48:36.567 -> [Info]: [APP-UPDATE]<--------update_result_deal=0x5a00 28--------->
+
+=================update_param_len:900
+>>>>>>>>>>>>>>>>>app_main...
+[Info]: [APP]run app>>> multi_conn
+[Info]: [APP]Nov  3 2026,10:42:29
+[Info]: [MULTI_CONN]=======================================
+[Info]: [MULTI_CONN]-----------multi_conn demo-------------
+[Info]: [MULTI_CONN]=======================================
+[Info]: [MULTI_CONN]app_file: D:\project\2026-07-17-天奕-迷你闪烁机-AC6329C-SOP16\code\project-2026-07-17-AC6329C-SOP16\apps\spp_and_le\examples\multi_conn\app_multi_conn.c
+10:48:36.572 -> [Info]: [COMM_BLE]---ble's address
+
+EA 1C CE C0 EA B8 
+[MUL]bt_ble_before_start_init 
+[Info]: [GATT_COMM]ble_comm_init,872
+
+[Info]: [GATT_COMM]ble_file: D:\project\2026-07-17-天奕-迷你闪烁机-AC6329C-SOP16\code\project-2026-07-17-AC6329C-SOP16\apps\common\third_party_profile\jieli\gatt_common\le_gatt_common.c
+[Info]: [GATT_COMM]gatt_config: 1,1
+
+[Info]: [GATT_COMM]btstack_config: 2-0-1-1
+
+[Info]: [GATT_SERVER]ble_gatt_server_init
+
+[Info]: [GATT_CLIENT]ble_gatt_client_init
+
+[Info]: [GATT_COMM]ble_comm_init end
+
+le_support:2 1
+le_config:2 1 1 0
+10:48:38.161 -> [Debug]: [LBUF]lbuf misalgin : 0x210d74 / 0xcbe
+10:48:38.174 -> [Info]: [GATT_COMM]ble_profile_init
+
+[Info]: [GATT_SERVER]ble_gatt_server_profile_init
+
+[Info]: [GATT_CLIENT]ble_gatt_client_profile_init
+
+att_send need_size >= 6+1+188
+[Info]: [GATT_COMM]ble_profile_init end
+
+JL_LEDCK->CLK = 0x103
+JL_LEDCx[0]->CON = 0x1a
+JL_LEDCx[0]->TIX = 0x1406071d
+JL_LEDCx[0]->RSTX = 0x4e2000
+[MCPWM] tmr0 con0 = 0x0
+[MCPWM] tmr0 pr = 0xbb7f
+[MCPWM] pwm ch0_con0 = 0x4
+[MCPWM] pwm ch0_con1 = 0x0
+[MCPWM] pwm ch0_cmph = 0x0, pwm ch0_cmpl = 0x0
+[MCPWM] MCPWM_CON0 = 0x101
+[MCPWM] mcpwm clk = 48000000
+[MCPWM] tmr1 con0 = 0x0
+[MCPWM] tmr1 pr = 0xbb7f
+[MCPWM] pwm ch1_con0 = 0x4
+[MCPWM] pwm ch1_con1 = 0x100
+[MCPWM] pwm ch1_cmph = 0x0, pwm ch1_cmpl = 0x0
+[MCPWM] MCPWM_CON0 = 0x303
+[MCPWM] mcpwm clk = 48000000
+[MCPWM] tmr2 con0 = 0x0
+[MCPWM] tmr2 pr = 0xbb7f
+[MCPWM] pwm ch2_con0 = 0x4
+[MCPWM] pwm ch2_con1 = 0x200
+[MCPWM] pwm ch2_cmph = 0x0, pwm ch2_cmpl = 0x0
+[MCPWM] MCPWM_CON0 = 0x707
+[MCPWM] mcpwm clk = 48000000
+[MCPWM] tmr3 con0 = 0x0
+[MCPWM] tmr3 pr = 0xbb7f
+[MCPWM] pwm ch3_con0 = 0x4
+[MCPWM] pwm ch3_con1 = 0x300
+[MCPWM] pwm ch3_cmph = 0x0, pwm ch3_cmpl = 0x0
+[MCPWM] MCPWM_CON0 = 0xf0f
+[MCPWM] mcpwm clk = 48000000
+adc_add_sample_ch() 0 4 5000d
+adc_add_sample_ch() 1 4 d
+adc_add_sample_ch() 2 4 ffffffff
+add sample ch 4
+data init
+soft_turn_on_the_light 602
+custom_meteor_effect 339
+10:48:38.183 -> M W=1780 T=0 d=1780 mW=1780 mT=0
+user_init
+[Info]: [MULTI_CONN]----multi_bt_connction_status_event_handler 3
+[Info]: [COMM_BLE]STATUS_INIT_OK
+
+[MUL]bt_ble_init
+ 
+[MUL]ble_file: D:\project\2026-07-17-天奕-迷你闪烁机-AC6329C-SOP16\code\project-2026-07-17-AC6329C-SOP16\apps\spp_and_le\examples\multi_conn\ble_multi.c 
+[Info]: [GATT_COMM]ble_comm_set_config_name
+
+[Info]: [GATT_COMM]ble name(14): RGBW Mini Lamp 
+
+[MUL-PER]multi_server_init 
+[MUL-PER]multi_adv_data(22): 
+02 01 06 03 03 30 AF 0E FF 5A 44 00 D9 03 86 08 
+EA 1C CE C0 EA B8 
+[MUL-PER]rsp_data(16): 
+0F 09 52 47 42 57 20 4D 69 6E 69 20 4C 61 6D 70 
+[MUL-CEN]multi_client_init 
+[Info]: [GATT_COMM]mode_en:1
+
+[Info]: [GATT_SERVER]mode_en:1
+
+[Info]: [GATT_SERVER]__gatt_server_just_new_dev_adv
+
+[Info]: [GATT_SERVER]new_dev_adv
+
+[Info]: [GATT_SERVER]adv_en:1
+
+[Info]: [GATT_SERVER]server_work_st:1->20
+
+[MUL-PER]server_state: handle=00,20
+ 
+10:48:38.188 -> 
+[Info]: [GATT_CLIENT]mode_en:1
+
+[Info]: [GATT_CLIENT]__gatt_client_just_new_dev_scan
+
+[Info]: [GATT_CLIENT]new_dev_scan
+
+[Info]: [GATT_CLIENT]client_work_st:1->40
+
+[MUL-CEN]client_state: handle=00,40
+ 
+[Info]: [GATT_CLIENT]scan_param: 1-38-25
+
+[Info]: [GATT_CLIENT]scan_en:1
+
+10:48:39.168 -> M W=2780 T=990 d=1790 mW=10 mT=10
+10:48:40.168 -> M W=3780 T=1990 d=1790 mW=10 mT=10
+10:48:41.169 -> M W=4780 T=2990 d=1790 mW=10 mT=10
+10:48:42.169 -> M W=5780 T=3990 d=1790 mW=10 mT=10
+10:48:43.169 -> M W=6780 T=4990 d=1790 mW=10 mT=10
+10:48:44.169 -> M W=7780 T=5990 d=1790 mW=10 mT=10
+10:48:45.169 -> M W=8780 T=6990 d=1790 mW=10 mT=10
+10:48:46.169 -> M W=9780 T=7990 d=1790 mW=10 mT=10
+10:48:47.169 -> M W=10780 T=8990 d=1790 mW=10 mT=10
+10:48:48.169 -> M W=11780 T=9990 d=1790 mW=10 mT=10
+10:48:49.169 -> M W=12780 T=10990 d=1790 mW=10 mT=10
+10:48:49.299 -> K W=12910 T=11120 ev=15
+r2c1 press
+10:48:50.169 -> M W=13780 T=11990 d=1790 mW=10 mT=10
+10:48:50.199 -> K W=13810 T=12020 ev=16
+10:48:51.169 -> M W=14780 T=12990 d=1790 mW=10 mT=10
+10:48:52.170 -> M W=15780 T=13990 d=1790 mW=10 mT=10
+10:48:52.299 -> S+ W=15910 T=14120
+10:48:52.307 -> S- W=15910 T=14130
+save info done 
+10:48:53.170 -> M W=16780 T=14990 d=1790 mW=10 mT=20
+10:48:54.170 -> M W=17780 T=15990 d=1790 mW=10 mT=10
+10:48:55.170 -> M W=18780 T=16990 d=1790 mW=10 mT=10
+10:48:56.170 -> M W=19780 T=17990 d=1790 mW=10 mT=10
+10:48:57.170 -> M W=20780 T=18990 d=1790 mW=10 mT=10
+10:48:58.140 -> K W=21750 T=19960 ev=20
+r2c2 press
+10:48:58.170 -> M W=21780 T=19990 d=1790 mW=10 mT=10
+10:48:59.020 -> K W=22630 T=20840 ev=21
+10:48:59.170 -> M W=22780 T=20990 d=1790 mW=10 mT=10
+10:49:00.170 -> M W=23780 T=21990 d=1790 mW=10 mT=10
+10:49:01.140 -> S+ W=24750 T=22960
+10:49:01.145 -> S- W=24750 T=22970
+save info done 
+10:49:01.170 -> M W=24780 T=22990 d=1790 mW=10 mT=20
+10:49:02.170 -> M W=25780 T=23990 d=1790 mW=10 mT=10
+10:49:03.171 -> M W=26780 T=24990 d=1790 mW=10 mT=10
+10:49:03.831 -> K W=27440 T=25650 ev=25
+r2c3 press
+10:49:04.171 -> M W=27780 T=25990 d=1790 mW=10 mT=10
+10:49:04.721 -> K W=28330 T=26540 ev=26
+10:49:05.171 -> M W=28780 T=26990 d=1790 mW=10 mT=10
+10:49:06.171 -> M W=29780 T=27990 d=1790 mW=10 mT=20
+10:49:06.831 -> S+ W=30440 T=28650
+10:49:06.838 -> S- W=30440 T=28660
+save info done 
+10:49:06.961 -> K W=30570 T=28780 ev=60
+r5c1 press
+led_colorful_anim_gradual: ms == 14400
+10:49:07.171 -> M W=30780 T=28990 d=1790 mW=10 mT=20
+10:49:07.941 -> K W=31550 T=29760 ev=62
+10:49:07.961 -> K W=31570 T=29780 ev=64
+10:49:08.171 -> M W=31780 T=29990 d=1790 mW=10 mT=20
+10:49:09.171 -> M W=32780 T=30990 d=1790 mW=10 mT=10
+10:49:09.961 -> S+ W=33570 T=31780
+10:49:09.966 -> S- W=33570 T=31790
+save info done 
+10:49:10.171 -> M W=33780 T=31990 d=1790 mW=10 mT=20
+10:49:10.442 -> K W=34050 T=32260 ev=65
+r5c2 press
+led_colorful_anim_breath: ms == 3360
+10:49:11.171 -> M W=34780 T=32990 d=1790 mW=10 mT=20
+10:49:11.201 -> K W=34810 T=33020 ev=66
+10:49:12.171 -> M W=35780 T=33990 d=1790 mW=10 mT=10
+10:49:13.172 -> M W=36780 T=34990 d=1790 mW=10 mT=20
+10:49:13.441 -> S+ W=37050 T=35260
+10:49:13.449 -> S- W=37050 T=35270
+save info done 
+10:49:14.172 -> M W=37780 T=35990 d=1790 mW=10 mT=20
+10:49:15.172 -> M W=38780 T=36990 d=1790 mW=10 mT=10
+10:49:16.172 -> M W=39780 T=37990 d=1790 mW=10 mT=10
+10:49:17.172 -> M W=40780 T=38990 d=1790 mW=10 mT=10
+10:49:18.172 -> M W=41780 T=39990 d=1790 mW=10 mT=20
+10:49:19.172 -> M W=42780 T=40990 d=1790 mW=10 mT=10
+10:49:20.172 -> M W=43780 T=41990 d=1790 mW=10 mT=20
+10:49:21.172 -> M W=44780 T=42990 d=1790 mW=10 mT=10
+10:49:22.172 -> M W=45780 T=43990 d=1790 mW=10 mT=10
+10:49:23.173 -> M W=46780 T=44990 d=1790 mW=10 mT=10
+10:49:24.173 -> M W=47780 T=45990 d=1790 mW=10 mT=10
+10:49:25.173 -> M W=48780 T=46990 d=1790 mW=10 mT=20
+10:49:26.173 -> M W=49780 T=47990 d=1790 mW=10 mT=10
+10:49:27.173 -> M W=50780 T=48990 d=1790 mW=10 mT=10
+10:49:28.173 -> M W=51780 T=49990 d=1790 mW=10 mT=10
+10:49:29.173 -> M W=52780 T=50990 d=1790 mW=10 mT=10
+10:49:30.173 -> M W=53780 T=51990 d=1790 mW=10 mT=20
+10:49:31.173 -> M W=54780 T=52990 d=1790 mW=10 mT=10
+10:49:32.173 -> M W=
+10:49:32.175 -> 55780 T=53990 d=1790 mW=10 mT=10
+10:49:33.173 -> M W=56780 T=54990 d=1790 mW=10 mT=10
+10:49:34.174 -> M W=57780 T=55990 d=1790 mW=10 mT=10
+10:49:35.174 -> M W=58780 T=56990 d=1790 mW=10 mT=20
+10:49:36.175 -> M W=59780 T=57990 d=1790 mW=10 mT=10
+10:49:37.174 -> M W=60780 T=58990 d=1790 mW=10 mT=10
+10:49:38.174 -> M W=61780 T=59990 d=1790 mW=10 mT=10
+10:49:39.174 -> M W=62780 T=60990 d=1790 mW=10 mT=10
+10:49:40.174 -> M W=63780 T=61990 d=1790 mW=10 mT=20
+10:49:41.174 -> M W=64780 T=62990 d=1790 mW=10 mT=10
+10:49:42.174 -> M W=65780 T=63990 d=1790 mW=10 mT=10
+10:49:43.174 -> M W=66780 T=64990 d=1790 mW=10 mT=10
+10:49:44.174 -> M W=67780 T=65990 d=1790 mW=10 mT=10
+10:49:45.174 -> M W=68780 T=66990 d=1790 mW=10 mT=10
+10:49:46.175 -> M W=69780 T=67990 d=1790 mW=10 mT=20
+10:49:47.175 -> M W=70780 T=68990 d=1790 mW=10 mT=10
+10:49:48.175 -> M W=71780 T=69990 d=1790 mW=10 mT=10
+10:49:49.175 -> M W=72780 T=70990 d=1790 mW=10 mT=10
+10:49:50.175 -> M W=73780 T=71990 d=1790 mW=10 mT=20
+10:49:51.175 -> M W=74780 T=72990 d=1790 mW=10 mT=10
+10:49:52.175 -> M W=75780 T=73990 d=1790 mW=10 mT=10
+10:49:53.175 -> M W=76780 T=74990 d=1790 mW=10 mT=20
+10:49:54.175 -> M W=77780 T=75990 d=1790 mW=10 mT=10
+10:49:55.175 -> M W=78780 T=76990 d=1790 mW=10 mT=10
+10:49:56.176 -> M W=79780 T=77990 d=1790 mW=10 mT=10
+10:49:57.176 -> M W=80780 T=78990 d=1790 mW=10 mT=10
+« 10:49:58.176 -> M W=81780 T=79990 d=1790 mW=10 mT=20
+10:49:59.176 -> M W=82780 T=80990 d=1790 mW=10 mT=10

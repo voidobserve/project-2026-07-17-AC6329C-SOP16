@@ -129,8 +129,9 @@ typedef struct Segment { // 20 bytes
 } Segment;
 
 // segment runtime parameters
-typedef struct Segment_runtime { // 16 bytes
-  unsigned long next_time;
+typedef struct Segment_runtime { // 20 bytes
+  unsigned long next_time;              // 本段下一帧的触发时刻（ms）
+  unsigned long last_trigger_time_ms;   // 本段上一次触发时刻（ms），用于计算真实帧间隔
   uint32_t counter_mode_step;
   uint32_t counter_mode_call;
   uint8_t aux_param;   // auxilary param (usually stores a color_wheel index)
@@ -139,7 +140,7 @@ typedef struct Segment_runtime { // 16 bytes
 } Segment_runtime;
 
 extern Segment* _seg;                      // currently active segment (20 bytes)
-extern Segment_runtime* _seg_rt;           // currently active segment runtime (16 bytes)
+extern Segment_runtime* _seg_rt;           // currently active segment runtime (20 bytes)
 extern uint16_t _seg_len;                  // num LEDs in the currently active segment
 
 //    timer(void),

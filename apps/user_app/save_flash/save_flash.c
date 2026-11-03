@@ -6,6 +6,10 @@
 #include "Adafruit_NeoPixel.H"
 
 #include "user_include.h"
+#if ENABLE_TEMP_MEASUREMENT
+#include "ws2812_bsp.h"   // HAL_GetTick（临时测量用）
+#include "system/timer.h" // sys_timer_get_ms（临时测量用）
+#endif
 
 #define CFG_USER_SAVE_DATA_PAGE_ID 3
 #define USER_SAVE_DATA_VALID_CODE  ((u8)0xC5) // 表示用户保存的数据有效的标志
@@ -61,10 +65,24 @@ void user_data_save(void)
     memcpy((void *)(&save_data.fc_save), (void *)(&fc_effect),
            sizeof(fc_effect_t));
 
-    os_time_dly(1); // 先让出cpu，处理其他任务，防止看门狗复位
+    // os_time_dly(1); // 先让出cpu，处理其他任务，防止看门狗复位
     // local_irq_disable(); // 禁用中断
+#if ENABLE_TEMP_MEASUREMENT
+    /*
+        临时测量（开关见 user_config.h 的 ENABLE_TEMP_MEASUREMENT）：
+        量写 flash 的耗时与两套时钟的走时
+        save_begin 与 save_end 的 system_ms 差 = 写入实际耗时；
+        anim_ms 差 = 动画钟在此期间走的时长；两者明显不等即动画钟丢拍
+    */
+    printf("save_begin system_ms=%lu anim_ms=%lu\n",
+           (unsigned long)sys_timer_get_ms(), (unsigned long)HAL_GetTick());
+#endif
     ret = syscfg_write(CFG_USER_SAVE_DATA_PAGE_ID, (u8 *)(&save_data),
                        sizeof(user_save_data_t));
+#if ENABLE_TEMP_MEASUREMENT
+    printf("save_end system_ms=%lu anim_ms=%lu\n",
+           (unsigned long)sys_timer_get_ms(), (unsigned long)HAL_GetTick());
+#endif
     // local_irq_enable(); // 使能中断
 
 #if USER_DEBUG_ENABLE

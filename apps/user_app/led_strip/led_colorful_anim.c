@@ -22,7 +22,7 @@
     动画统一按 LED_ANIM_FRAME_MS （20ms）请求下一帧，把"周期时长"换算成"每帧走多少步"再累加推进，
     慢速（一帧走不完一步）和快速（一帧走好几步）都能精确。
 
-    换算用的是真实帧间隔 g_anim_frame_ms ，不是写死的 20ms：帧间隔被循环负载拉长时，
+    换算用的是真实帧间隔 anim_frame_interval_ms ，不是写死的 20ms：帧间隔被循环负载拉长时，
     动画速率仍然等于墙上时间，两台设备才不会跑出速度差。
 */
 
@@ -100,7 +100,7 @@ u16 led_colorful_anim_jump(void)
         按定点步长累加要每帧取整，慢速档（4s 换一种颜色）会有千分之几的速率误差
     */
     cycle_ms = led_anim_get_ms(JUMP_COLOR_MS_SLOW, JUMP_COLOR_MS_FAST);
-    cycle_acc += g_anim_frame_ms;
+    cycle_acc += anim_frame_interval_ms;
     while (cycle_acc >= cycle_ms) {
         cycle_acc -= cycle_ms;
 
@@ -284,7 +284,7 @@ u16 led_colorful_anim_strobe(void)
         相位按真实帧间隔推进（不用固定帧数），帧间隔被循环负载拉长时节奏仍然等于墙上时间；
         一帧跨过多次相位切换时用 while 补齐，保证不丢相位。
     */
-    phase_acc += g_anim_frame_ms;
+    phase_acc += anim_frame_interval_ms;
     while (phase_acc >= half_ms) {
         phase_acc -= half_ms;
         phase_on = !phase_on;
@@ -333,8 +333,8 @@ u16 led_colorful_anim_gradual_by_pause(void)
 
     if (hold_ms > 0) {
         // 停顿期间画面保持不动，按真实帧间隔扣，否则帧间隔变长时停顿会跟着变久
-        hold_ms = (hold_ms > g_anim_frame_ms)
-                      ? (u16)(hold_ms - g_anim_frame_ms)
+        hold_ms = (hold_ms > anim_frame_interval_ms)
+                      ? (u16)(hold_ms - anim_frame_interval_ms)
                       : 0;
         return LED_ANIM_FRAME_MS;
     }
@@ -414,7 +414,7 @@ u16 led_colorful_anim_slide(void)
 
     cycle_ms = led_anim_get_ms(SLIDE_CYCLE_MS_SLOW, SLIDE_CYCLE_MS_FAST);
     // 一整圈 2π 分 cycle_ms / 实际帧间隔 步走完
-    delta = TWO_PI / ((float)cycle_ms / (float)g_anim_frame_ms);
+    delta = TWO_PI / ((float)cycle_ms / (float)anim_frame_interval_ms);
 
     /* 取当前两色并按正弦插值计算混合比例（0..255） */
     t = sinf(radian);

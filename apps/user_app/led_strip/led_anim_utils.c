@@ -38,7 +38,7 @@ uint16_t led_anim_percent_to_ms(uint8_t speed_percent, uint16_t slow_ms,
  *        返回值放大了 LED_ANIM_STEP_SCALE 倍，调用方用累加器判断够不够走一步，
  *        这样慢速动画（一帧走不完一步）和快速动画（一帧走好几步）都能精确
  *
- *        注意：这里用的是真实帧间隔 g_anim_frame_ms，不是 LED_ANIM_FRAME_MS。
+ *        注意：这里用的是真实帧间隔 anim_frame_interval_ms，不是 LED_ANIM_FRAME_MS。
  *        帧间隔会被循环负载拉长，用固定值折算会让动画整体变慢，
  *        而且两台设备负载不同就会跑出不同速度，时间一长就错位。
  *
@@ -53,7 +53,7 @@ uint16_t led_anim_step_per_frame(uint16_t total_steps, uint32_t cycle_ms)
         cycle_ms = 1;
     }
 
-    step = (uint32_t)total_steps * g_anim_frame_ms * LED_ANIM_STEP_SCALE /
+    step = (uint32_t)total_steps * anim_frame_interval_ms * LED_ANIM_STEP_SCALE /
            cycle_ms;
     if (step < 1) {
         step = 1;

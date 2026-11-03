@@ -57,13 +57,13 @@ static uint16_t _rand16seed;
 static void (*customShow)(void) = NULL;
 uint8_t _running, _triggered;
 static Segment _segments[MAX_NUM_SEGMENTS];                 // array of segments (20 bytes per element)
-static Segment_runtime  _segment_runtimes[MAX_NUM_ACTIVE_SEGMENTS]; // array of segment runtimes (16 bytes per element)
+static Segment_runtime  _segment_runtimes[MAX_NUM_ACTIVE_SEGMENTS]; // array of segment runtimes (20 bytes per element)
 static uint8_t _active_segments[MAX_NUM_ACTIVE_SEGMENTS];          // array of active segments (1 bytes per element)
 static uint8_t _segments_len = 0;          // size of _segments array
 static uint8_t _active_segments_len = 0;   // size of _segments_runtime and _active_segments arrays
 static uint8_t _num_segments = 0;          // number of configured segments in the _segments array
  Segment* _seg;                      // currently active segment (20 bytes)
- Segment_runtime* _seg_rt;           // currently active segment runtime (16 bytes)
+ Segment_runtime* _seg_rt;           // currently active segment runtime (20 bytes)
  uint16_t _seg_len;                  // num LEDs in the currently active segment
 
 
@@ -106,12 +106,13 @@ ws218运行
 extern u32 get_syn_time(void);
 
 /*
-    真实帧间隔（ms）：上一次 show 到这一次 show 的实际时长，供动画换算步长。
+    真实帧间隔（ms）：本段动画自己上一次触发到这一次触发的实际时长，供动画换算本帧推进量。
+    不能用"距上一次 show"：show 由所有活动段共用，另一段（如流星）穿插触发会把读到
+    的间隔算小，动画推进量随之算错，两台设备相位不同就会跑出不同速度。
     帧间隔不是常数：ws2812fx_service() 被任务循环调用，循环周期会被 BLE、2.4G、
     电机中断、ADC、printf 等负载拉长，动画必须按真实时间走，否则两台设备会错位。
 */
-volatile uint16_t g_anim_frame_ms = LED_ANIM_FRAME_MS;
-static volatile unsigned long last_show_ms;
+volatile uint16_t anim_frame_interval_ms = LED_ANIM_FRAME_MS;
 
 void WS2812FX_service() 
 {
@@ -131,7 +132,24 @@ void WS2812FX_service()
         if(now >= _seg_rt->next_time || _triggered) {
           SET_FRAME;
           doShow = true;
-          
+
+          /*
+              本段真实帧间隔（ms）= 本段上一次触发到本次触发的实际时长，
+              供七彩动画换算本帧推进量。
+              超过上限说明是本段第一帧、或中间发生过长时间停顿（如写 flash），
+              落回默认 20ms，避免一帧走掉一大截动画。
+          */
+          unsigned long frame_interval_ms =
+              now - _seg_rt->last_trigger_time_ms;
+          _seg_rt->last_trigger_time_ms = now;
+          if (frame_interval_ms > LED_ANIM_FRAME_MAX_MS) {
+            anim_frame_interval_ms = LED_ANIM_FRAME_MS;
+          } else if (frame_interval_ms < 1) {
+            anim_frame_interval_ms = 1;
+          } else {
+            anim_frame_interval_ms = (uint16_t)frame_interval_ms;
+          }
+
           uint16_t delay = _seg->mode();
           _seg_rt->next_time = now + max(delay, SPEED_MIN);
           _seg_rt->counter_mode_call++;
@@ -151,18 +169,6 @@ void WS2812FX_service()
     }
     if(doShow) {
     //  delay(1); // for ESP32 (see https://forums.adafruit.com/viewtopic.php?f=47&t=117327)
-      unsigned long elapsed = now - last_show_ms;
-
-      last_show_ms = now;
-      /* 长时间停顿（写 flash 等）落回默认值，避免一帧走掉一大截动画 */
-      if (elapsed > LED_ANIM_FRAME_MAX_MS) {
-        g_anim_frame_ms = LED_ANIM_FRAME_MS;
-      } else if (elapsed < 1) {
-        g_anim_frame_ms = 1;
-      } else {
-        g_anim_frame_ms = (uint16_t)elapsed;
-      }
-
       WS2812FX_show();
     }
     _triggered = false;
@@ -222,9 +228,8 @@ void WS2812FX_show(void) {
 }
 
 void WS2812FX_start() {
+  // 重置各段运行时（last_trigger_time_ms 一并清零），本段第一帧的间隔由 service 兜底
   WS2812FX_resetSegmentRuntimes();
-  /* 重新开始后第一帧的真实间隔从这一刻算起，避免用上一轮的旧时间 */
-  last_show_ms = millis();
   _running = true;
 }
 

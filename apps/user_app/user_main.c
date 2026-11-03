@@ -12,6 +12,10 @@
 #include "user_ble_notify.h"
 
 #include "dev_config.h"
+#include "ws2812_bsp.h" // HAL_GetTick / run_tick_per_10ms
+#if ENABLE_TEMP_MEASUREMENT
+#include "system/timer.h" // sys_timer_get_ms（临时测量用）
+#endif
 
 void user_msg_handle_task(void *p);
 void user_main(void *p);
@@ -87,6 +91,55 @@ void user_msg_handle_task(void *p)
     }
 }
 
+#if ENABLE_TEMP_MEASUREMENT
+/* ---- 临时测量代码（开关见 user_config.h 的 ENABLE_TEMP_MEASUREMENT）----
+    循环抖动 + 两套时钟发散，验证后整体删除
+    system_time_ms   = sys_timer_get_ms()  系统时钟（os_time_dly 的时基）
+    animation_time_ms = HAL_GetTick()      动画时钟（usr_timer 每 10ms 累加的 tick_ms）
+    每 1000ms（按系统时钟）打印一行 loop_stat：
+      clock_diff     = 系统时钟 - 动画时钟；持续增大说明动画钟在丢拍
+      max_system_gap = 本打印周期内相邻两次循环的最大间隔；>50ms 说明出现任务级停顿
+      max_anim_gap   = 同上，按动画时钟统计
+    （第一行的最大间隔因静态变量还没记录过基准值会偏大，属正常） */
+#define DEBUG_PRINT_PERIOD_MS 1000U
+
+static void debug_print_loop_statistics(void)
+{
+    static u32 last_system_time_ms;
+    static u32 last_animation_time_ms;
+    static u32 max_system_interval_ms;
+    static u32 max_animation_interval_ms;
+    static u32 next_print_time_ms;
+    u32 system_time_ms = sys_timer_get_ms();
+    u32 animation_time_ms = (u32)HAL_GetTick();
+
+    // 记录本打印周期内相邻两次循环的最大间隔
+    if ((system_time_ms - last_system_time_ms) > max_system_interval_ms) {
+        max_system_interval_ms = system_time_ms - last_system_time_ms;
+    }
+    if ((animation_time_ms - last_animation_time_ms) >
+        max_animation_interval_ms) {
+        max_animation_interval_ms =
+            animation_time_ms - last_animation_time_ms;
+    }
+    last_system_time_ms = system_time_ms;
+    last_animation_time_ms = animation_time_ms;
+
+    // 到 1000ms 打印一次，并清零最大间隔统计
+    if ((system_time_ms - next_print_time_ms) >= DEBUG_PRINT_PERIOD_MS) {
+        next_print_time_ms = system_time_ms;
+        printf("loop_stat system_ms=%lu anim_ms=%lu clock_diff=%ld "
+               "max_system_gap=%lu max_anim_gap=%lu\n",
+               (unsigned long)system_time_ms, (unsigned long)animation_time_ms,
+               (long)(system_time_ms - animation_time_ms),
+               (unsigned long)max_system_interval_ms,
+               (unsigned long)max_animation_interval_ms);
+        max_system_interval_ms = 0;
+        max_animation_interval_ms = 0;
+    }
+}
+#endif /* ENABLE_TEMP_MEASUREMENT */
+
 void user_main(void *p)
 {
     while (1) {
@@ -94,7 +147,7 @@ void user_main(void *p)
         // printf("fc_effect.rgb.w == %u\n", (u16)fc_effect.rgb.w);
 
         user_data_save_handle();
-  
+
         /****添加 处理函数 start**/
         check_mic_sound();    // 采集声音并计算平均值
         music_static_sound(); // 声控，七彩灯定色转换
@@ -114,9 +167,13 @@ void user_main(void *p)
         //     set_ls_lenght(16);
         // }
 
-        WS2812FX_service(); // 注意，实际 这里约 20ms 才调用一次动画
-
         rf24g_key_handle();
+        WS2812FX_service();
+
+#if ENABLE_TEMP_MEASUREMENT
+        // 临时测量：每秒打印一次循环统计（开关见 user_config.h）
+        debug_print_loop_statistics();
+#endif
 
         // clr_wdt(); // 线程里只喂狗，不调用系统延时，还是会出现复位问题
         os_time_dly(1);
