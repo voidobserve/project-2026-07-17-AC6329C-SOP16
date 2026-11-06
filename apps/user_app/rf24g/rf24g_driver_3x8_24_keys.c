@@ -609,6 +609,7 @@ void rf24g_key_r7c1_press_handle(void)
     fc_effect.motor_sec_per_round = 8;
     motor_set_mode(fc_effect.motor_mode);
     motor_set_speed_sec_per_round(fc_effect.motor_sec_per_round);
+    user_ble_notify_motor_speed();
 }
 
 void rf24g_key_r7c2_press_handle(void)
@@ -625,6 +626,7 @@ void rf24g_key_r7c2_press_handle(void)
     fc_effect.motor_sec_per_round = 13;
     motor_set_mode(fc_effect.motor_mode);
     motor_set_speed_sec_per_round(fc_effect.motor_sec_per_round);
+    user_ble_notify_motor_speed();
 }
 
 void rf24g_key_r7c3_press_handle(void)
@@ -641,6 +643,7 @@ void rf24g_key_r7c3_press_handle(void)
     fc_effect.motor_sec_per_round = 18;
     motor_set_mode(fc_effect.motor_mode);
     motor_set_speed_sec_per_round(fc_effect.motor_sec_per_round);
+    user_ble_notify_motor_speed();
 }
 
 void rf24g_key_r8c1_press_handle(void)
@@ -657,6 +660,7 @@ void rf24g_key_r8c1_press_handle(void)
     fc_effect.motor_sec_per_round = 21;
     motor_set_mode(fc_effect.motor_mode);
     motor_set_speed_sec_per_round(fc_effect.motor_sec_per_round);
+    user_ble_notify_motor_speed();
 }
 
 void rf24g_key_r8c2_press_handle(void)
@@ -673,6 +677,7 @@ void rf24g_key_r8c2_press_handle(void)
     fc_effect.motor_sec_per_round = 26;
     motor_set_mode(fc_effect.motor_mode);
     motor_set_speed_sec_per_round(fc_effect.motor_sec_per_round);
+    user_ble_notify_motor_speed();
 }
 
 void rf24g_key_r8c3_press_handle(void)
@@ -689,6 +694,7 @@ void rf24g_key_r8c3_press_handle(void)
     fc_effect.motor_sec_per_round = 35;
     motor_set_mode(fc_effect.motor_mode);
     motor_set_speed_sec_per_round(fc_effect.motor_sec_per_round);
+    user_ble_notify_motor_speed();
 }
 
 const rf24_key_handle_func_t

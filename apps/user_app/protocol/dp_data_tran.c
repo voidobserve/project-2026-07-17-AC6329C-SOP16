@@ -379,7 +379,7 @@ void parse_zd_data(unsigned char *LedCommand)
     if (LedCommand[0] == 0x2F && LedCommand[1] == 0x07) {
         fc_effect.motor_sec_per_round = LedCommand[2];
         motor_set_speed_sec_per_round(fc_effect.motor_sec_per_round);
-        // user_ble_notify_motor_speed(); // 电机转速
+        user_ble_notify_motor_speed(); // 电机转速
     }
 }
 

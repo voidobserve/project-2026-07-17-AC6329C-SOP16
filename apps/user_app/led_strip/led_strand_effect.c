@@ -597,7 +597,7 @@ void soft_turn_on_the_light(void) //软开灯处理
     // 设置电机的 模式 和 转速
     motor_set_mode(fc_effect.motor_mode);
     motor_set_speed_sec_per_round(fc_effect.motor_sec_per_round);
-
+    user_ble_notify_motor_speed();
 #if USER_DEBUG_ENABLE
     printf("%s %d\n", __FUNCTION__, __LINE__);
 #endif

@@ -733,7 +733,7 @@ void rf24g_key_r7c1_press_handle(void)
     }
 
     motor_set_speed_sec_per_round(fc_effect.motor_sec_per_round);
-
+    user_ble_notify_motor_speed();
 #if USER_DEBUG_ENABLE
     printf("fc_effect.motor_sec_per_round == %u\n",
            (u16)fc_effect.motor_sec_per_round);
@@ -759,7 +759,7 @@ void rf24g_key_r7c1_hold_handle(void)
     }
 
     motor_set_speed_sec_per_round(fc_effect.motor_sec_per_round);
-
+    user_ble_notify_motor_speed();
 #if USER_DEBUG_ENABLE
     printf("fc_effect.motor_sec_per_round == %u\n",
            (u16)fc_effect.motor_sec_per_round);
@@ -778,6 +778,7 @@ void rf24g_key_r7c2_press_handle(void)
 
     fc_effect.motor_sec_per_round = 42;
     motor_set_speed_sec_per_round(fc_effect.motor_sec_per_round);
+    user_ble_notify_motor_speed();
 #if USER_DEBUG_ENABLE
     printf("fc_effect.motor_sec_per_round == %u\n",
            (u16)fc_effect.motor_sec_per_round);
@@ -796,6 +797,7 @@ void rf24g_key_r7c3_press_handle(void)
 
     fc_effect.motor_sec_per_round = 30;
     motor_set_speed_sec_per_round(fc_effect.motor_sec_per_round);
+    user_ble_notify_motor_speed();
 #if USER_DEBUG_ENABLE
     printf("fc_effect.motor_sec_per_round == %u\n",
            (u16)fc_effect.motor_sec_per_round);
@@ -821,7 +823,7 @@ void rf24g_key_r7c4_press_handle(void)
     }
 
     motor_set_speed_sec_per_round(fc_effect.motor_sec_per_round);
-
+    user_ble_notify_motor_speed();
 #if USER_DEBUG_ENABLE
     printf("fc_effect.motor_sec_per_round == %u\n",
            (u16)fc_effect.motor_sec_per_round);
@@ -847,7 +849,7 @@ void rf24g_key_r7c4_hold_handle(void)
     }
 
     motor_set_speed_sec_per_round(fc_effect.motor_sec_per_round);
-
+    user_ble_notify_motor_speed();
 #if USER_DEBUG_ENABLE
     printf("fc_effect.motor_sec_per_round == %u\n",
            (u16)fc_effect.motor_sec_per_round);

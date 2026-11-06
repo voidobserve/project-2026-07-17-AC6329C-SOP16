@@ -85,6 +85,10 @@ void user_ble_notify_motor_speed(void)
     buf[buf_len++] = 0x2F;
     buf[buf_len++] = 0x07;
     buf[buf_len++] = fc_effect.motor_sec_per_round;
+    // byte 3： 电机转速最小值
+    buf[buf_len++] = MOTOR_THE_FASTEST_SPEED_SEC_PER_ROUND;
+    // byte 4： 电机转速最大值
+    buf[buf_len++] = MOTOR_THE_SLOWEST_SPEED_SEC_PER_ROUND;
     user_ble_notify_param_put(buf, buf_len);
 }
 
@@ -95,29 +99,6 @@ void user_ble_notify_motor_mode(void)
     u8 buf_len = 0;
     buf[buf_len++] = 0x2F;
     buf[buf_len++] = 0x06;
-    // switch (fc_effect.motor_mode) {
-    // case MOTOR_MODE_STOP:
-    //     buf[buf_len++] = 0x00;
-    //     break;
-    // case MOTOR_MODE_FORWARD_ROTATION:
-    //     buf[buf_len++] = 0x02;
-    //     break;
-    // case MOTOR_MODE_REVERSE_ROTATION:
-    //     buf[buf_len++] = 0x01;
-    //     break;
-    // case MOTOR_MODE_FORWARD_THEN_REVERSE_ROTATION:
-    //     buf[buf_len++] = 0x03;
-    //     break;
-    // case MOTOR_MODE_REVERSE_THEN_FORWARD_ROTATION:
-    //     buf[buf_len++] = 0x04;
-    //     break;
-    // case MOTOR_MODE_SOUND_CONTROL:
-    //     buf[buf_len++] = 0x05;
-    //     break;
-    // default:
-    //     buf[buf_len++] = 0x00;
-    //     break;
-    // }
     buf[buf_len++] = fc_effect.motor_mode;
     user_ble_notify_param_put(buf, buf_len);
 }
@@ -228,7 +209,7 @@ void user_ble_notify_dev_all_info(void)
     user_ble_notify_light_speed();
     user_ble_notify_light_len();
     user_ble_notify_sensitive();
-    // user_ble_notify_motor_speed();
+    user_ble_notify_motor_speed();
     user_ble_notify_motor_mode();
     user_ble_notify_rgb_sequence();
     user_ble_notify_sound_ctl_type();
