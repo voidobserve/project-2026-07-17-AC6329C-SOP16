@@ -271,7 +271,7 @@ void rf24g_key_r1c3_press_handle(void)
 #endif
 
     // 关机
-    soft_rurn_off_lights();
+    soft_turn_off_the_light();
     user_ble_notify_light_pwr_sta();
 }
 

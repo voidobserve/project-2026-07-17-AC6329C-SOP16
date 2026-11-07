@@ -314,7 +314,7 @@ void io_key_handle(struct sys_event *event)
                     timeout = 0;
                     if(get_on_off_state() == DEVICE_ON && open_flag == 1 )
                     {
-                        soft_rurn_off_lights();
+                        soft_turn_off_the_light();
                         open_flag = 0;
                     }
                         
@@ -363,7 +363,7 @@ void acc_control(void)
     if(gpio_read(IO_PORTB_05) == 1 && only_one == 1)
     {
       
-        soft_rurn_off_lights();
+        soft_turn_off_the_light();
         only_one = 0;
 
     }

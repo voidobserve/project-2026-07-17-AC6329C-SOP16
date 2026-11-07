@@ -575,7 +575,7 @@ void external_devices_variable(void)
     // set_time = 1;
 }
 
-void soft_rurn_off_lights(void) //软关灯处理
+void soft_turn_off_the_light(void) //软关灯处理
 {
 
     fc_effect.on_off_flag = DEVICE_OFF;
@@ -614,7 +614,7 @@ void set_on_off_led(u8 on_off)
     if (fc_effect.on_off_flag == DEVICE_ON) {
         soft_turn_on_the_light(); // 开灯
     } else {
-        soft_rurn_off_lights(); // 关灯
+        soft_turn_off_the_light(); // 关灯
     }
 }
 

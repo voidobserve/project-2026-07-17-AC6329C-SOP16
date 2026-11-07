@@ -11,14 +11,6 @@
 
 #if (USE_RF24G_REMOTE == RF24G_REMOTE_3x8_24_KEYS)
 
-/*
-    当r1c3按键触发时，设备是否处于开机状态
-
-    用来修复的问题：设备处于关机状态时，如果长按r1c3，会先触发press事件进行开机，
-    再触发long事件进行关机
-*/
-static uint8_t rf24g_r1c3_was_on_when_pressed;
-
 const uint8_t rf24g_key_type_24keys_table[][RF24G_KEY_EVENT_MAX + 1] = {
     {RF24G_TYPE_24KEY_KEY_VAL_R1C1, RF24G_TYPE_24KEY_EVENT_R1C1_PRESS,
      RF24G_TYPE_24KEY_EVENT_R1C1_CLICK, RF24G_TYPE_24KEY_EVENT_R1C1_LONG,
@@ -276,29 +268,13 @@ void rf24g_key_r1c3_press_handle(void)
     printf("r1c3 press\n");
 #endif
 
-    rf24g_r1c3_was_on_when_pressed = (fc_effect.on_off_flag == DEVICE_ON);
-
-    // 关机状态下按下时立即开灯
-    if (rf24g_r1c3_was_on_when_pressed == 0) {
-        // 设备原本处于 关闭状态 时，再执行开灯
+    // 短按：开机/关机切换（不再有长按关机）
+    if (DEVICE_ON == fc_effect.on_off_flag) {
+        soft_turn_off_the_light();
+    } else {
         soft_turn_on_the_light();
-        user_ble_notify_light_pwr_sta();
     }
-}
-
-void rf24g_key_r1c3_long_handle(void)
-{
-#if USER_DEBUG_ENABLE
-    printf("r1c3 long\n");
-#endif
-
-    // 长按事件 进行关灯
-    if (rf24g_r1c3_was_on_when_pressed != 0 &&
-        fc_effect.on_off_flag == DEVICE_ON) {
-        // 本次按下前已开启时，长按关灯
-        soft_rurn_off_lights();
-        user_ble_notify_light_pwr_sta();
-    }
+    user_ble_notify_light_pwr_sta();
 }
 
 void rf24g_key_r2c1_press_handle(void)
@@ -702,8 +678,6 @@ const rf24_key_handle_func_t
         [RF24G_TYPE_24KEY_EVENT_R1C1_PRESS] = rf24g_key_r1c1_press_handle,
         [RF24G_TYPE_24KEY_EVENT_R1C2_PRESS] = rf24g_key_r1c2_press_handle,
         [RF24G_TYPE_24KEY_EVENT_R1C3_PRESS] = rf24g_key_r1c3_press_handle,
-
-        [RF24G_TYPE_24KEY_EVENT_R1C3_LONG] = rf24g_key_r1c3_long_handle,
 
         [RF24G_TYPE_24KEY_EVENT_R2C1_PRESS] = rf24g_key_r2c1_press_handle,
         [RF24G_TYPE_24KEY_EVENT_R2C2_PRESS] = rf24g_key_r2c2_press_handle,

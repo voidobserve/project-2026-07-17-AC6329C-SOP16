@@ -10,6 +10,7 @@
 #include "rf24g_app.h"
 #include "user_config.h"
 #include "user_ble_notify.h"
+#include "user_rtc.h"
 
 #include "dev_config.h"
 #include "ws2812_bsp.h" // HAL_GetTick / run_tick_per_10ms
@@ -35,6 +36,7 @@ void user_init(void)
 #endif
     sound_control_init();
 
+    user_rtc_init(); // 在 user_data_init 之前给 rtc 设置默认值
     user_data_init();
 
     full_color_init();
@@ -119,8 +121,7 @@ static void debug_print_loop_statistics(void)
     }
     if ((animation_time_ms - last_animation_time_ms) >
         max_animation_interval_ms) {
-        max_animation_interval_ms =
-            animation_time_ms - last_animation_time_ms;
+        max_animation_interval_ms = animation_time_ms - last_animation_time_ms;
     }
     last_system_time_ms = system_time_ms;
     last_animation_time_ms = animation_time_ms;
@@ -184,6 +185,7 @@ void user_10ms_isr(void)
 {
     run_tick_per_10ms();
     user_data_save_delay_add();
+    user_rtc_handle();
 }
 
 // 在定时器中断内调用

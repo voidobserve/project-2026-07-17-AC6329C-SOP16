@@ -31,7 +31,7 @@ void ad_key_handle(struct sys_event *event)
         {
             if(get_on_off_state() == DEVICE_ON)
             {
-            soft_rurn_off_lights();
+            soft_turn_off_the_light();
 
             }
             else

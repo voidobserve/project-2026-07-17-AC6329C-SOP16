@@ -11,8 +11,11 @@
 #include "ble_user.h"
 #include "btstack/le/ble_api.h"
 #include "led_strip_drive.h"
+
+#include "user_rtc.h"            // RTC 时间
 #include "user_ble_notify.h"     // BLE notify 反馈通道
 #include "user_ble_notify_app.h" // 各状态 notify 接口
+
 // #include "one_wire.h"
 dp_data_header_t dp_data_header; //涂鸦DP数据头
 dp_switch_led_t dp_switch_led;   //DPID_SWITCH_LED开关
@@ -88,7 +91,7 @@ unsigned short dp_extract_data_handle(unsigned char *buff)
         if (fc_effect.on_off_flag == DEVICE_ON) {
             soft_turn_on_the_light();
         } else {
-            soft_rurn_off_lights();
+            soft_turn_off_the_light();
         }
         break;
 
@@ -207,6 +210,32 @@ void parse_zd_data(unsigned char *LedCommand)
     if (LedCommand[0] == 0x01 && LedCommand[1] == 0x03) {
         // APP的同步指令，与APP同步数据
         user_ble_notify_dev_all_info();
+    } else if (LedCommand[0] == 0x06 && LedCommand[1] == 0x02) {
+        // 设置系统时间 06 02 时 分 秒 星期
+        user_time_t cur_time;
+
+        cur_time.hour = LedCommand[2];
+        cur_time.min = LedCommand[3];
+        cur_time.sec = LedCommand[4];
+        cur_time.weekday = LedCommand[5];
+
+        user_rtc_set_time(&cur_time);
+    } else if (LedCommand[0] == 0x05) {
+        // 设置闹钟 05 闹钟索引 时 分 (开关<<7)|保留 (开关<<7)|星期
+        uint8_t alarm_idx;
+        user_alarm_t alarm;
+
+        alarm_idx = LedCommand[1];
+        alarm.hour = LedCommand[2];
+        alarm.min = LedCommand[3];
+        alarm.sec = 0; // 通信协议中没有秒，默认为0
+
+        // byte 4，bit7 : 0-关闭闹钟，1-开启闹钟
+        alarm.enable = (LedCommand[4] & 0x80) ? 1 : 0;
+        // byte 5, bit 7, 0：关闭设备，1：开启设备
+        alarm.power_on = LedCommand[5] >> 7;
+        alarm.weekday = LedCommand[5] & 0x7F;
+        user_rtc_set_alarm(alarm_idx, &alarm);
     }
 
     //---------------------------------接收到开关灯命令-----------------------------------

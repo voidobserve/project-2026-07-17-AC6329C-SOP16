@@ -63,7 +63,7 @@ typedef enum
 //         else
 //         {
 //             cd_state = 0;
-//             soft_rurn_off_lights();  //关灯.
+//             soft_turn_off_the_light();  //关灯.
 
 //         }
 //     }

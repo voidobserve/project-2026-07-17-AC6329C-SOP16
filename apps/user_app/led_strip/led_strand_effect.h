@@ -214,7 +214,7 @@ void ls_speed_sub(void);
 void set_fc_effect(void);
 
 void full_color_init(void);
-void soft_rurn_off_lights(void);   //软关灯处理
+void soft_turn_off_the_light(void);   //软关灯处理
 void soft_turn_on_the_light(void); //软开灯处理
 void ls_set_speed(uint8_t speed_percent);
 // void fc_static_effect(u8 n);

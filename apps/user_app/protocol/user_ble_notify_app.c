@@ -5,6 +5,8 @@
 #include "led_strand_effect.h"
 #include "motor.h"
 
+#include "user_rtc.h"
+
 // notify 设备信息
 void user_ble_notify_dev_type(void)
 {
@@ -168,21 +170,22 @@ void user_ble_notify_meteor_period(void)
     user_ble_notify_param_put(buf, buf_len);
 }
 
-#if 0
+#if 1
 // notify 闹钟（定时）数据
-void user_ble_notify_alarm_data(unsigned char alarm_index)
+void user_ble_notify_alarm_info(uint8_t alarm_index, user_alarm_t *alarm_info)
 {
     u8 buf[10] = {0};
     u8 buf_len = 0;
     if (alarm_index > 2) {
         return;
     }
+
     buf[buf_len++] = 0x05;
     buf[buf_len++] = alarm_index;
-    buf[buf_len++] = alarm_clock[alarm_index].hour;
-    buf[buf_len++] = alarm_clock[alarm_index].minute;
-    buf[buf_len++] = alarm_clock[alarm_index].on_off;
-    buf[buf_len++] = alarm_clock[alarm_index].mode;
+    buf[buf_len++] = alarm_info->hour;
+    buf[buf_len++] = alarm_info->min;
+    buf[buf_len++] = alarm_info->enable << 7;
+    buf[buf_len++] = (alarm_info->power_on << 7) | (alarm_info->weekday);
 
     user_ble_notify_param_put(buf, buf_len);
 }
@@ -200,9 +203,13 @@ void user_ble_notify_syn_end(void)
     user_ble_notify_param_put(buf, buf_len);
 }
 
+static volatile user_alarm_t app_msg_sync_alarm_buf[3];
 // 一次性下发设备全部状态（0x0103 与 app 同步时调用）
 void user_ble_notify_dev_all_info(void)
 {
+    // 都取模块级缓冲区，不占用 任务的栈
+    user_alarm_t *alarm_info = app_msg_sync_alarm_buf;
+
     user_ble_notify_dev_type();
     user_ble_notify_light_pwr_sta();
     user_ble_notify_light_brightness();
@@ -218,11 +225,14 @@ void user_ble_notify_dev_all_info(void)
     user_ble_notify_meteor_speed();
     user_ble_notify_meteor_period();
 
-#if 0
-    user_ble_notify_alarm_data(0);
-    user_ble_notify_alarm_data(1);
-    user_ble_notify_alarm_data(2);
-#endif
+#if 1
+    // 获取闹钟数据
+    user_rtc_get_alarm_info(0, &alarm_info[0]);
+    user_rtc_get_alarm_info(1, &alarm_info[1]);
+    user_rtc_get_alarm_info(2, &alarm_info[2]);
 
-    // user_ble_notify_syn_end();
+    user_ble_notify_alarm_info(0, &alarm_info[0]);
+    user_ble_notify_alarm_info(1, &alarm_info[1]);
+    user_ble_notify_alarm_info(2, &alarm_info[2]);
+#endif
 }
