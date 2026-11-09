@@ -516,18 +516,25 @@ void rf24g_key_r5c3_press_handle(void)
     set_fc_effect();
 }
 
+// 电机转速：8 -> 13 -> 18 -> 21 -> 26 -> 35 -> 停转 -> 8 …
 void rf24g_key_r6c1_press_handle(void)
 {
 #if USER_DEBUG_ENABLE
     printf("r6c1 press\n");
 #endif
 
-    if (0 == fc_effect.on_off_flag) {
+    if (DEVICE_OFF == fc_effect.on_off_flag) {
         return;
     }
 
-    // 只关闭电机，不影响下次上电的状态
-    motor_set_mode(MOTOR_MODE_STOP);
+    motor_speed_next();
+
+    // 停转不写入 fc_effect，保持"关机再开不恢复停转"的原有行为
+    if (MOTOR_MODE_STOP != motor.mode) {
+        fc_effect.motor_mode = motor.mode;
+        fc_effect.motor_sec_per_round = motor.speed_sec_per_round;
+    }
+    user_ble_notify_motor_speed();
 }
 
 void rf24g_key_r6c2_press_handle(void)
@@ -571,106 +578,66 @@ void rf24g_key_r6c3_press_handle(void)
     user_ble_notify_sound_ctl_mode();
 }
 
+// 单流星 / 双流星
 void rf24g_key_r7c1_press_handle(void)
 {
 #if USER_DEBUG_ENABLE
     printf("r7c1 press\n");
 #endif
 
-    if (0 == fc_effect.on_off_flag) {
-        return;
-    }
-
-    fc_effect.motor_mode = MOTOR_MODE_FORWARD_ROTATION;
-    fc_effect.motor_sec_per_round = 8;
-    motor_set_mode(fc_effect.motor_mode);
-    motor_set_speed_sec_per_round(fc_effect.motor_sec_per_round);
-    user_ble_notify_motor_speed();
+    meteor_toggle_single_double();
 }
 
+// 声控流星 1 / 2
 void rf24g_key_r7c2_press_handle(void)
 {
 #if USER_DEBUG_ENABLE
     printf("r7c2 press\n");
 #endif
 
-    if (0 == fc_effect.on_off_flag) {
-        return;
-    }
-
-    fc_effect.motor_mode = MOTOR_MODE_FORWARD_ROTATION;
-    fc_effect.motor_sec_per_round = 13;
-    motor_set_mode(fc_effect.motor_mode);
-    motor_set_speed_sec_per_round(fc_effect.motor_sec_per_round);
-    user_ble_notify_motor_speed();
+    meteor_toggle_music();
 }
 
+// 流星方向：正向 / 反向
 void rf24g_key_r7c3_press_handle(void)
 {
 #if USER_DEBUG_ENABLE
     printf("r7c3 press\n");
 #endif
 
-    if (0 == fc_effect.on_off_flag) {
-        return;
-    }
-
-    fc_effect.motor_mode = MOTOR_MODE_FORWARD_ROTATION;
-    fc_effect.motor_sec_per_round = 18;
-    motor_set_mode(fc_effect.motor_mode);
-    motor_set_speed_sec_per_round(fc_effect.motor_sec_per_round);
-    user_ble_notify_motor_speed();
+    meteor_toggle_direction();
 }
 
+// 流星速度
 void rf24g_key_r8c1_press_handle(void)
 {
 #if USER_DEBUG_ENABLE
     printf("r8c1 press\n");
 #endif
 
-    if (0 == fc_effect.on_off_flag) {
-        return;
-    }
-
-    fc_effect.motor_mode = MOTOR_MODE_FORWARD_ROTATION;
-    fc_effect.motor_sec_per_round = 21;
-    motor_set_mode(fc_effect.motor_mode);
-    motor_set_speed_sec_per_round(fc_effect.motor_sec_per_round);
-    user_ble_notify_motor_speed();
+    meteor_speed_next();
+    user_ble_notify_meteor_speed();
 }
 
+// 流星周期
 void rf24g_key_r8c2_press_handle(void)
 {
 #if USER_DEBUG_ENABLE
     printf("r8c2 press\n");
 #endif
 
-    if (0 == fc_effect.on_off_flag) {
-        return;
-    }
-
-    fc_effect.motor_mode = MOTOR_MODE_FORWARD_ROTATION;
-    fc_effect.motor_sec_per_round = 26;
-    motor_set_mode(fc_effect.motor_mode);
-    motor_set_speed_sec_per_round(fc_effect.motor_sec_per_round);
-    user_ble_notify_motor_speed();
+    meteor_period_next();
+    user_ble_notify_meteor_period();
 }
 
+// 流星拖尾长度
 void rf24g_key_r8c3_press_handle(void)
 {
 #if USER_DEBUG_ENABLE
     printf("r8c3 press\n");
 #endif
 
-    if (0 == fc_effect.on_off_flag) {
-        return;
-    }
-
-    fc_effect.motor_mode = MOTOR_MODE_FORWARD_ROTATION;
-    fc_effect.motor_sec_per_round = 35;
-    motor_set_mode(fc_effect.motor_mode);
-    motor_set_speed_sec_per_round(fc_effect.motor_sec_per_round);
-    user_ble_notify_motor_speed();
+    meteor_tail_next();
 }
 
 const rf24_key_handle_func_t

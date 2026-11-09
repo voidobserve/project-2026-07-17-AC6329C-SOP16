@@ -89,6 +89,7 @@ void fc_data_init(void)
     // 流星
     fc_effect.metemor_on_off = 0x01;                       //开关
     fc_effect.metemor_effect_index = 1;                    //效果编号
+    fc_effect.meteor_tail_idx = 0;                         //拖尾挡位：3颗
     fc_effect.speed = 100;                                 //变化速度
     fc_effect.meteor_period = 8;                           //默认8秒  周期值
     fc_effect.period_cnt = fc_effect.meteor_period * 1000; //ms,运行时的计数器
@@ -252,6 +253,20 @@ const u8 fade_type[3] = {
     FADE_XFAST, FADE_FAST, FADE_MEDIUM //,FADE_SLOW
 };
 
+/*
+    当前拖尾挡位对应的选项位（3 颗 / 5 颗 / 6 颗）
+
+    挡位保存在 fc_effect.meteor_tail_idx 里，跟随 flash 保存；
+    旧版本存下来的数据里这个字段可能是任意值，越界时回落到默认的 3 颗
+*/
+static u8 meteor_tail_fade(void)
+{
+    if (fc_effect.meteor_tail_idx >= ARRAY_SIZE(fade_type)) {
+        return fade_type[0];
+    }
+    return fade_type[fc_effect.meteor_tail_idx];
+}
+
 // void set_power_off(void)
 // {
 //     fc_effect.metemor_effect_index = 1; //关机效果
@@ -317,16 +332,6 @@ u8 get_custom_index(void)
     return fc_effect.metemor_effect_index;
 }
 
-void change_dir(void)
-{
-    if (fc_effect.dream_scene.direction == IS_forward) {
-        fc_effect.dream_scene.direction = IS_back;
-
-    } else {
-        fc_effect.dream_scene.direction = IS_forward;
-    }
-}
-
 u8 get_meteor_on_off(void)
 {
 
@@ -350,7 +355,7 @@ void custom_meteor_effect(void)
                 &WS2812FX_mode_comet_1, //效果
                 WHITE,                  //颜色
                 fc_effect.speed,        //速度
-                fade_type[0] | 0); //选项，这里像素点大小：3 REVERSE决定方向
+                meteor_tail_fade() | 0); //选项，这里像素点大小：3 REVERSE决定方向
             WS2812FX_start();
         } else if (fc_effect.metemor_effect_index == 2) //单流星
         {
@@ -362,7 +367,7 @@ void custom_meteor_effect(void)
                 &WS2812FX_mode_comet_1, //效果
                 WHITE,                  //颜色
                 fc_effect.speed,        //速度
-                fade_type[0] |
+                meteor_tail_fade() |
                     REVERSE); //选项，这里像素点大小：3 REVERSE决定方向
             WS2812FX_start();
         } else if (fc_effect.metemor_effect_index == 3) //双流星
@@ -375,7 +380,7 @@ void custom_meteor_effect(void)
                 &fc_double_meteor,    //效果
                 WHITE,                //颜色
                 fc_effect.speed,      //速度
-                fade_type[0] | 0);    //选项，这里像素点大小：3 REVERSE决定方向
+                meteor_tail_fade() | 0);    //选项，这里像素点大小：3 REVERSE决定方向
             WS2812FX_start();
         } else if (fc_effect.metemor_effect_index == 4) //双流星
         {
@@ -387,7 +392,7 @@ void custom_meteor_effect(void)
                 &fc_double_meteor,    //效果
                 WHITE,                //颜色
                 fc_effect.speed,      //速度
-                fade_type[0] |
+                meteor_tail_fade() |
                     REVERSE); //选项，这里像素点大小：3 REVERSE决定方向
             WS2812FX_start();
         } else if (fc_effect.metemor_effect_index == 5) //频闪效果
@@ -488,7 +493,7 @@ void custom_meteor_effect(void)
                 &WS2812FX_mode_comet_2, //效果
                 WHITE,                  //颜色
                 fc_effect.speed,        //速度
-                fade_type[0] | 0); //选项，这里像素点大小：3 REVERSE决定方向
+                meteor_tail_fade() | 0); //选项，这里像素点大小：3 REVERSE决定方向
             WS2812FX_start();
         } else if (fc_effect.metemor_effect_index == 14) //中心发撒
         {
@@ -499,7 +504,7 @@ void custom_meteor_effect(void)
                 &WS2812FX_mode_comet_2, //效果
                 WHITE,                  //颜色
                 fc_effect.speed,        //速度
-                fade_type[0] |
+                meteor_tail_fade() |
                     REVERSE); //选项，这里像素点大小：3 REVERSE决定方向
             WS2812FX_start();
         } else if (fc_effect.metemor_effect_index == 15) //追逐流水
@@ -1393,6 +1398,124 @@ void set_meteor_p(u8 p)
     if (p >= 2 && p <= 20) {
         fc_effect.meteor_period = p;
         fc_effect.period_cnt = 0;
+    }
+}
+
+/* ========================== 流星灯遥控快捷键 ========================== */
+
+/*
+    流星灯类遥控按键的公共前提：
+    灯关着、或者流星灯关着时，这些按键都不响应
+*/
+static u8 meteor_key_usable(void)
+{
+    return (DEVICE_ON == fc_effect.on_off_flag) &&
+           (0x01 == fc_effect.metemor_on_off);
+}
+
+/* 单流星（模式 1/2） <-> 双流星（模式 3/4），保持当前方向 */
+void meteor_toggle_single_double(void)
+{
+    u8 index = fc_effect.metemor_effect_index;
+
+    if (!meteor_key_usable()) {
+        return;
+    }
+
+    if (1 == index || 2 == index) {
+        set_mereor_mode(index + 2); // 单流星 -> 双流星
+    } else if (3 == index || 4 == index) {
+        set_mereor_mode(index - 2); // 双流星 -> 单流星
+    } else {
+        set_mereor_mode(1); // 其他模式：先切到单流星（正向）
+    }
+}
+
+/* 声控流星：模式 17（音乐律动 1） <-> 模式 18（音乐律动 2） */
+void meteor_toggle_music(void)
+{
+    if (!meteor_key_usable()) {
+        return;
+    }
+
+    set_mereor_mode(17 == fc_effect.metemor_effect_index ? 18 : 17);
+}
+
+/*
+    流星方向：模式 1~6、9~16 是正反成对的（奇数正向、偶数反向）
+
+    7/8 是两个不同效果（不是正反一对），17/18 是声控律动，都没有方向，
+    按键不响应
+*/
+void meteor_toggle_direction(void)
+{
+    u8 index = fc_effect.metemor_effect_index;
+
+    if (!meteor_key_usable()) {
+        return;
+    }
+
+    if (index < 1 || index > 16 || 7 == index || 8 == index) {
+        return;
+    }
+
+    set_mereor_mode((index & 0x01) ? (index + 1) : (index - 1));
+}
+
+/* 流星速度：1 -> 25 -> 49 -> 73 -> 97 -> 1（百分比，5 挡循环） */
+void meteor_speed_next(void)
+{
+    if (!meteor_key_usable()) {
+        return;
+    }
+
+    adjust_meteor_speed();
+}
+
+/* 流星周期：2 -> 8 -> 12 -> 16 -> 20 -> 2（秒） */
+void meteor_period_next(void)
+{
+    static const u8 period_table[] = {2, 8, 12, 16, 20}; // 单位：秒
+    u8 i;
+
+    if (!meteor_key_usable()) {
+        return;
+    }
+
+    // 先找当前周期在表里的位置，再切下一挡；当前值不在表里时从第一挡开始
+    for (i = 0; i < ARRAY_SIZE(period_table); i++) {
+        if (period_table[i] == fc_effect.meteor_period) {
+            break;
+        }
+    }
+    i = (i + 1) % ARRAY_SIZE(period_table);
+
+    set_meteor_p(period_table[i]);
+}
+
+/*
+    流星拖尾：3 颗 -> 5 颗 -> 6 颗 -> 3 颗
+
+    只有模式 1~4、13、14 用拖尾长度，其他模式先切到单流星，
+    这样按下按键后能直接看到拖尾变化
+*/
+void meteor_tail_next(void)
+{
+    u8 index = fc_effect.metemor_effect_index;
+
+    if (!meteor_key_usable()) {
+        return;
+    }
+
+    fc_effect.meteor_tail_idx++;
+    if (fc_effect.meteor_tail_idx >= ARRAY_SIZE(fade_type)) {
+        fc_effect.meteor_tail_idx = 0;
+    }
+
+    if ((index >= 1 && index <= 4) || 13 == index || 14 == index) {
+        custom_meteor_effect();
+    } else {
+        set_mereor_mode(1);
     }
 }
 

@@ -94,6 +94,52 @@ void motor_set_mode(motor_mode_t mode)
     motor_24byj48_stop();
 }
 
+/*
+	遥控器按键切换转速用的挡位表，单位：秒/圈
+
+	与参考工程（RGBW 户外光纤）的 motor_period 一致：8 13 18 21 26 35
+*/
+static const u8 motor_speed_table[] = {8, 13, 18, 21, 26, 35};
+
+/**
+ * @brief 遥控器按键切换电机转速
+ *
+ *        顺序：8 -> 13 -> 18 -> 21 -> 26 -> 35 -> 停转 -> 8 …
+ *        停转之后再按一次，从最快挡重新开始
+ */
+void motor_speed_next(void)
+{
+    u8 i;
+
+    if (MOTOR_MODE_STOP == motor.mode) {
+        // 停转状态下按一次，从最快挡重新开始
+        i = 0;
+    } else {
+        // 先找到当前转速所在的挡位，再切到下一挡
+        for (i = 0; i < ARRAY_SIZE(motor_speed_table); i++) {
+            if (motor_speed_table[i] == motor.speed_sec_per_round) {
+                break;
+            }
+        }
+
+        if (i >= ARRAY_SIZE(motor_speed_table)) {
+            // 当前转速不在表里（app 设置的），从最快挡重新开始
+            i = 0;
+        } else {
+            i++;
+        }
+    }
+
+    if (i >= ARRAY_SIZE(motor_speed_table)) {
+        // 已经是最慢挡，再按一次停转
+        motor_set_mode(MOTOR_MODE_STOP);
+        return;
+    }
+
+    motor_set_mode(MOTOR_MODE_FORWARD_ROTATION);
+    motor_set_speed_sec_per_round(motor_speed_table[i]);
+}
+
 /**
  * @brief 声控信号触发，检测到声音时调用
  *

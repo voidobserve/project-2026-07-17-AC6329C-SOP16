@@ -74,6 +74,8 @@ void motor_handle_125us(void);
 void motor_set_mode(motor_mode_t mode);
 // 根据传参设置电机转速
 void motor_set_speed_sec_per_round(u8 sec_per_round);
+// 遥控器按键切换转速：8 -> 13 -> 18 -> 21 -> 26 -> 35 -> 停转 -> 8 …
+void motor_speed_next(void);
 // 声控信号触发，检测到声音时调用，声控模式下会快速转动一段时间
 void motor_sound_control_trigger(void);
 

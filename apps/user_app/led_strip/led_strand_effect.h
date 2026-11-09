@@ -177,6 +177,8 @@ typedef struct
 
     // 向app反馈的数据
     u8 speed_percent;
+
+    u8 meteor_tail_idx; // 流星拖尾挡位 0~2，对应 fade_type[]（3/5/6 颗）
 } fc_effect_t;
 
 // typedef struct _LED_STATE {
@@ -228,6 +230,14 @@ void fc_dynamic_effect(u8 n);
 void meteor_period_sub(void);    // 流星周期计时（每10ms调用一次）
 void custom_meteor_effect(void); // 根据 metemor_effect_index 设置流星效果
 void set_mereor_mode(u8 m);      // 设置流星模式（app下发，上限18种）
+
+// 流星灯遥控快捷键（2.4G 遥控器用）
+void meteor_toggle_single_double(void); // 单流星 <-> 双流星
+void meteor_toggle_music(void);         // 声控流星 1 <-> 2
+void meteor_toggle_direction(void);     // 流星方向：正向 <-> 反向
+void meteor_speed_next(void);           // 流星速度切到下一挡
+void meteor_period_next(void);          // 流星周期切到下一挡
+void meteor_tail_next(void);            // 流星拖尾切到下一挡
 
 void led_colorful_light_set_static_color(u32 color);
 #if 0
